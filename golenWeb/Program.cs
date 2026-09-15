@@ -1,5 +1,5 @@
-using golenWeb.Services;
 using golenWeb.Data;
+using golenWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,27 +13,28 @@ builder.Services.AddAuthentication("MyCookieAuth").AddCookie("MyCookieAuth", opt
     options.Cookie.Name = "MyCookieAuth";
 });
 
-// Register services
-builder.Services.AddScoped<AuthService>();
+// Register database & services for Golden Success College Website
+builder.Services.AddScoped<DatabaseConnectionFactory>();
 builder.Services.AddScoped<MySqlDb>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<EventService>();
+builder.Services.AddScoped<BulletinService>();
 builder.Services.AddTransient<DbInitializer>();
 
 var app = builder.Build();
 
-// Ensure database objects exist on startup (creates Users table if missing)
+// Auto-create database and tables on startup
 using (var scope = app.Services.CreateScope())
 {
     var initializer = scope.ServiceProvider.GetRequiredService<DbInitializer>();
     try
     {
-        // run synchronously during startup
         initializer.InitializeAsync().GetAwaiter().GetResult();
     }
     catch (Exception ex)
     {
         var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("DbInitializer");
-        logger.LogError(ex, "Database initialization failed");
-        // do not stop the app; user can fix DB and restart
+        logger.LogError(ex, "Database initialization failed on startup.");
     }
 }
 
@@ -41,7 +42,6 @@ using (var scope = app.Services.CreateScope())
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -57,6 +57,5 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-
 
 app.Run();

@@ -1,0 +1,36 @@
+@model golenWeb.Models.EventModel
+
+@{
+    ViewData["Title"] = "Delete Campus Event";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-danger shadow-sm">
+            <div class="card-header bg-danger text-white p-3">
+                <h4 class="mb-0 fw-bold"><i class="bi bi-exclamation-triangle me-2"></i>Delete Event Confirmation</h4>
+            </div>
+            <div class="card-body p-4">
+                <p class="fs-5 text-dark mb-4">Are you sure you want to permanently delete this campus event?</p>
+
+                <div class="bg-light p-3 rounded mb-4 border border-danger">
+                    <div class="fw-bold fs-4 text-dark mb-2">@Model.Title</div>
+                    <div class="text-muted mb-2">Category: <span class="badge bg-success">@Model.Category</span></div>
+                    <div class="row g-2 small">
+                        <div class="col-6"><strong>Date:</strong> @Model.EventDate.ToString("MMM dd, yyyy")</div>
+                        <div class="col-6"><strong>Time:</strong> @Model.StartTime - @Model.EndTime</div>
+                        <div class="col-12 mt-1"><strong>Venue:</strong> @Model.Location</div>
+                    </div>
+                </div>
+
+                <form asp-action="DeleteConfirmed" method="post">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-danger px-4 fw-bold">Confirm Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

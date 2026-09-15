@@ -1,8 +1,190 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@using golenWeb.Models
+@{
+    ViewData["Title"] = "Golden Success College - Official Website";
+    var todayEvents = ViewData["TodayEvents"] as List<EventModel> ?? new List<EventModel>();
+    var bulletins = ViewData["Bulletins"] as List<Bulletin> ?? new List<Bulletin>();
+    var todayStr = DateTime.Today.ToString("dddd, MMMM dd, yyyy");
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- HERO SECTION -->
+<section class="gsc-hero rounded-4 mb-5 shadow-lg p-0 overflow-hidden" style="background: linear-gradient(135deg, #0b5e28 0%, #1b2a4a 60%, #0b5e28 100%); position:relative; min-height:380px;">
+    <div class="row g-0 align-items-center h-100" style="min-height:380px;">
+        <div class="col-md-4 text-center py-5 px-4">
+            <img src="~/images/logo.png" alt="Golden Success College Logo" class="img-fluid" style="max-height:240px; filter: drop-shadow(0 6px 24px rgba(0,0,0,0.6));" />
+        </div>
+        <div class="col-md-8 py-5 px-5 text-white">
+            <p class="fw-bold text-warning fs-6 mb-2 text-uppercase letter-spacing-2">
+                <i class="bi bi-star-fill me-2"></i>Official College Website
+            </p>
+            <h1 class="display-4 fw-bold lh-sm mb-3">
+                Golden Success College
+            </h1>
+            <p class="fs-5 text-light mb-1 fst-italic">"Determination &bull; Courage &bull; Hardwork"</p>
+            <p class="text-warning-emphasis opacity-75 small mb-4">Isa. 33:6</p>
+            <div class="d-flex flex-wrap gap-3 mt-2">
+                <a asp-controller="Events" asp-action="Index" class="btn btn-warning text-dark fw-bold px-4 shadow-sm">
+                    <i class="bi bi-calendar-event me-2"></i>View Events Calendar
+                </a>
+                <a asp-controller="Bulletins" asp-action="Index" class="btn btn-outline-light fw-bold px-4">
+                    <i class="bi bi-megaphone me-2"></i>Campus Bulletin Board
+                </a>
+                <a asp-controller="Events" asp-action="Create" class="btn btn-success fw-bold px-4">
+                    <i class="bi bi-plus-circle me-2"></i>Post an Event
+                </a>
+            </div>
+        </div>
+    </div>
+    <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:url('/images/logo.png') repeat center; opacity:0.03; pointer-events:none;"></div>
+</section>
+
+<!-- DATE BANNER -->
+<div class="d-flex align-items-center bg-success text-white rounded-3 px-4 py-2 mb-4 shadow-sm">
+    <i class="bi bi-calendar3 fs-4 me-3 text-warning"></i>
+    <div>
+        <span class="fw-bold fs-6">Today is <span class="text-warning">@todayStr</span></span>
+        <span class="ms-3 text-white-50">| @todayEvents.Count scheduled campus event(s) today</span>
+    </div>
+    <a asp-controller="Events" asp-action="Index" asp-route-date="@DateTime.Today.ToString("yyyy-MM-dd")" class="btn btn-sm btn-warning ms-auto fw-bold text-dark">
+        View Today's Schedule
+    </a>
+</div>
+
+<div class="row g-4">
+    <!-- TODAY'S EVENTS WIDGET -->
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center">
+                <span class="fw-bold fs-5"><i class="bi bi-calendar-check me-2"></i>Today's Campus Events</span>
+                <a asp-controller="Events" asp-action="Create" class="btn btn-sm btn-warning fw-bold text-dark">
+                    <i class="bi bi-plus me-1"></i>Add Event
+                </a>
+            </div>
+            <div class="card-body p-0">
+                @if (!todayEvents.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-calendar-x fs-1 d-block mb-3 text-secondary"></i>
+                        <p class="mb-1 fw-semibold">No events scheduled for today.</p>
+                        <a asp-controller="Events" asp-action="Create" class="btn btn-sm btn-success mt-2">
+                            <i class="bi bi-plus-circle me-1"></i>Schedule Event
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var ev in todayEvents)
+                        {
+                            <li class="list-group-item px-4 py-3 border-start border-success border-4">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <span class="badge bg-success mb-1">@ev.Category</span>
+                                        <div class="fw-bold text-dark">@ev.Title</div>
+                                        <small class="text-muted">
+                                            <i class="bi bi-clock me-1"></i>@ev.StartTime – @ev.EndTime
+                                            &nbsp;&nbsp;<i class="bi bi-geo-alt me-1"></i>@ev.Location
+                                        </small>
+                                    </div>
+                                    <a asp-controller="Events" asp-action="Edit" asp-route-id="@ev.Id" class="btn btn-sm btn-outline-secondary ms-3">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+            <div class="card-footer bg-white border-0 py-3 px-4">
+                <a asp-controller="Events" asp-action="Index" class="text-success fw-bold text-decoration-none">
+                    <i class="bi bi-arrow-right me-1"></i>View Full Event Calendar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- BULLETIN BOARD WIDGET -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+                <span class="fw-bold fs-5"><i class="bi bi-megaphone me-2 text-warning"></i>Latest Bulletins</span>
+                <a asp-controller="Bulletins" asp-action="Create" class="btn btn-sm btn-warning fw-bold text-dark">
+                    <i class="bi bi-plus me-1"></i>Post Notice
+                </a>
+            </div>
+            <div class="card-body p-0">
+                @if (!bulletins.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-card-checklist fs-1 d-block mb-3 text-secondary"></i>
+                        <p class="mb-1 fw-semibold">No bulletins posted yet.</p>
+                    </div>
+                }
+                else
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var b in bulletins.Take(4))
+                        {
+                            var leftColor = b.Priority == "High" ? "border-danger" : "border-success";
+                            var badge = b.Priority == "High" ? "bg-danger" : "bg-secondary";
+                            <li class="list-group-item px-4 py-3 border-start border-4 @leftColor">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <span class="badge @badge mb-1">@b.Priority</span>
+                                        <span class="badge bg-light text-dark border ms-1">@b.Category</span>
+                                        <div class="fw-bold text-dark mt-1">@b.Title</div>
+                                        <small class="text-muted">@b.Author &bull; @b.PublishDate.ToString("MMM dd, yyyy")</small>
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+            <div class="card-footer bg-white border-0 py-3 px-4">
+                <a asp-controller="Bulletins" asp-action="Index" class="text-dark fw-bold text-decoration-none">
+                    <i class="bi bi-arrow-right me-1"></i>View All Bulletins
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QUICK ACCESS CARDS -->
+<div class="row g-4 mt-2">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100 text-center p-3 border-top border-4 border-success">
+            <div class="card-body">
+                <div class="fs-1 text-success mb-2"><i class="bi bi-calendar-event"></i></div>
+                <h5 class="fw-bold">Event Calendar</h5>
+                <p class="text-muted small">Schedule, view, and manage all campus events by date and category.</p>
+                <a asp-controller="Events" asp-action="Create" class="btn btn-success btn-sm px-3">
+                    <i class="bi bi-plus-lg me-1"></i>Add Event for Today
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100 text-center p-3 border-top border-4 border-warning">
+            <div class="card-body">
+                <div class="fs-1 text-warning mb-2"><i class="bi bi-megaphone"></i></div>
+                <h5 class="fw-bold">Bulletin Board</h5>
+                <p class="text-muted small">Post official college announcements, academic notices, and urgent alerts.</p>
+                <a asp-controller="Bulletins" asp-action="Create" class="btn btn-warning text-dark btn-sm px-3">
+                    <i class="bi bi-plus-lg me-1"></i>Post New Bulletin
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100 text-center p-3 border-top border-4 border-dark">
+            <div class="card-body">
+                <div class="fs-1 text-dark mb-2"><i class="bi bi-lightning-charge"></i></div>
+                <h5 class="fw-bold">API CRUD Tester</h5>
+                <p class="text-muted small">Send live HTTP GET, POST, PUT, DELETE requests to the Events REST API.</p>
+                <a asp-controller="CrudTest" asp-action="Index" class="btn btn-dark btn-sm px-3">
+                    <i class="bi bi-send me-1"></i>Test API Requests
+                </a>
+            </div>
+        </div>
+    </div>
 </div>

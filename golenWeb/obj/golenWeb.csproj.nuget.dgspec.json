@@ -56,6 +56,10 @@
               "target": "Package",
               "version": "[13.5.3, )"
             },
+            "Microsoft.Data.Sqlite": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
             "MySql.Data": {
               "target": "Package",
               "version": "[26.7.0, )"

@@ -1,0 +1,72 @@
+@model IEnumerable<golenWeb.Models.Bulletin>
+
+@{
+    ViewData["Title"] = "Campus Bulletin Board";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="fw-bold mb-1 text-success">
+            <i class="bi bi-megaphone me-2"></i>Campus Bulletin Board
+        </h2>
+        <p class="text-muted mb-0">Official Notices, Academic Updates & Campus Announcements</p>
+    </div>
+    <div>
+        <a asp-action="Create" class="btn btn-success btn-lg shadow-sm px-4 fw-bold">
+            <i class="bi bi-plus-circle me-2"></i>Post New Bulletin
+        </a>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row g-4">
+    @if (!Model.Any())
+    {
+        <div class="col-12">
+            <div class="card border-0 shadow-sm text-center py-5">
+                <div class="card-body text-muted">
+                    <i class="bi bi-card-checklist fs-1 d-block mb-2"></i>
+                    <h5>No Bulletins Currently Posted</h5>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        @foreach (var b in Model)
+        {
+            var priorityBadge = b.Priority == "High" ? "bg-danger" : "bg-primary";
+            <div class="col-12">
+                <div class="card border-0 shadow-sm border-start border-4 @(b.Priority == "High" ? "border-danger" : "border-success")">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h4 class="fw-bold text-dark mb-0">@b.Title</h4>
+                            <div class="d-flex gap-2">
+                                <span class="badge @priorityBadge">@b.Priority Priority</span>
+                                <span class="badge bg-secondary">@b.Category</span>
+                            </div>
+                        </div>
+                        <p class="text-secondary fs-6 mb-3" style="white-space: pre-line;">@b.Content</p>
+                        <div class="d-flex justify-content-between align-items-center text-muted small pt-2 border-top">
+                            <div>
+                                <i class="bi bi-person-fill me-1 text-success"></i> Posted by <strong>@b.Author</strong> on @b.PublishDate.ToString("MMMM dd, yyyy")
+                            </div>
+                            <form asp-action="Delete" asp-route-id="@b.Id" method="post" onsubmit="return confirm('Remove this bulletin notice?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash me-1"></i>Remove Notice
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

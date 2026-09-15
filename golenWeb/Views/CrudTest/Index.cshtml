@@ -1,0 +1,181 @@
+@{
+    ViewData["Title"] = "Events API CRUD Request Tester";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="p-4 rounded-3 shadow-sm d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #0b5e28, #1b2a4a);">
+            <div>
+                <h2 class="fw-bold mb-1 text-white"><i class="bi bi-send-check me-2 text-warning"></i>Events API CRUD Playground</h2>
+                <p class="text-light opacity-75 mb-0">Test live HTTP <code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>DELETE</code> requests against the Golden Success College Events REST API.</p>
+            </div>
+            <div>
+                <span class="badge bg-success fs-6 px-3 py-2"><i class="bi bi-database-check me-1"></i> Auto-DB Active</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preset Action Buttons -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-light fw-bold">
+        <i class="bi bi-lightning-charge text-warning me-1"></i> Quick Preset CRUD Requests
+    </div>
+    <div class="card-body">
+        <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-outline-success" onclick="loadPreset('GET', '/api/events', null)">
+                <span class="badge bg-success me-1">GET</span> All Events
+            </button>
+            <button class="btn btn-outline-success" onclick="loadPreset('GET', '/api/events/today', null)">
+                <span class="badge bg-success me-1">GET</span> Today's Events
+            </button>
+            <button class="btn btn-outline-success" onclick="loadPreset('GET', '/api/events/1', null)">
+                <span class="badge bg-success me-1">GET</span> Event #1
+            </button>
+            <button class="btn btn-outline-primary" onclick="loadPreset('POST', '/api/events', '{\n  \"title\": \"Campus Leadership Seminar 2026\",\n  \"description\": \"Interactive seminar on student leadership development.\",\n  \"eventDate\": \"@(DateTime.Today.ToString("yyyy-MM-dd"))\",\n  \"startTime\": \"09:00 AM\",\n  \"endTime\": \"12:00 PM\",\n  \"location\": \"Audio-Visual Room 201\",\n  \"organizer\": \"Office of Student Affairs\",\n  \"category\": \"Seminar\",\n  \"isFeatured\": true\n}')">
+                <span class="badge bg-primary me-1">POST</span> Create Event
+            </button>
+            <button class="btn btn-outline-warning text-dark" onclick="loadPreset('PUT', '/api/events/1', '{\n  \"id\": 1,\n  \"title\": \"Updated Campus Convocation 2026\",\n  \"description\": \"Updated program details.\",\n  \"eventDate\": \"@(DateTime.Today.ToString("yyyy-MM-dd"))\",\n  \"startTime\": \"08:00 AM\",\n  \"endTime\": \"11:00 AM\",\n  \"location\": \"Main Auditorium\",\n  \"organizer\": \"GSC Admin Office\",\n  \"category\": \"Ceremony\",\n  \"isFeatured\": true\n}')">
+                <span class="badge bg-warning text-dark me-1">PUT</span> Update Event #1
+            </button>
+            <button class="btn btn-outline-danger" onclick="loadPreset('DELETE', '/api/events/1', null)">
+                <span class="badge bg-danger me-1">DELETE</span> Delete Event #1
+            </button>
+            <button class="btn btn-outline-secondary" onclick="loadPreset('GET', '/api/users', null)">
+                <span class="badge bg-secondary me-1">GET</span> Read All Users
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Request Composer -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white fw-bold py-3">
+                <i class="bi bi-sliders me-2 text-success"></i>Compose HTTP Request
+            </div>
+            <div class="card-body">
+                <form id="requestForm" onsubmit="sendRequest(event)">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">HTTP Method & Request URL</label>
+                        <div class="input-group">
+                            <select id="reqMethod" class="form-select fw-bold" style="max-width: 130px;">
+                                <option value="GET">GET</option>
+                                <option value="POST">POST</option>
+                                <option value="PUT">PUT</option>
+                                <option value="DELETE">DELETE</option>
+                            </select>
+                            <input type="text" id="reqUrl" class="form-control font-monospace" value="/api/events" placeholder="/api/events" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Request Headers</label>
+                        <input type="text" class="form-control font-monospace bg-light" value="Content-Type: application/json" readonly />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">JSON Request Body (for POST / PUT)</label>
+                        <textarea id="reqBody" class="form-control font-monospace" rows="10"></textarea>
+                    </div>
+
+                    <button type="submit" id="btnSend" class="btn btn-success w-100 btn-lg fw-bold shadow-sm">
+                        <i class="bi bi-send-fill me-2"></i>Send CRUD Request
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Response Inspector -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                <span class="fw-bold"><i class="bi bi-terminal me-2 text-success"></i>HTTP Response</span>
+                <span id="statusBadge" class="badge bg-secondary">Awaiting Request</span>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between text-muted small mb-2">
+                    <span id="respTime">Latency: -- ms</span>
+                    <span id="respSize">Size: -- bytes</span>
+                </div>
+                <div class="flex-grow-1 bg-dark text-success p-3 rounded font-monospace overflow-auto" style="min-height: 360px; max-height: 480px;">
+                    <pre id="respBody" class="mb-0 text-light"><code>Select a preset or compose a request above, then click "Send CRUD Request" to see live API responses!</code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function loadPreset(method, url, body) {
+        document.getElementById('reqMethod').value = method;
+        document.getElementById('reqUrl').value = url;
+        document.getElementById('reqBody').value = body || '';
+        sendRequest(null);
+    }
+
+    async function sendRequest(e) {
+        if (e) e.preventDefault();
+
+        const method = document.getElementById('reqMethod').value;
+        const url = document.getElementById('reqUrl').value;
+        const bodyStr = document.getElementById('reqBody').value;
+        const statusBadge = document.getElementById('statusBadge');
+        const respBody = document.getElementById('respBody');
+        const respTime = document.getElementById('respTime');
+        const respSize = document.getElementById('respSize');
+        const btnSend = document.getElementById('btnSend');
+
+        btnSend.disabled = true;
+        btnSend.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Sending...';
+        statusBadge.className = 'badge bg-warning text-dark';
+        statusBadge.innerText = 'Sending...';
+
+        const startTime = performance.now();
+
+        try {
+            const options = {
+                method: method,
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
+            };
+
+            if ((method === 'POST' || method === 'PUT') && bodyStr.trim().length > 0) {
+                options.body = bodyStr;
+            }
+
+            const response = await fetch(url, options);
+            const duration = Math.round(performance.now() - startTime);
+            respTime.innerText = `Latency: ${duration} ms`;
+
+            statusBadge.className = `badge ${response.ok ? 'bg-success' : 'bg-danger'}`;
+            statusBadge.innerText = `${response.status} ${response.statusText}`;
+
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const data = await response.json();
+                const formatted = JSON.stringify(data, null, 2);
+                respBody.innerHTML = `<code>${escapeHtml(formatted)}</code>`;
+                respSize.innerText = `Size: ${formatted.length} bytes`;
+            } else {
+                const text = await response.text();
+                respBody.innerHTML = `<code>${escapeHtml(text)}</code>`;
+                respSize.innerText = `Size: ${text.length} bytes`;
+            }
+        } catch (err) {
+            statusBadge.className = 'badge bg-danger';
+            statusBadge.innerText = 'Request Failed';
+            respBody.innerHTML = `<code class="text-danger">Error: ${escapeHtml(err.message)}</code>`;
+        } finally {
+            btnSend.disabled = false;
+            btnSend.innerHTML = '<i class="bi bi-send-fill me-2"></i>Send CRUD Request';
+        }
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+</script>
+}

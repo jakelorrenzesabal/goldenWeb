@@ -1,35 +1,29 @@
-using Microsoft.Extensions.Configuration;
-using MySqlConnector;
+using System.Data.Common;
 
 namespace golenWeb.Data
 {
     public class MySqlDb
     {
-        private readonly string _connectionString;
+        private readonly DatabaseConnectionFactory _factory;
 
-        public MySqlDb(Microsoft.Extensions.Configuration.IConfiguration config)
+        public MySqlDb(DatabaseConnectionFactory factory)
         {
-            _connectionString = config.GetConnectionString("DefaultConnection") ?? string.Empty;
+            _factory = factory;
         }
 
-        public MySqlConnection GetConnection()
+        public DbConnection GetConnection()
         {
-            return new MySqlConnection(_connectionString);
+            return _factory.CreateConnection();
         }
 
-        // Return a connection that does not include the Database part of the connection string
-        public MySqlConnection GetServerConnection()
+        public DbConnection GetServerConnection()
         {
-            var builder = new MySqlConnector.MySqlConnectionStringBuilder(_connectionString);
-            // clear the Database so we can connect to server level and create the database
-            builder.Database = string.Empty;
-            return new MySqlConnection(builder.ConnectionString);
+            return _factory.CreateServerConnection();
         }
 
         public string GetDatabaseName()
         {
-            var builder = new MySqlConnector.MySqlConnectionStringBuilder(_connectionString);
-            return builder.Database ?? string.Empty;
+            return _factory.GetDatabaseName();
         }
     }
 }

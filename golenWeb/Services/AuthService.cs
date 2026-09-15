@@ -1,51 +1,62 @@
+using System.Data.Common;
 using System.Security.Cryptography;
-using System.Text;
 using golenWeb.Data;
 using golenWeb.Models;
-using MySqlConnector;
 
 namespace golenWeb.Services
 {
     public class AuthService
     {
-        private readonly MySqlDb _db;
+        private readonly DatabaseConnectionFactory _factory;
 
-        public AuthService(MySqlDb db)
+        public AuthService(DatabaseConnectionFactory factory)
         {
-            _db = db;
+            _factory = factory;
         }
 
         // Create a user (username must be unique)
         public async Task<int> CreateUserAsync(string username, string email, string password)
         {
             var hash = HashPassword(password);
-            using var conn = _db.GetConnection();
+            await using var conn = _factory.CreateConnection();
             await conn.OpenAsync();
-            var cmd = conn.CreateCommand();
-            cmd.CommandText = "INSERT INTO Users (Username, Email, PasswordHash) VALUES (@u,@e,@p); SELECT LAST_INSERT_ID();";
-            cmd.Parameters.Add(new MySqlParameter("@u", username));
-            cmd.Parameters.Add(new MySqlParameter("@e", email));
-            cmd.Parameters.Add(new MySqlParameter("@p", hash));
+            await using var cmd = conn.CreateCommand();
+
+            if (_factory.ProviderType == DbProviderType.Sqlite)
+            {
+                cmd.CommandText = "INSERT INTO Users (Username, Email, PasswordHash) VALUES (@u,@e,@p); SELECT last_insert_rowid();";
+            }
+            else
+            {
+                cmd.CommandText = "INSERT INTO Users (Username, Email, PasswordHash) VALUES (@u,@e,@p); SELECT LAST_INSERT_ID();";
+            }
+
+            AddParam(cmd, "@u", username);
+            AddParam(cmd, "@e", email);
+            AddParam(cmd, "@p", hash);
+
             var idObj = await cmd.ExecuteScalarAsync();
             return Convert.ToInt32(idObj);
         }
 
         public async Task<User?> ValidateUserAsync(string username, string password)
         {
-            using var conn = _db.GetConnection();
+            await using var conn = _factory.CreateConnection();
             await conn.OpenAsync();
-            var cmd = conn.CreateCommand();
+            await using var cmd = conn.CreateCommand();
             cmd.CommandText = "SELECT Id, Username, Email, PasswordHash FROM Users WHERE Username = @u LIMIT 1";
-            cmd.Parameters.Add(new MySqlParameter("@u", username));
-            using var reader = await cmd.ExecuteReaderAsync();
+            AddParam(cmd, "@u", username);
+
+            await using var reader = await cmd.ExecuteReaderAsync();
             if (!await reader.ReadAsync()) return null;
-            var storedHash = reader.GetString("PasswordHash");
+            var storedHash = reader.GetString(3);
             if (!VerifyPassword(password, storedHash)) return null;
+
             return new User
             {
-                Id = reader.GetInt32("Id"),
-                Username = reader.GetString("Username"),
-                Email = reader.GetString("Email"),
+                Id = reader.GetInt32(0),
+                Username = reader.GetString(1),
+                Email = reader.IsDBNull(2) ? "" : reader.GetString(2),
                 PasswordHash = storedHash
             };
         }
@@ -53,19 +64,20 @@ namespace golenWeb.Services
         public async Task<List<User>> GetAllAsync()
         {
             var list = new List<User>();
-            using var conn = _db.GetConnection();
+            await using var conn = _factory.CreateConnection();
             await conn.OpenAsync();
-            var cmd = conn.CreateCommand();
+            await using var cmd = conn.CreateCommand();
             cmd.CommandText = "SELECT Id, Username, Email, PasswordHash FROM Users ORDER BY Id DESC";
-            using var reader = await cmd.ExecuteReaderAsync();
+            
+            await using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
                 list.Add(new User
                 {
-                    Id = reader.GetInt32("Id"),
-                    Username = reader.GetString("Username"),
-                    Email = reader.GetString("Email"),
-                    PasswordHash = reader.GetString("PasswordHash")
+                    Id = reader.GetInt32(0),
+                    Username = reader.GetString(1),
+                    Email = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                    PasswordHash = reader.GetString(3)
                 });
             }
             return list;
@@ -73,59 +85,68 @@ namespace golenWeb.Services
 
         public async Task<User?> GetByIdAsync(int id)
         {
-            using var conn = _db.GetConnection();
+            await using var conn = _factory.CreateConnection();
             await conn.OpenAsync();
-            var cmd = conn.CreateCommand();
+            await using var cmd = conn.CreateCommand();
             cmd.CommandText = "SELECT Id, Username, Email, PasswordHash FROM Users WHERE Id = @id LIMIT 1";
-            cmd.Parameters.Add(new MySqlParameter("@id", id));
-            using var reader = await cmd.ExecuteReaderAsync();
+            AddParam(cmd, "@id", id);
+
+            await using var reader = await cmd.ExecuteReaderAsync();
             if (!await reader.ReadAsync()) return null;
+
             return new User
             {
-                Id = reader.GetInt32("Id"),
-                Username = reader.GetString("Username"),
-                Email = reader.GetString("Email"),
-                PasswordHash = reader.GetString("PasswordHash")
+                Id = reader.GetInt32(0),
+                Username = reader.GetString(1),
+                Email = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                PasswordHash = reader.GetString(3)
             };
         }
 
         public async Task UpdateUserAsync(int id, string username, string email, string? newPassword = null)
         {
-            using var conn = _db.GetConnection();
+            await using var conn = _factory.CreateConnection();
             await conn.OpenAsync();
-            var cmd = conn.CreateCommand();
+            await using var cmd = conn.CreateCommand();
+
             if (!string.IsNullOrEmpty(newPassword))
             {
                 var hash = HashPassword(newPassword);
                 cmd.CommandText = "UPDATE Users SET Username=@u, Email=@e, PasswordHash=@p WHERE Id=@id";
-                cmd.Parameters.Add(new MySqlParameter("@p", hash));
+                AddParam(cmd, "@p", hash);
             }
             else
             {
                 cmd.CommandText = "UPDATE Users SET Username=@u, Email=@e WHERE Id=@id";
             }
-            cmd.Parameters.Add(new MySqlParameter("@u", username));
-            cmd.Parameters.Add(new MySqlParameter("@e", email));
-            cmd.Parameters.Add(new MySqlParameter("@id", id));
+            AddParam(cmd, "@u", username);
+            AddParam(cmd, "@e", email);
+            AddParam(cmd, "@id", id);
             await cmd.ExecuteNonQueryAsync();
         }
 
         public async Task DeleteUserAsync(int id)
         {
-            using var conn = _db.GetConnection();
+            await using var conn = _factory.CreateConnection();
             await conn.OpenAsync();
-            var cmd = conn.CreateCommand();
+            await using var cmd = conn.CreateCommand();
             cmd.CommandText = "DELETE FROM Users WHERE Id=@id";
-            cmd.Parameters.Add(new MySqlParameter("@id", id));
+            AddParam(cmd, "@id", id);
             await cmd.ExecuteNonQueryAsync();
         }
 
-        // Password hashing helpers (PBKDF2)
+        private static void AddParam(DbCommand cmd, string name, object value)
+        {
+            var p = cmd.CreateParameter();
+            p.ParameterName = name;
+            p.Value = value;
+            cmd.Parameters.Add(p);
+        }
+
         private static string HashPassword(string password)
         {
-            using var rng = RandomNumberGenerator.Create();
             byte[] salt = new byte[16];
-            rng.GetBytes(salt);
+            RandomNumberGenerator.Fill(salt);
             const int iterations = 100_000;
             using var derive = new Rfc2898DeriveBytes(password, salt, iterations, HashAlgorithmName.SHA256);
             var hash = derive.GetBytes(32);

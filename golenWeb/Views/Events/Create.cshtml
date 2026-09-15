@@ -1,0 +1,79 @@
+@model golenWeb.Models.EventModel
+
+@{
+    ViewData["Title"] = "Schedule New Campus Event";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-success text-white p-3">
+                <h4 class="mb-0 fw-bold"><i class="bi bi-calendar-plus me-2"></i>Schedule Campus Event</h4>
+                <small class="text-light">Golden Success College Event Management</small>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Title" class="form-label fw-semibold">Event Title</label>
+                        <input asp-for="Title" class="form-control form-control-lg" placeholder="e.g. Annual College Intramurals 2026" required />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="EventDate" class="form-label fw-semibold">Event Date</label>
+                            <input asp-for="EventDate" type="date" class="form-control" required />
+                            <span asp-validation-for="EventDate" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Category" class="form-label fw-semibold">Event Category</label>
+                            <select asp-for="Category" class="form-select">
+                                <option value="Academic">Academic</option>
+                                <option value="Ceremony">Ceremony</option>
+                                <option value="Seminar">Seminar / Workshop</option>
+                                <option value="Sports">Sports & Athletics</option>
+                                <option value="Cultural">Cultural & Arts</option>
+                                <option value="Club">Student Club Activity</option>
+                            </select>
+                            <span asp-validation-for="Category" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="StartTime" class="form-label fw-semibold">Start Time</label>
+                            <input asp-for="StartTime" class="form-control" placeholder="e.g. 08:30 AM" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="EndTime" class="form-label fw-semibold">End Time</label>
+                            <input asp-for="EndTime" class="form-control" placeholder="e.g. 04:00 PM" required />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Location" class="form-label fw-semibold">Venue / Location</label>
+                            <input asp-for="Location" class="form-control" placeholder="e.g. College Main Auditorium" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Organizer" class="form-label fw-semibold">Organizer / Department</label>
+                            <input asp-for="Organizer" class="form-control" placeholder="e.g. Office of Student Affairs" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Description" class="form-label fw-semibold">Event Details / Program Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="4" placeholder="Enter detailed event description or agenda..."></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-between pt-2">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-success px-4 fw-bold">Save & Schedule Event</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
