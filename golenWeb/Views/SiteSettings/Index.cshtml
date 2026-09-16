@@ -1,0 +1,363 @@
+@model golenWeb.Models.SiteSettingsViewModel
+@{
+    ViewData["Title"] = "Customize Site";
+}
+
+<style>
+    .settings-sidebar {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        position: sticky;
+        top: 20px;
+    }
+
+    .settings-section {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        margin-bottom: 1.5rem;
+    }
+
+    .settings-section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f0f0f0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #444;
+        margin-bottom: 0.4rem;
+    }
+
+    .form-control, .form-select {
+        border: 1.5px solid #e8e8e8;
+        border-radius: 8px;
+        padding: 0.6rem 0.9rem;
+        font-size: 0.9rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--gsc-green, #0b5e28);
+        box-shadow: 0 0 0 3px rgba(11,94,40,0.1);
+    }
+
+    .color-picker-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .color-picker-wrapper input[type="color"] {
+        width: 48px;
+        height: 42px;
+        padding: 2px;
+        border-radius: 8px;
+        border: 1.5px solid #e8e8e8;
+        cursor: pointer;
+    }
+
+    .color-hex-input {
+        flex: 1;
+        font-family: monospace;
+        font-size: 0.9rem;
+    }
+
+    .preview-card {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        border: none;
+    }
+
+    .preview-nav {
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .preview-hero {
+        padding: 30px 24px;
+        color: white;
+        text-align: center;
+    }
+
+    .preview-hero h2 { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.4rem; }
+    .preview-hero p { font-size: 0.82rem; opacity: 0.85; margin: 0; }
+
+    .btn-save-settings {
+        background: linear-gradient(135deg, #0b5e28, #1a8c45);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 2rem;
+        font-weight: 700;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        box-shadow: 0 4px 12px rgba(11,94,40,0.3);
+    }
+
+    .btn-save-settings:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(11,94,40,0.4);
+        color: white;
+    }
+
+    .nav-tab-btn {
+        padding: 0.6rem 1rem;
+        border: none;
+        background: none;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #888;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: left;
+        width: 100%;
+    }
+
+    .nav-tab-btn.active, .nav-tab-btn:hover {
+        background: #f0faf4;
+        color: #0b5e28;
+    }
+
+    .nav-tab-btn i { margin-right: 8px; width: 16px; }
+</style>
+
+<div class="d-flex align-items-center gap-3 mb-4">
+    <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#0b5e28,#1a8c45);display:flex;align-items:center;justify-content:center;">
+        <i class="bi bi-palette-fill text-white" style="font-size:1.3rem;"></i>
+    </div>
+    <div>
+        <h1 class="mb-0" style="font-size:1.6rem;font-weight:800;">Site Customization</h1>
+        <p class="mb-0 text-muted" style="font-size:0.85rem;">Personalize your Golden Success College website</p>
+    </div>
+    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary ms-auto">
+        <i class="bi bi-arrow-left me-1"></i>Dashboard
+    </a>
+</div>
+
+<form asp-controller="SiteSettings" asp-action="Save" method="post">
+    @Html.AntiForgeryToken()
+    <div class="row g-4">
+        <!-- Left: Settings Sections -->
+        <div class="col-lg-8">
+
+            <!-- Content & Text -->
+            <div class="settings-section">
+                <div class="settings-section-title">
+                    <i class="bi bi-fonts" style="color:#0b5e28;"></i>Content & Text
+                </div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Site / College Name</label>
+                        <input asp-for="SiteTitle" class="form-control" placeholder="Golden Success College" id="prev-sitename" oninput="updatePreview()" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Hero Title <span class="text-muted fw-normal">(main homepage heading)</span></label>
+                        <input asp-for="HeroTitle" class="form-control" placeholder="Welcome to Golden Success College" id="prev-herotitle" oninput="updatePreview()" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Hero Subtitle</label>
+                        <input asp-for="HeroSubtitle" class="form-control" placeholder="Your path to excellence starts here" id="prev-herosubtitle" oninput="updatePreview()" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Navbar Tagline <span class="text-muted fw-normal">(below college name in navbar)</span></label>
+                        <input asp-for="Tagline" class="form-control" placeholder="Determination • Courage • Hardwork" id="prev-tagline" oninput="updatePreview()" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">About Text</label>
+                        <textarea asp-for="AboutText" class="form-control" rows="3" placeholder="About the college..."></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Footer Text</label>
+                        <input asp-for="FooterText" class="form-control" placeholder="Golden Success College • All Rights Reserved" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colors & Theme -->
+            <div class="settings-section">
+                <div class="settings-section-title">
+                    <i class="bi bi-palette" style="color:#c62828;"></i>Colors & Theme
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Primary Color <span class="text-muted fw-normal">(main green)</span></label>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="primaryColorPicker" value="@Model.PrimaryColor" oninput="syncColor('primaryColorPicker','PrimaryColor'); updatePreview();" />
+                            <input asp-for="PrimaryColor" id="PrimaryColor" class="form-control color-hex-input" oninput="syncColorFromHex('PrimaryColor','primaryColorPicker'); updatePreview();" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Accent Color <span class="text-muted fw-normal">(gold)</span></label>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="accentColorPicker" value="@Model.AccentColor" oninput="syncColor('accentColorPicker','AccentColor'); updatePreview();" />
+                            <input asp-for="AccentColor" id="AccentColor" class="form-control color-hex-input" oninput="syncColorFromHex('AccentColor','accentColorPicker'); updatePreview();" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Nav Background</label>
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="navBgPicker" value="@Model.NavBackground" oninput="syncColor('navBgPicker','NavBackground'); updatePreview();" />
+                            <input asp-for="NavBackground" id="NavBackground" class="form-control color-hex-input" oninput="syncColorFromHex('NavBackground','navBgPicker'); updatePreview();" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="settings-section">
+                <div class="settings-section-title">
+                    <i class="bi bi-envelope" style="color:#1565c0;"></i>Contact Information
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Email Address</label>
+                        <input asp-for="ContactEmail" class="form-control" placeholder="info@goldensuccess.edu" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Phone Number</label>
+                        <input asp-for="ContactPhone" class="form-control" placeholder="+63 xxx xxx xxxx" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Address</label>
+                        <input asp-for="Address" class="form-control" placeholder="123 College Street, City, Province" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Announcement Banner -->
+            <div class="settings-section">
+                <div class="settings-section-title">
+                    <i class="bi bi-megaphone-fill" style="color:#e6a000;"></i>Announcement Banner
+                </div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Banner Message <span class="text-muted fw-normal">(shown at top of every page when enabled)</span></label>
+                        <input asp-for="AnnouncementBanner" class="form-control" placeholder="e.g. School holiday on Monday, September 20" />
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check form-switch">
+                            <input asp-for="ShowAnnouncementBanner" class="form-check-input" type="checkbox" role="switch" id="showBannerSwitch" style="width:3em;height:1.5em;" />
+                            <label class="form-check-label fw-600 ms-2" for="showBannerSwitch" style="font-weight:600;">
+                                Show Announcement Banner on Site
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-3 flex-wrap">
+                <button type="submit" class="btn btn-save-settings">
+                    <i class="bi bi-check2-circle me-2"></i>Save All Changes
+                </button>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary" target="_blank">
+                    <i class="bi bi-eye me-1"></i>Preview Site
+                </a>
+            </div>
+        </div>
+
+        <!-- Right: Live Preview + Reset -->
+        <div class="col-lg-4">
+            <div class="settings-sidebar">
+                <div class="fw-bold mb-3" style="font-size:0.9rem;"><i class="bi bi-eye me-2" style="color:#0b5e28;"></i>Live Preview</div>
+
+                <div class="preview-card mb-3" id="preview-card">
+                    <div class="preview-nav" id="prev-nav" style="background: linear-gradient(90deg, @Model.NavBackground, #1b2a4a); border-bottom: 2px solid @Model.AccentColor;">
+                        <div style="width:24px;height:24px;border-radius:50%;background:@Model.AccentColor;"></div>
+                        <div>
+                            <div id="prev-name" style="color:white;font-weight:800;font-size:0.75rem;">@Model.SiteTitle</div>
+                            <div id="prev-tag" style="color:@Model.AccentColor;font-size:0.55rem;">@Model.Tagline</div>
+                        </div>
+                    </div>
+                    <div class="preview-hero" id="prev-hero" style="background: linear-gradient(135deg, @Model.PrimaryColor, #1b2a4a);">
+                        <h2 id="prev-h2">@Model.HeroTitle</h2>
+                        <p id="prev-sub">@Model.HeroSubtitle</p>
+                    </div>
+                    <div style="padding:12px;background:#f9f9f9;">
+                        <div style="height:8px;background:#e0e0e0;border-radius:4px;margin-bottom:6px;width:80%;"></div>
+                        <div style="height:8px;background:#e0e0e0;border-radius:4px;margin-bottom:6px;width:60%;"></div>
+                        <div style="height:8px;background:#e0e0e0;border-radius:4px;width:70%;"></div>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="fw-bold mb-2" style="font-size:0.85rem;color:#666;">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>Reset to Defaults
+                </div>
+                <p class="text-muted mb-3" style="font-size:0.78rem;">This will restore all settings to the original Golden Success College defaults.</p>
+                <form asp-controller="SiteSettings" asp-action="ResetDefaults" method="post" onsubmit="return confirm('Reset all settings to defaults? This cannot be undone.');">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>Reset to Defaults
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        function syncColor(pickerId, hexId) {
+            document.getElementById(hexId).value = document.getElementById(pickerId).value;
+        }
+        function syncColorFromHex(hexId, pickerId) {
+            var val = document.getElementById(hexId).value;
+            if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+                document.getElementById(pickerId).value = val;
+            }
+        }
+        function updatePreview() {
+            var primary = document.getElementById('PrimaryColor').value || '#0b5e28';
+            var accent = document.getElementById('AccentColor').value || '#e6b800';
+            var navBg = document.getElementById('NavBackground').value || '#073d1a';
+
+            var nav = document.getElementById('prev-nav');
+            if (nav) {
+                nav.style.background = 'linear-gradient(90deg, ' + navBg + ', #1b2a4a)';
+                nav.style.borderBottomColor = accent;
+            }
+
+            var navDot = nav ? nav.querySelector('div') : null;
+            if (navDot) navDot.style.background = accent;
+
+            var tag = document.getElementById('prev-tag');
+            if (tag) tag.style.color = accent;
+
+            var hero = document.getElementById('prev-hero');
+            if (hero) hero.style.background = 'linear-gradient(135deg, ' + primary + ', #1b2a4a)';
+
+            var name = document.getElementById('prev-name');
+            if (name) name.textContent = document.getElementById('prev-sitename').value || 'Golden Success College';
+
+            var tagEl = document.getElementById('prev-tag');
+            if (tagEl) tagEl.textContent = document.getElementById('prev-tagline').value || 'Tagline here';
+
+            var h2 = document.getElementById('prev-h2');
+            if (h2) h2.textContent = document.getElementById('prev-herotitle').value || 'Hero Title';
+
+            var sub = document.getElementById('prev-sub');
+            if (sub) sub.textContent = document.getElementById('prev-herosubtitle').value || 'Subtitle here';
+        }
+
+        // Run on page load to initialize preview with current values
+        updatePreview();
+    </script>
+}

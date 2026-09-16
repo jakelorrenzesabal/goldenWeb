@@ -20,7 +20,7 @@ namespace golenWeb.Services
             await conn.OpenAsync();
 
             await using var cmd = conn.CreateCommand();
-            var sql = "SELECT Id, Title, Content, Category, Priority, PublishDate, Author FROM Bulletins WHERE 1=1";
+            var sql = "SELECT Id, Title, Content, Category, Priority, PublishDate, Author, ImageUrl FROM Bulletins WHERE 1=1";
 
             if (!string.IsNullOrWhiteSpace(category))
             {
@@ -42,7 +42,8 @@ namespace golenWeb.Services
                     Category = reader.IsDBNull(3) ? "General" : reader.GetString(3),
                     Priority = reader.IsDBNull(4) ? "Normal" : reader.GetString(4),
                     PublishDate = Convert.ToDateTime(reader.GetValue(5)),
-                    Author = reader.IsDBNull(6) ? "Admin" : reader.GetString(6)
+                    Author = reader.IsDBNull(6) ? "Admin" : reader.GetString(6),
+                    ImageUrl = reader.FieldCount > 7 && !reader.IsDBNull(7) ? reader.GetString(7) : null
                 });
             }
 
@@ -55,7 +56,7 @@ namespace golenWeb.Services
             await conn.OpenAsync();
 
             await using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT Id, Title, Content, Category, Priority, PublishDate, Author FROM Bulletins WHERE Id = @id LIMIT 1";
+            cmd.CommandText = "SELECT Id, Title, Content, Category, Priority, PublishDate, Author, ImageUrl FROM Bulletins WHERE Id = @id LIMIT 1";
             AddParam(cmd, "@id", id);
 
             await using var reader = await cmd.ExecuteReaderAsync();
@@ -69,7 +70,8 @@ namespace golenWeb.Services
                 Category = reader.IsDBNull(3) ? "General" : reader.GetString(3),
                 Priority = reader.IsDBNull(4) ? "Normal" : reader.GetString(4),
                 PublishDate = Convert.ToDateTime(reader.GetValue(5)),
-                Author = reader.IsDBNull(6) ? "Admin" : reader.GetString(6)
+                Author = reader.IsDBNull(6) ? "Admin" : reader.GetString(6),
+                ImageUrl = reader.FieldCount > 7 && !reader.IsDBNull(7) ? reader.GetString(7) : null
             };
         }
 
@@ -82,15 +84,15 @@ namespace golenWeb.Services
             if (_factory.ProviderType == DbProviderType.Sqlite)
             {
                 cmd.CommandText = @"
-INSERT INTO Bulletins (Title, Content, Category, Priority, PublishDate, Author)
-VALUES (@t, @c, @cat, @pr, @pd, @a);
+INSERT INTO Bulletins (Title, Content, Category, Priority, PublishDate, Author, ImageUrl)
+VALUES (@t, @c, @cat, @pr, @pd, @a, @img);
 SELECT last_insert_rowid();";
             }
             else
             {
                 cmd.CommandText = @"
-INSERT INTO Bulletins (Title, Content, Category, Priority, PublishDate, Author)
-VALUES (@t, @c, @cat, @pr, @pd, @a);
+INSERT INTO Bulletins (Title, Content, Category, Priority, PublishDate, Author, ImageUrl)
+VALUES (@t, @c, @cat, @pr, @pd, @a, @img);
 SELECT LAST_INSERT_ID();";
             }
 
@@ -100,6 +102,7 @@ SELECT LAST_INSERT_ID();";
             AddParam(cmd, "@pr", b.Priority);
             AddParam(cmd, "@pd", b.PublishDate.ToString("yyyy-MM-dd"));
             AddParam(cmd, "@a", b.Author);
+            AddParam(cmd, "@img", (object?)b.ImageUrl ?? DBNull.Value);
 
             var idObj = await cmd.ExecuteScalarAsync();
             b.Id = Convert.ToInt32(idObj);
@@ -114,7 +117,7 @@ SELECT LAST_INSERT_ID();";
             await using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
 UPDATE Bulletins
-SET Title=@t, Content=@c, Category=@cat, Priority=@pr, PublishDate=@pd, Author=@a
+SET Title=@t, Content=@c, Category=@cat, Priority=@pr, PublishDate=@pd, Author=@a, ImageUrl=@img
 WHERE Id=@id";
 
             AddParam(cmd, "@t", b.Title);
@@ -123,6 +126,7 @@ WHERE Id=@id";
             AddParam(cmd, "@pr", b.Priority);
             AddParam(cmd, "@pd", b.PublishDate.ToString("yyyy-MM-dd"));
             AddParam(cmd, "@a", b.Author);
+            AddParam(cmd, "@img", (object?)b.ImageUrl ?? DBNull.Value);
             AddParam(cmd, "@id", b.Id);
 
             var rows = await cmd.ExecuteNonQueryAsync();

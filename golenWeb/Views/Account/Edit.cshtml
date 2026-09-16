@@ -1,23 +1,85 @@
 @model golenWeb.Models.User
 @{
-    ViewData["Title"] = "Edit user";
+    ViewData["Title"] = "Edit User";
 }
 
-<h2>Edit user</h2>
+<style>
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        padding: 2.5rem;
+        max-width: 540px;
+        margin: 0 auto;
+    }
+    .form-card .form-label { font-weight: 600; font-size: 0.88rem; color: #444; }
+    .form-card .form-control, .form-card .form-select {
+        border: 1.5px solid #e8e8e8;
+        border-radius: 8px;
+        padding: 0.65rem 0.9rem;
+        font-size: 0.9rem;
+    }
+    .form-card .form-control:focus, .form-card .form-select:focus {
+        border-color: #0b5e28;
+        box-shadow: 0 0 0 3px rgba(11,94,40,0.1);
+    }
+    .btn-save { background: linear-gradient(135deg,#0b5e28,#1a8c45); color:white; border:none; border-radius:10px; padding:0.7rem 2rem; font-weight:700; }
+    .btn-save:hover { color:white; opacity:0.9; }
+    .user-avatar-lg {
+        width: 64px; height: 64px; border-radius: 50%;
+        background: linear-gradient(135deg,#0b5e28,#1a8c45);
+        color: white; display: flex; align-items: center;
+        justify-content: center; font-weight: 800; font-size: 1.6rem;
+    }
+</style>
 
-<form method="post" asp-action="Edit">
-    <input type="hidden" name="id" value="@Model.Id" />
-    <div class="mb-3">
-        <label class="form-label">Username</label>
-        <input name="username" value="@Model.Username" class="form-control" />
+<div class="d-flex justify-content-center">
+    <div class="form-card w-100">
+        <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="user-avatar-lg">@Model.Username.Substring(0, 1).ToUpper()</div>
+            <div>
+                <h2 class="mb-0" style="font-size:1.4rem;font-weight:800;">Edit User</h2>
+                <p class="mb-0 text-muted" style="font-size:0.82rem;">ID #@Model.Id — Update account details and role</p>
+            </div>
+        </div>
+
+        <form method="post" asp-action="Edit">
+            <input type="hidden" name="id" value="@Model.Id" />
+
+            <div class="mb-3">
+                <label class="form-label">Username <span class="text-danger">*</span></label>
+                <input name="username" value="@Model.Username" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input name="email" type="email" value="@Model.Email" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Role</label>
+                <select name="role" class="form-select">
+                    @if (Model.Role == "User")
+                    {
+                        <option value="User" selected>👤 User — Content editor only</option>
+                        <option value="Admin">🛡️ Admin — Full access</option>
+                    }
+                    else
+                    {
+                        <option value="User">👤 User — Content editor only</option>
+                        <option value="Admin" selected>🛡️ Admin — Full access</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="form-label">New Password <span class="text-muted fw-normal">(leave blank to keep current)</span></label>
+                <input name="newPassword" type="password" class="form-control" placeholder="Leave empty to keep existing password" />
+            </div>
+
+            <div class="d-flex gap-3">
+                <button type="submit" class="btn btn-save">
+                    <i class="bi bi-floppy me-2"></i>Save Changes
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
     </div>
-    <div class="mb-3">
-        <label class="form-label">Email</label>
-        <input name="email" value="@Model.Email" class="form-control" />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">New password (leave empty to keep current)</label>
-        <input name="newPassword" type="password" class="form-control" />
-    </div>
-    <button class="btn btn-primary">Save</button>
-</form>
+</div>

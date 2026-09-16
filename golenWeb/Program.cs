@@ -1,10 +1,14 @@
 using golenWeb.Data;
+using golenWeb.Filters;
 using golenWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<SiteSettingsFilter>();
+});
 
 // Cookie authentication (simple custom auth, no Identity)
 builder.Services.AddAuthentication("MyCookieAuth").AddCookie("MyCookieAuth", options =>
@@ -19,6 +23,8 @@ builder.Services.AddScoped<MySqlDb>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<EventService>();
 builder.Services.AddScoped<BulletinService>();
+builder.Services.AddScoped<SiteSettingsService>();
+builder.Services.AddScoped<FileStorageService>();
 builder.Services.AddTransient<DbInitializer>();
 
 var app = builder.Build();

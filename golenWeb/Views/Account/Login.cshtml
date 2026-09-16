@@ -2,18 +2,216 @@
     ViewData["Title"] = "Login";
 }
 
-<h2>Login</h2>
+<style>
+    .auth-container {
+        min-height: 75vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+    }
+    .auth-card {
+        max-width: 440px;
+        width: 100%;
+        background: #ffffff;
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(7, 61, 26, 0.12);
+        overflow: hidden;
+        border-top: 5px solid var(--gsc-gold, #e6b800);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .auth-card:hover {
+        box-shadow: 0 14px 48px rgba(7, 61, 26, 0.18);
+    }
+    .auth-card-header {
+        background: linear-gradient(135deg, #073d1a 0%, #1b2a4a 100%);
+        padding: 2.5rem 2rem 2rem;
+        text-align: center;
+        color: white;
+        position: relative;
+    }
+    .auth-logo {
+        width: 75px;
+        height: 75px;
+        object-fit: contain;
+        filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+        margin-bottom: 0.75rem;
+    }
+    .auth-title {
+        font-weight: 800;
+        font-size: 1.4rem;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.2rem;
+    }
+    .auth-subtitle {
+        font-size: 0.8rem;
+        color: var(--gsc-gold, #e6b800);
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+    .auth-body {
+        padding: 2.25rem 2rem 1.75rem;
+    }
+    .form-control:focus {
+        border-color: #0b5e28;
+        box-shadow: 0 0 0 0.25rem rgba(11, 94, 40, 0.18);
+    }
+    .input-group-text {
+        background-color: #f8faf8;
+        border-color: #dee2e6;
+        color: #0b5e28;
+    }
+    .btn-gsc-primary {
+        background: linear-gradient(135deg, #0b5e28 0%, #073d1a 100%);
+        border: none;
+        color: white;
+        font-weight: 700;
+        padding: 0.8rem 1.5rem;
+        border-radius: 10px;
+        font-size: 1rem;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 14px rgba(11, 94, 40, 0.3);
+        transition: all 0.25s ease;
+    }
+    .btn-gsc-primary:hover {
+        background: linear-gradient(135deg, #073d1a 0%, #1b2a4a 100%);
+        color: #f5d020;
+        box-shadow: 0 6px 18px rgba(7, 61, 26, 0.4);
+        transform: translateY(-2px);
+    }
+    .demo-credentials-box {
+        background: #f4f9f5;
+        border: 1px dashed #0b5e28;
+        border-radius: 12px;
+        padding: 0.9rem 1rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.82rem;
+    }
+    .demo-chip {
+        cursor: pointer;
+        background: #ffffff;
+        border: 1px solid #c8e6c9;
+        padding: 6px 12px;
+        border-radius: 8px;
+        transition: all 0.2s;
+        display: inline-block;
+        width: 100%;
+        text-align: left;
+    }
+    .demo-chip:hover {
+        background: #e8f5e9;
+        border-color: #0b5e28;
+        transform: translateY(-1px);
+    }
+    .auth-footer {
+        text-align: center;
+        padding-top: 1.25rem;
+        border-top: 1px solid #f0f0f0;
+        font-size: 0.88rem;
+    }
+    .auth-footer a {
+        color: #0b5e28;
+        font-weight: 700;
+        text-decoration: none;
+    }
+    .auth-footer a:hover {
+        text-decoration: underline;
+        color: #073d1a;
+    }
+</style>
 
-<form method="post" asp-action="Login">
-    <div class="mb-3">
-        <label class="form-label">Username</label>
-        <input name="username" class="form-control" />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Password</label>
-        <input name="password" type="password" class="form-control" />
-    </div>
-    <button class="btn btn-primary">Login</button>
-</form>
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-card-header">
+            <img src="~/images/logo.png" alt="Golden Success College Shield" class="auth-logo" />
+            <div class="auth-title">Golden Success College</div>
+            <div class="auth-subtitle"><i class="bi bi-shield-lock-fill me-1"></i>Portal Sign In</div>
+        </div>
 
-<p>Don't have an account? <a asp-action="Register">Register</a></p>
+        <div class="auth-body">
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger d-flex align-items-center mb-4 py-2 px-3 rounded-3" role="alert" style="font-size:0.88rem;">
+                    <i class="bi bi-exclamation-triangle-fill fs-5 me-2 flex-shrink-0"></i>
+                    <div>
+                        @Html.ValidationSummary(true, "", new { @class = "mb-0 fw-semibold text-danger list-unstyled" })
+                    </div>
+                </div>
+            }
+
+            <form method="post" asp-action="Login" id="loginForm">
+                @if (ViewData["ReturnUrl"] != null)
+                {
+                    <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                }
+
+                <!-- Quick Demo Fill Box -->
+                <div class="demo-credentials-box">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <span class="fw-bold text-success"><i class="bi bi-key-fill me-1"></i>Default Credentials</span>
+                        <span class="badge bg-success text-white" style="font-size:0.65rem;">Seeded</span>
+                    </div>
+                    <div class="text-muted mb-2 small">Click to auto-fill default admin account:</div>
+                    <button type="button" class="demo-chip text-dark" onclick="fillCredentials('admin', 'Admin@123')">
+                        <i class="bi bi-shield-check text-warning me-1"></i><strong>Admin:</strong> admin / Admin@123
+                    </button>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-dark small mb-1"><i class="bi bi-person-fill text-success me-1"></i>Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input name="username" id="usernameInput" class="form-control form-control-lg" placeholder="Enter your username" required autofocus style="font-size:0.95rem;" />
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label fw-bold text-dark small mb-0"><i class="bi bi-lock-fill text-success me-1"></i>Password</label>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-key"></i></span>
+                        <input name="password" type="password" id="passwordInput" class="form-control form-control-lg" placeholder="Enter your password" required style="font-size:0.95rem;" />
+                        <button class="btn btn-outline-secondary" type="button" id="togglePasswordBtn" title="Toggle password visibility">
+                            <i class="bi bi-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="d-grid mb-3">
+                    <button type="submit" class="btn btn-gsc-primary">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In to Portal
+                    </button>
+                </div>
+            </form>
+
+            <div class="auth-footer">
+                <span class="text-muted">Don't have an account yet?</span>
+                <a asp-action="Register" class="ms-1">Create an Account <i class="bi bi-arrow-right-short"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function fillCredentials(u, p) {
+        document.getElementById('usernameInput').value = u;
+        document.getElementById('passwordInput').value = p;
+    }
+
+    document.getElementById('togglePasswordBtn').addEventListener('click', function () {
+        const passwordInput = document.getElementById('passwordInput');
+        const toggleIcon = document.getElementById('toggleIcon');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('bi-eye');
+            toggleIcon.classList.add('bi-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('bi-eye-slash');
+            toggleIcon.classList.add('bi-eye');
+        }
+    });
+</script>

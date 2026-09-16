@@ -2,20 +2,176 @@
     ViewData["Title"] = "Register";
 }
 
-<h2>Register</h2>
+<style>
+    .auth-container {
+        min-height: 75vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+    }
+    .auth-card {
+        max-width: 460px;
+        width: 100%;
+        background: #ffffff;
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(7, 61, 26, 0.12);
+        overflow: hidden;
+        border-top: 5px solid var(--gsc-gold, #e6b800);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .auth-card:hover {
+        box-shadow: 0 14px 48px rgba(7, 61, 26, 0.18);
+    }
+    .auth-card-header {
+        background: linear-gradient(135deg, #073d1a 0%, #1b2a4a 100%);
+        padding: 2.5rem 2rem 2rem;
+        text-align: center;
+        color: white;
+        position: relative;
+    }
+    .auth-logo {
+        width: 75px;
+        height: 75px;
+        object-fit: contain;
+        filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+        margin-bottom: 0.75rem;
+    }
+    .auth-title {
+        font-weight: 800;
+        font-size: 1.4rem;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.2rem;
+    }
+    .auth-subtitle {
+        font-size: 0.8rem;
+        color: var(--gsc-gold, #e6b800);
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+    .auth-body {
+        padding: 2.25rem 2rem 1.75rem;
+    }
+    .form-control:focus {
+        border-color: #0b5e28;
+        box-shadow: 0 0 0 0.25rem rgba(11, 94, 40, 0.18);
+    }
+    .input-group-text {
+        background-color: #f8faf8;
+        border-color: #dee2e6;
+        color: #0b5e28;
+    }
+    .btn-gsc-primary {
+        background: linear-gradient(135deg, #0b5e28 0%, #073d1a 100%);
+        border: none;
+        color: white;
+        font-weight: 700;
+        padding: 0.8rem 1.5rem;
+        border-radius: 10px;
+        font-size: 1rem;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 14px rgba(11, 94, 40, 0.3);
+        transition: all 0.25s ease;
+    }
+    .btn-gsc-primary:hover {
+        background: linear-gradient(135deg, #073d1a 0%, #1b2a4a 100%);
+        color: #f5d020;
+        box-shadow: 0 6px 18px rgba(7, 61, 26, 0.4);
+        transform: translateY(-2px);
+    }
+    .auth-footer {
+        text-align: center;
+        padding-top: 1.25rem;
+        border-top: 1px solid #f0f0f0;
+        font-size: 0.88rem;
+    }
+    .auth-footer a {
+        color: #0b5e28;
+        font-weight: 700;
+        text-decoration: none;
+    }
+    .auth-footer a:hover {
+        text-decoration: underline;
+        color: #073d1a;
+    }
+</style>
 
-<form method="post" asp-action="Register">
-    <div class="mb-3">
-        <label class="form-label">Username</label>
-        <input name="username" class="form-control" />
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-card-header">
+            <img src="~/images/logo.png" alt="Golden Success College Shield" class="auth-logo" />
+            <div class="auth-title">Golden Success College</div>
+            <div class="auth-subtitle"><i class="bi bi-person-plus-fill me-1"></i>Create New Account</div>
+        </div>
+
+        <div class="auth-body">
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger d-flex align-items-center mb-4 py-2 px-3 rounded-3" role="alert" style="font-size:0.88rem;">
+                    <i class="bi bi-exclamation-triangle-fill fs-5 me-2 flex-shrink-0"></i>
+                    <div>
+                        @Html.ValidationSummary(true, "", new { @class = "mb-0 fw-semibold text-danger list-unstyled" })
+                    </div>
+                </div>
+            }
+
+            <form method="post" asp-action="Register">
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-dark small mb-1"><i class="bi bi-person-fill text-success me-1"></i>Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input name="username" class="form-control form-control-lg" placeholder="Choose a username" required autofocus style="font-size:0.95rem;" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-dark small mb-1"><i class="bi bi-envelope-fill text-success me-1"></i>Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        <input name="email" type="email" class="form-control form-control-lg" placeholder="student@goldensuccess.edu" required style="font-size:0.95rem;" />
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-dark small mb-1"><i class="bi bi-lock-fill text-success me-1"></i>Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-key"></i></span>
+                        <input name="password" type="password" id="regPasswordInput" class="form-control form-control-lg" placeholder="Create a password" required style="font-size:0.95rem;" />
+                        <button class="btn btn-outline-secondary" type="button" id="regTogglePasswordBtn" title="Toggle password visibility">
+                            <i class="bi bi-eye" id="regToggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="d-grid mb-3">
+                    <button type="submit" class="btn btn-gsc-primary">
+                        <i class="bi bi-person-check-fill me-2"></i>Create Account
+                    </button>
+                </div>
+            </form>
+
+            <div class="auth-footer">
+                <span class="text-muted">Already registered?</span>
+                <a asp-action="Login" class="ms-1">Sign In <i class="bi bi-arrow-right-short"></i></a>
+            </div>
+        </div>
     </div>
-    <div class="mb-3">
-        <label class="form-label">Email</label>
-        <input name="email" class="form-control" />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Password</label>
-        <input name="password" type="password" class="form-control" />
-    </div>
-    <button class="btn btn-primary">Register</button>
-</form>
+</div>
+
+<script>
+    document.getElementById('regTogglePasswordBtn').addEventListener('click', function () {
+        const passwordInput = document.getElementById('regPasswordInput');
+        const toggleIcon = document.getElementById('regToggleIcon');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('bi-eye');
+            toggleIcon.classList.add('bi-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('bi-eye-slash');
+            toggleIcon.classList.add('bi-eye');
+        }
+    });
+</script>

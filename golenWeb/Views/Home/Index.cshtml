@@ -76,16 +76,26 @@
                         @foreach (var ev in todayEvents)
                         {
                             <li class="list-group-item px-4 py-3 border-start border-success border-4">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
+                                <div class="d-flex align-items-center gap-3">
+                                    @if (!string.IsNullOrEmpty(ev.ImageUrl))
+                                    {
+                                        <img src="@ev.ImageUrl" alt="@ev.Title" class="rounded-3 shadow-sm flex-shrink-0" style="width: 75px; height: 75px; object-fit: cover; border: 2px solid #0b5e28;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-3 flex-shrink-0 d-flex align-items-center justify-content-center shadow-sm" style="width: 75px; height: 75px; background: linear-gradient(135deg, #0b5e28, #1b2a4a); color: #e6b800; font-size: 1.8rem;">
+                                            <i class="bi bi-calendar-event-fill"></i>
+                                        </div>
+                                    }
+                                    <div class="flex-grow-1">
                                         <span class="badge bg-success mb-1">@ev.Category</span>
-                                        <div class="fw-bold text-dark">@ev.Title</div>
-                                        <small class="text-muted">
+                                        <div class="fw-bold text-dark fs-6">@ev.Title</div>
+                                        <small class="text-muted d-block mt-1">
                                             <i class="bi bi-clock me-1"></i>@ev.StartTime – @ev.EndTime
-                                            &nbsp;&nbsp;<i class="bi bi-geo-alt me-1"></i>@ev.Location
+                                            &nbsp;&bull;&nbsp;<i class="bi bi-geo-alt me-1 text-danger"></i>@ev.Location
                                         </small>
                                     </div>
-                                    <a asp-controller="Events" asp-action="Edit" asp-route-id="@ev.Id" class="btn btn-sm btn-outline-secondary ms-3">
+                                    <a asp-controller="Events" asp-action="Edit" asp-route-id="@ev.Id" class="btn btn-sm btn-outline-secondary ms-2 flex-shrink-0">
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                 </div>
@@ -127,12 +137,24 @@
                             var leftColor = b.Priority == "High" ? "border-danger" : "border-success";
                             var badge = b.Priority == "High" ? "bg-danger" : "bg-secondary";
                             <li class="list-group-item px-4 py-3 border-start border-4 @leftColor">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <span class="badge @badge mb-1">@b.Priority</span>
-                                        <span class="badge bg-light text-dark border ms-1">@b.Category</span>
-                                        <div class="fw-bold text-dark mt-1">@b.Title</div>
-                                        <small class="text-muted">@b.Author &bull; @b.PublishDate.ToString("MMM dd, yyyy")</small>
+                                <div class="d-flex align-items-center gap-3">
+                                    @if (!string.IsNullOrEmpty(b.ImageUrl))
+                                    {
+                                        <img src="@b.ImageUrl" alt="@b.Title" class="rounded-3 shadow-sm flex-shrink-0" style="width: 70px; height: 70px; object-fit: cover; border: 2px solid #e6b800;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-3 flex-shrink-0 d-flex align-items-center justify-content-center shadow-sm" style="width: 70px; height: 70px; background: linear-gradient(135deg, #1b2a4a, #073d1a); color: #f5d020; font-size: 1.6rem;">
+                                            <i class="bi bi-megaphone-fill"></i>
+                                        </div>
+                                    }
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center gap-1 mb-1">
+                                            <span class="badge @badge">@b.Priority</span>
+                                            <span class="badge bg-light text-dark border">@b.Category</span>
+                                        </div>
+                                        <div class="fw-bold text-dark" style="font-size:0.95rem;">@b.Title</div>
+                                        <small class="text-muted d-block mt-1">@b.Author &bull; @b.PublishDate.ToString("MMM dd, yyyy")</small>
                                     </div>
                                 </div>
                             </li>
@@ -156,7 +178,7 @@
             <div class="card-body">
                 <div class="fs-1 text-success mb-2"><i class="bi bi-calendar-event"></i></div>
                 <h5 class="fw-bold">Event Calendar</h5>
-                <p class="text-muted small">Schedule, view, and manage all campus events by date and category.</p>
+                <p class="text-muted small">Schedule, view, and manage all campus events with uploaded pictures.</p>
                 <a asp-controller="Events" asp-action="Create" class="btn btn-success btn-sm px-3">
                     <i class="bi bi-plus-lg me-1"></i>Add Event for Today
                 </a>
@@ -168,7 +190,7 @@
             <div class="card-body">
                 <div class="fs-1 text-warning mb-2"><i class="bi bi-megaphone"></i></div>
                 <h5 class="fw-bold">Bulletin Board</h5>
-                <p class="text-muted small">Post official college announcements, academic notices, and urgent alerts.</p>
+                <p class="text-muted small">Post official college announcements and notices with hashed image attachments.</p>
                 <a asp-controller="Bulletins" asp-action="Create" class="btn btn-warning text-dark btn-sm px-3">
                     <i class="bi bi-plus-lg me-1"></i>Post New Bulletin
                 </a>

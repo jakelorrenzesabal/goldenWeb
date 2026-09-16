@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using golenWeb.Models;
 using golenWeb.Services;
@@ -15,6 +15,8 @@ namespace golenWeb.Controllers
         {
             _auth = auth;
         }
+
+        // ─── Public: Login / Register / Logout ───────────────────────────
 
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
@@ -36,14 +38,18 @@ namespace golenWeb.Controllers
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username)
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Role, user.Role)   // ← role claim for IsInRole / [Authorize(Roles=...)]
             };
             var identity = new ClaimsIdentity(claims, "MyCookieAuth");
             var principal = new ClaimsPrincipal(identity);
             await HttpContext.SignInAsync("MyCookieAuth", principal);
+
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return Redirect(returnUrl);
-            return RedirectToAction("Index", "Home");
+
+            // Redirect to dashboard after login
+            return RedirectToAction("Index", "Dashboard");
         }
 
         [HttpGet]
@@ -57,7 +63,9 @@ namespace golenWeb.Controllers
         {
             try
             {
-                await _auth.CreateUserAsync(username, email, password);
+                // New registrations always get "User" role; Admin assigns roles from the dashboard
+                await _auth.CreateUserAsync(username, email, password, "User");
+                TempData["SuccessMessage"] = "Account created! You can now log in.";
                 return RedirectToAction("Login");
             }
             catch (Exception ex)
@@ -74,7 +82,9 @@ namespace golenWeb.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        // Simple CRUD
+        // ─── Admin-only: User Management CRUD ────────────────────────────
+
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -82,16 +92,28 @@ namespace golenWeb.Controllers
             return View(users);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult Create() => View();
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<IActionResult> Create(string username, string email, string password)
+        public async Task<IActionResult> Create(string username, string email, string password, string role = "User")
         {
-            await _auth.CreateUserAsync(username, email, password);
-            return RedirectToAction("Index");
+            try
+            {
+                await _auth.CreateUserAsync(username, email, password, role);
+                TempData["SuccessMessage"] = $"User '{username}' created successfully with role '{role}'.";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View();
+            }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -100,13 +122,16 @@ namespace golenWeb.Controllers
             return View(user);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<IActionResult> Edit(int id, string username, string email, string? newPassword)
+        public async Task<IActionResult> Edit(int id, string username, string email, string role, string? newPassword)
         {
-            await _auth.UpdateUserAsync(id, username, email, newPassword);
+            await _auth.UpdateUserAsync(id, username, email, role, newPassword);
+            TempData["SuccessMessage"] = $"User '{username}' updated successfully.";
             return RedirectToAction("Index");
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
@@ -115,10 +140,21 @@ namespace golenWeb.Controllers
             return View(user);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await _auth.DeleteUserAsync(id);
+            TempData["SuccessMessage"] = "User account deleted.";
+            return RedirectToAction("Index");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> ChangeRole(int id, string role)
+        {
+            await _auth.UpdateRoleAsync(id, role);
+            TempData["SuccessMessage"] = $"Role updated to '{role}' successfully.";
             return RedirectToAction("Index");
         }
     }

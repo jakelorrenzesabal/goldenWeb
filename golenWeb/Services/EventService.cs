@@ -20,7 +20,7 @@ namespace golenWeb.Services
             await conn.OpenAsync();
 
             await using var cmd = conn.CreateCommand();
-            var sql = "SELECT Id, Title, Description, EventDate, StartTime, EndTime, Location, Organizer, Category, IsFeatured, CreatedAt FROM Events WHERE 1=1";
+            var sql = "SELECT Id, Title, Description, EventDate, StartTime, EndTime, Location, Organizer, Category, IsFeatured, CreatedAt, ImageUrl FROM Events WHERE 1=1";
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -63,7 +63,7 @@ namespace golenWeb.Services
             await conn.OpenAsync();
 
             await using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT Id, Title, Description, EventDate, StartTime, EndTime, Location, Organizer, Category, IsFeatured, CreatedAt FROM Events WHERE Id = @id LIMIT 1";
+            cmd.CommandText = "SELECT Id, Title, Description, EventDate, StartTime, EndTime, Location, Organizer, Category, IsFeatured, CreatedAt, ImageUrl FROM Events WHERE Id = @id LIMIT 1";
             AddParam(cmd, "@id", id);
 
             await using var reader = await cmd.ExecuteReaderAsync();
@@ -81,15 +81,15 @@ namespace golenWeb.Services
             if (_factory.ProviderType == DbProviderType.Sqlite)
             {
                 cmd.CommandText = @"
-INSERT INTO Events (Title, Description, EventDate, StartTime, EndTime, Location, Organizer, Category, IsFeatured, CreatedAt)
-VALUES (@t, @d, @ed, @st, @et, @loc, @org, @cat, @feat, @dt);
+INSERT INTO Events (Title, Description, EventDate, StartTime, EndTime, Location, Organizer, Category, IsFeatured, CreatedAt, ImageUrl)
+VALUES (@t, @d, @ed, @st, @et, @loc, @org, @cat, @feat, @dt, @img);
 SELECT last_insert_rowid();";
             }
             else
             {
                 cmd.CommandText = @"
-INSERT INTO Events (Title, Description, EventDate, StartTime, EndTime, Location, Organizer, Category, IsFeatured, CreatedAt)
-VALUES (@t, @d, @ed, @st, @et, @loc, @org, @cat, @feat, @dt);
+INSERT INTO Events (Title, Description, EventDate, StartTime, EndTime, Location, Organizer, Category, IsFeatured, CreatedAt, ImageUrl)
+VALUES (@t, @d, @ed, @st, @et, @loc, @org, @cat, @feat, @dt, @img);
 SELECT LAST_INSERT_ID();";
             }
 
@@ -103,6 +103,7 @@ SELECT LAST_INSERT_ID();";
             AddParam(cmd, "@cat", ev.Category);
             AddParam(cmd, "@feat", ev.IsFeatured ? 1 : 0);
             AddParam(cmd, "@dt", DateTime.UtcNow);
+            AddParam(cmd, "@img", (object?)ev.ImageUrl ?? DBNull.Value);
 
             var idObj = await cmd.ExecuteScalarAsync();
             ev.Id = Convert.ToInt32(idObj);
@@ -117,7 +118,7 @@ SELECT LAST_INSERT_ID();";
             await using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
 UPDATE Events
-SET Title=@t, Description=@d, EventDate=@ed, StartTime=@st, EndTime=@et, Location=@loc, Organizer=@org, Category=@cat, IsFeatured=@feat
+SET Title=@t, Description=@d, EventDate=@ed, StartTime=@st, EndTime=@et, Location=@loc, Organizer=@org, Category=@cat, IsFeatured=@feat, ImageUrl=@img
 WHERE Id=@id";
 
             AddParam(cmd, "@t", ev.Title);
@@ -129,6 +130,7 @@ WHERE Id=@id";
             AddParam(cmd, "@org", ev.Organizer);
             AddParam(cmd, "@cat", ev.Category);
             AddParam(cmd, "@feat", ev.IsFeatured ? 1 : 0);
+            AddParam(cmd, "@img", (object?)ev.ImageUrl ?? DBNull.Value);
             AddParam(cmd, "@id", ev.Id);
 
             var rows = await cmd.ExecuteNonQueryAsync();
@@ -172,7 +174,8 @@ WHERE Id=@id";
                 Organizer = r.IsDBNull(7) ? "GSC Admin" : r.GetString(7),
                 Category = r.IsDBNull(8) ? "Academic" : r.GetString(8),
                 IsFeatured = r.IsDBNull(9) ? true : Convert.ToBoolean(r.GetValue(9)),
-                CreatedAt = r.IsDBNull(10) ? DateTime.UtcNow : Convert.ToDateTime(r.GetValue(10))
+                CreatedAt = r.IsDBNull(10) ? DateTime.UtcNow : Convert.ToDateTime(r.GetValue(10)),
+                ImageUrl = r.FieldCount > 11 && !r.IsDBNull(11) ? r.GetString(11) : null
             };
         }
 

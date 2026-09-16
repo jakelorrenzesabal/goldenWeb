@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Golden Success College - Official Website featuring Campus Events Calendar and Bulletin Board System" />
-    <title>@ViewData["Title"] - Golden Success College</title>
+    <title>@(ViewData["SiteTitle"] ?? ViewData["Title"]) - @(ViewData["CollegeName"] ?? "Golden Success College")</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
@@ -12,9 +12,9 @@
     <link rel="stylesheet" href="~/golenWeb.styles.css" asp-append-version="true" />
     <style>
         :root {
-            --gsc-green: #0b5e28;
-            --gsc-dark-green: #073d1a;
-            --gsc-gold: #e6b800;
+            --gsc-green: @(ViewData["PrimaryColor"] ?? "#0b5e28");
+            --gsc-dark-green: @(ViewData["NavBackground"] ?? "#073d1a");
+            --gsc-gold: @(ViewData["AccentColor"] ?? "#e6b800");
             --gsc-navy: #1b2a4a;
         }
 
@@ -26,9 +26,7 @@
             box-shadow: 0 2px 16px rgba(0,0,0,0.3);
         }
 
-        .gsc-brand-text {
-            line-height: 1.15;
-        }
+        .gsc-brand-text { line-height: 1.15; }
 
         .gsc-brand-text .college-name {
             font-size: 1.05rem;
@@ -58,14 +56,93 @@
 
         .nav-link.gsc-link i { margin-right: 4px; }
 
+        .role-badge-admin {
+            font-size: 0.6rem;
+            background: linear-gradient(135deg, #e6b800, #f5d020);
+            color: #1a1a1a;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .role-badge-user {
+            font-size: 0.6rem;
+            background: rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.9);
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .user-info-nav {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255,255,255,0.9);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--gsc-gold);
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.8rem;
+        }
+
         footer.gsc-footer {
             background: linear-gradient(90deg, var(--gsc-dark-green), var(--gsc-navy));
             color: rgba(255,255,255,0.8);
             border-top: 3px solid var(--gsc-gold);
         }
+
+        .announcement-banner {
+            background: linear-gradient(90deg, var(--gsc-gold), #f5d020);
+            color: #1a1a1a;
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 8px 0;
+            text-align: center;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .toast-success {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 320px;
+            animation: slideInRight 0.3s ease;
+        }
+
+        @@keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
     </style>
 </head>
 <body>
+    @{
+        var showBanner = ViewData["ShowAnnouncementBanner"]?.ToString() == "true";
+        var bannerText = ViewData["AnnouncementBanner"]?.ToString();
+    }
+    @if (showBanner && !string.IsNullOrWhiteSpace(bannerText))
+    {
+        <div class="announcement-banner">
+            <i class="bi bi-megaphone-fill me-2"></i>@bannerText
+        </div>
+    }
+
     <header>
         <nav class="navbar navbar-expand-lg gsc-navbar py-2">
             <div class="container">
@@ -73,8 +150,8 @@
                 <a class="navbar-brand d-flex align-items-center gap-3 text-decoration-none" asp-area="" asp-controller="Home" asp-action="Index">
                     <img src="~/images/logo.png" alt="Golden Success College Logo" style="height:52px; width:52px; object-fit:contain; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));" />
                     <div class="gsc-brand-text">
-                        <div class="college-name">Golden Success College</div>
-                        <div class="tagline">Determination &bull; Courage &bull; Hardwork &bull; Isa. 33:6</div>
+                        <div class="college-name">@(ViewData["CollegeName"] ?? "Golden Success College")</div>
+                        <div class="tagline">@(ViewData["NavTagline"] ?? "Determination &bull; Courage &bull; Hardwork &bull; Isa. 33:6")</div>
                     </div>
                 </a>
 
@@ -100,35 +177,86 @@
                                 <i class="bi bi-megaphone text-warning"></i>Bulletin Board
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link gsc-link" asp-controller="CrudTest" asp-action="Index">
-                                <i class="bi bi-lightning-charge text-warning"></i>API Tester
-                            </a>
-                        </li>
-                        <li class="nav-item ms-1">
-                            @if (User?.Identity?.IsAuthenticated ?? false)
+
+                        @if (User?.Identity?.IsAuthenticated ?? false)
+                        {
+                            <!-- Dashboard link for all logged-in users -->
+                            <li class="nav-item">
+                                <a class="nav-link gsc-link" asp-controller="Dashboard" asp-action="Index">
+                                    <i class="bi bi-speedometer2 text-warning"></i>Dashboard
+                                </a>
+                            </li>
+                            <!-- Customize Site — both roles -->
+                            <li class="nav-item">
+                                <a class="nav-link gsc-link" asp-controller="SiteSettings" asp-action="Index">
+                                    <i class="bi bi-palette text-warning"></i>Customize
+                                </a>
+                            </li>
+                            @if (User.IsInRole("Admin"))
                             {
-                                <div class="d-flex align-items-center gap-2">
+                                <!-- Admin-only: Manage Users -->
+                                <li class="nav-item">
                                     <a class="nav-link gsc-link" asp-controller="Account" asp-action="Index">
-                                        <i class="bi bi-people"></i>Users
+                                        <i class="bi bi-people-fill text-warning"></i>Users
                                     </a>
+                                </li>
+                            }
+
+                            <!-- User info + logout -->
+                            <li class="nav-item ms-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="user-info-nav">
+                                        <div class="user-avatar">
+                                            @User.Identity!.Name!.Substring(0, 1).ToUpper()
+                                        </div>
+                                        <div>
+                                            <div style="font-size:0.8rem;">@User.Identity!.Name</div>
+                                            @if (User.IsInRole("Admin"))
+                                            {
+                                                <span class="role-badge-admin">Admin</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="role-badge-user">User</span>
+                                            }
+                                        </div>
+                                    </div>
                                     <form method="post" asp-controller="Account" asp-action="Logout" class="d-inline">
                                         <button type="submit" class="btn btn-sm btn-outline-warning fw-bold">
                                             <i class="bi bi-box-arrow-right me-1"></i>Logout
                                         </button>
                                     </form>
                                 </div>
-                            }
-                            else
-                            {
-                                <a class="btn btn-sm btn-outline-light" asp-controller="Account" asp-action="Login">Login</a>
-                            }
-                        </li>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item ms-1">
+                                <a class="btn btn-sm btn-outline-light" asp-controller="Account" asp-action="Login">
+                                    <i class="bi bi-person-circle me-1"></i>Login
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
+
+    <!-- Success/Error Toast -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="toast-success toast show border-0 shadow-lg" role="alert" id="successToast">
+            <div class="toast-header bg-success text-white border-0">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <strong class="me-auto">Success</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" onclick="document.getElementById('successToast').remove()"></button>
+            </div>
+            <div class="toast-body fw-semibold">
+                @TempData["SuccessMessage"]
+            </div>
+        </div>
+    }
 
     <div class="container py-4">
         <main role="main">
@@ -141,14 +269,21 @@
             <div class="mb-2">
                 <img src="~/images/logo.png" alt="GSC Logo" style="height:40px; opacity:0.85;" />
             </div>
-            <p class="mb-1 fw-bold" style="color: #f0c040;">Golden Success College</p>
-            <p class="small mb-0 text-white-50">&copy; @DateTime.Now.Year Golden Success College &bull; All Rights Reserved &bull; <em>Isa. 33:6</em></p>
+            <p class="mb-1 fw-bold" style="color: #f0c040;">@(ViewData["CollegeName"] ?? "Golden Success College")</p>
+            <p class="small mb-0 text-white-50">&copy; @DateTime.Now.Year @(ViewData["FooterText"] ?? "Golden Success College • All Rights Reserved") &bull; <em>Isa. 33:6</em></p>
         </div>
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        // Auto-dismiss success toast after 4s
+        setTimeout(function () {
+            var t = document.getElementById('successToast');
+            if (t) t.remove();
+        }, 4000);
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

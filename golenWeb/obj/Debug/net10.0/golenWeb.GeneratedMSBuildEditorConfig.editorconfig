@@ -51,12 +51,20 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQnVsbGV0aW5zXENyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/goldenWebsitePro/golenWeb/golenWeb/Views/Bulletins/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQnVsbGV0aW5zXEVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/goldenWebsitePro/golenWeb/golenWeb/Views/Bulletins/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQnVsbGV0aW5zXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/goldenWebsitePro/golenWeb/golenWeb/Views/CrudTest/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3J1ZFRlc3RcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/goldenWebsitePro/golenWeb/golenWeb/Views/Dashboard/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGFzaGJvYXJkXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/goldenWebsitePro/golenWeb/golenWeb/Views/Events/Create.cshtml]
@@ -89,6 +97,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [D:/goldenWebsitePro/golenWeb/golenWeb/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/goldenWebsitePro/golenWeb/golenWeb/Views/SiteSettings/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2l0ZVNldHRpbmdzXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/goldenWebsitePro/golenWeb/golenWeb/Views/_ViewImports.cshtml]

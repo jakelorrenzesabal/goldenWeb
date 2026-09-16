@@ -1,27 +1,135 @@
 @model IEnumerable<golenWeb.Models.User>
 @{
-    ViewData["Title"] = "Users";
+    ViewData["Title"] = "User Management";
 }
 
-<h2>Users</h2>
-
-<p><a class="btn btn-success" asp-action="Create">Create new user</a></p>
-
-<table class="table">
-    <thead>
-        <tr><th>Id</th><th>Username</th><th>Email</th><th></th></tr>
-    </thead>
-    <tbody>
-    @foreach(var u in Model){
-        <tr>
-            <td>@u.Id</td>
-            <td>@u.Username</td>
-            <td>@u.Email</td>
-            <td>
-                <a class="btn btn-sm btn-primary" asp-action="Edit" asp-route-id="@u.Id">Edit</a>
-                <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@u.Id">Delete</a>
-            </td>
-        </tr>
+<style>
+    .user-mgmt-header {
+        background: linear-gradient(135deg, #1b2a4a, #073d1a);
+        border-radius: 16px;
+        padding: 2rem;
+        color: white;
+        margin-bottom: 2rem;
     }
-    </tbody>
-</table>
+    .users-table-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+    .users-table th {
+        background: #f8fafb;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #666;
+        border-bottom: 2px solid #eee;
+        padding: 1rem 1.25rem;
+    }
+    .users-table td {
+        padding: 1rem 1.25rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .role-badge {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .role-badge.admin { background: linear-gradient(135deg,#e6b800,#f5d020); color: #1a1a1a; }
+    .role-badge.user { background: #e8f5e9; color: #2e7d32; }
+    .user-avatar-sm {
+        width: 36px; height: 36px; border-radius: 50%;
+        background: linear-gradient(135deg,#0b5e28,#1a8c45);
+        color: white; display: flex; align-items: center;
+        justify-content: center; font-weight: 800; font-size: 0.9rem; flex-shrink:0;
+    }
+</style>
+
+<div class="user-mgmt-header">
+    <div class="d-flex align-items-center justify-content-between">
+        <div>
+            <h1 class="mb-1" style="font-size:1.6rem;font-weight:800;"><i class="bi bi-shield-fill-check me-2" style="color:#e6b800;"></i>User Management</h1>
+            <p class="mb-0" style="color:rgba(255,255,255,0.7);font-size:0.9rem;">Manage accounts and roles — Admin access only</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-light btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Dashboard
+            </a>
+            <a asp-action="Create" class="btn btn-warning btn-sm fw-bold">
+                <i class="bi bi-person-plus me-1"></i>Add User
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="users-table-card">
+    <table class="table users-table mb-0">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>User</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in Model)
+            {
+                <tr>
+                    <td class="text-muted" style="font-size:0.85rem;">@u.Id</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="user-avatar-sm">@u.Username.Substring(0, 1).ToUpper()</div>
+                            <span class="fw-600" style="font-weight:600;">@u.Username</span>
+                        </div>
+                    </td>
+                    <td class="text-muted" style="font-size:0.88rem;">@u.Email</td>
+                    <td>
+                        @if (u.Role == "Admin")
+                        {
+                            <span class="role-badge admin"><i class="bi bi-shield-fill-check me-1"></i>Admin</span>
+                        }
+                        else
+                        {
+                            <span class="role-badge user"><i class="bi bi-person me-1"></i>User</span>
+                        }
+                    </td>
+                    <td>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a asp-action="Edit" asp-route-id="@u.Id" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil me-1"></i>Edit
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@u.Id" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash me-1"></i>Delete
+                            </a>
+                            <!-- Quick Role Toggle -->
+                            <form asp-action="ChangeRole" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@u.Id" />
+                                <input type="hidden" name="role" value="@(u.Role == "Admin" ? "User" : "Admin")" />
+                                <button type="submit" class="btn btn-sm btn-outline-secondary"
+                                        onclick="return confirm('Change role of @u.Username to @(u.Role == "Admin" ? "User" : "Admin")?')">
+                                    <i class="bi bi-arrow-left-right me-1"></i>
+                                    → @(u.Role == "Admin" ? "User" : "Admin")
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-people" style="font-size:3rem;opacity:0.3;"></i>
+            <p class="mt-2">No users found.</p>
+        </div>
+    }
+</div>

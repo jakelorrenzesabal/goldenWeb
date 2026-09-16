@@ -15,7 +15,7 @@ namespace golenWeb.Services
         }
 
         // Create a user (username must be unique)
-        public async Task<int> CreateUserAsync(string username, string email, string password)
+        public async Task<int> CreateUserAsync(string username, string email, string password, string role = "User")
         {
             var hash = HashPassword(password);
             await using var conn = _factory.CreateConnection();
@@ -24,16 +24,17 @@ namespace golenWeb.Services
 
             if (_factory.ProviderType == DbProviderType.Sqlite)
             {
-                cmd.CommandText = "INSERT INTO Users (Username, Email, PasswordHash) VALUES (@u,@e,@p); SELECT last_insert_rowid();";
+                cmd.CommandText = "INSERT INTO Users (Username, Email, PasswordHash, Role) VALUES (@u,@e,@p,@r); SELECT last_insert_rowid();";
             }
             else
             {
-                cmd.CommandText = "INSERT INTO Users (Username, Email, PasswordHash) VALUES (@u,@e,@p); SELECT LAST_INSERT_ID();";
+                cmd.CommandText = "INSERT INTO Users (Username, Email, PasswordHash, Role) VALUES (@u,@e,@p,@r); SELECT LAST_INSERT_ID();";
             }
 
             AddParam(cmd, "@u", username);
             AddParam(cmd, "@e", email);
             AddParam(cmd, "@p", hash);
+            AddParam(cmd, "@r", role);
 
             var idObj = await cmd.ExecuteScalarAsync();
             return Convert.ToInt32(idObj);
@@ -44,7 +45,7 @@ namespace golenWeb.Services
             await using var conn = _factory.CreateConnection();
             await conn.OpenAsync();
             await using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT Id, Username, Email, PasswordHash FROM Users WHERE Username = @u LIMIT 1";
+            cmd.CommandText = "SELECT Id, Username, Email, PasswordHash, Role FROM Users WHERE Username = @u LIMIT 1";
             AddParam(cmd, "@u", username);
 
             await using var reader = await cmd.ExecuteReaderAsync();
@@ -57,7 +58,8 @@ namespace golenWeb.Services
                 Id = reader.GetInt32(0),
                 Username = reader.GetString(1),
                 Email = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                PasswordHash = storedHash
+                PasswordHash = storedHash,
+                Role = reader.IsDBNull(4) ? "User" : reader.GetString(4)
             };
         }
 
@@ -67,8 +69,8 @@ namespace golenWeb.Services
             await using var conn = _factory.CreateConnection();
             await conn.OpenAsync();
             await using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT Id, Username, Email, PasswordHash FROM Users ORDER BY Id DESC";
-            
+            cmd.CommandText = "SELECT Id, Username, Email, PasswordHash, Role FROM Users ORDER BY Id DESC";
+
             await using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
@@ -77,7 +79,8 @@ namespace golenWeb.Services
                     Id = reader.GetInt32(0),
                     Username = reader.GetString(1),
                     Email = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                    PasswordHash = reader.GetString(3)
+                    PasswordHash = reader.GetString(3),
+                    Role = reader.IsDBNull(4) ? "User" : reader.GetString(4)
                 });
             }
             return list;
@@ -88,7 +91,7 @@ namespace golenWeb.Services
             await using var conn = _factory.CreateConnection();
             await conn.OpenAsync();
             await using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT Id, Username, Email, PasswordHash FROM Users WHERE Id = @id LIMIT 1";
+            cmd.CommandText = "SELECT Id, Username, Email, PasswordHash, Role FROM Users WHERE Id = @id LIMIT 1";
             AddParam(cmd, "@id", id);
 
             await using var reader = await cmd.ExecuteReaderAsync();
@@ -99,11 +102,12 @@ namespace golenWeb.Services
                 Id = reader.GetInt32(0),
                 Username = reader.GetString(1),
                 Email = reader.IsDBNull(2) ? "" : reader.GetString(2),
-                PasswordHash = reader.GetString(3)
+                PasswordHash = reader.GetString(3),
+                Role = reader.IsDBNull(4) ? "User" : reader.GetString(4)
             };
         }
 
-        public async Task UpdateUserAsync(int id, string username, string email, string? newPassword = null)
+        public async Task UpdateUserAsync(int id, string username, string email, string role, string? newPassword = null)
         {
             await using var conn = _factory.CreateConnection();
             await conn.OpenAsync();
@@ -112,15 +116,27 @@ namespace golenWeb.Services
             if (!string.IsNullOrEmpty(newPassword))
             {
                 var hash = HashPassword(newPassword);
-                cmd.CommandText = "UPDATE Users SET Username=@u, Email=@e, PasswordHash=@p WHERE Id=@id";
+                cmd.CommandText = "UPDATE Users SET Username=@u, Email=@e, PasswordHash=@p, Role=@r WHERE Id=@id";
                 AddParam(cmd, "@p", hash);
             }
             else
             {
-                cmd.CommandText = "UPDATE Users SET Username=@u, Email=@e WHERE Id=@id";
+                cmd.CommandText = "UPDATE Users SET Username=@u, Email=@e, Role=@r WHERE Id=@id";
             }
             AddParam(cmd, "@u", username);
             AddParam(cmd, "@e", email);
+            AddParam(cmd, "@r", role);
+            AddParam(cmd, "@id", id);
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        public async Task UpdateRoleAsync(int id, string role)
+        {
+            await using var conn = _factory.CreateConnection();
+            await conn.OpenAsync();
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = "UPDATE Users SET Role=@r WHERE Id=@id";
+            AddParam(cmd, "@r", role);
             AddParam(cmd, "@id", id);
             await cmd.ExecuteNonQueryAsync();
         }
@@ -135,6 +151,15 @@ namespace golenWeb.Services
             await cmd.ExecuteNonQueryAsync();
         }
 
+        public async Task<int> GetUserCountAsync()
+        {
+            await using var conn = _factory.CreateConnection();
+            await conn.OpenAsync();
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT COUNT(*) FROM Users";
+            return Convert.ToInt32(await cmd.ExecuteScalarAsync());
+        }
+
         private static void AddParam(DbCommand cmd, string name, object value)
         {
             var p = cmd.CreateParameter();
@@ -145,11 +170,9 @@ namespace golenWeb.Services
 
         private static string HashPassword(string password)
         {
-            byte[] salt = new byte[16];
-            RandomNumberGenerator.Fill(salt);
+            byte[] salt = RandomNumberGenerator.GetBytes(16);
             const int iterations = 100_000;
-            using var derive = new Rfc2898DeriveBytes(password, salt, iterations, HashAlgorithmName.SHA256);
-            var hash = derive.GetBytes(32);
+            byte[] hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, iterations, HashAlgorithmName.SHA256, 32);
             return $"{iterations}.{Convert.ToBase64String(salt)}.{Convert.ToBase64String(hash)}";
         }
 
@@ -162,8 +185,7 @@ namespace golenWeb.Services
                 var iterations = int.Parse(parts[0]);
                 var salt = Convert.FromBase64String(parts[1]);
                 var hash = Convert.FromBase64String(parts[2]);
-                using var derive = new Rfc2898DeriveBytes(password, salt, iterations, HashAlgorithmName.SHA256);
-                var candidate = derive.GetBytes(hash.Length);
+                byte[] candidate = Rfc2898DeriveBytes.Pbkdf2(password, salt, iterations, HashAlgorithmName.SHA256, hash.Length);
                 return CryptographicOperations.FixedTimeEquals(candidate, hash);
             }
             catch

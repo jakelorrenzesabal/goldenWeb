@@ -81,7 +81,7 @@ namespace golenWeb.Controllers.Api
                 return NotFound(new { message = $"User with ID {id} was not found." });
             }
 
-            await _authService.UpdateUserAsync(id, req.Username, req.Email, req.NewPassword);
+            await _authService.UpdateUserAsync(id, req.Username, req.Email, user.Role, req.NewPassword);
             return Ok(new { message = $"User {id} updated successfully.", id, req.Username, req.Email });
         }
 

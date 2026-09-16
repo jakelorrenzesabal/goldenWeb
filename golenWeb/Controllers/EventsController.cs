@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using golenWeb.Models;
 using golenWeb.Services;
@@ -7,13 +8,15 @@ namespace golenWeb.Controllers
     public class EventsController : Controller
     {
         private readonly EventService _eventService;
+        private readonly FileStorageService _fileStorage;
 
-        public EventsController(EventService eventService)
+        public EventsController(EventService eventService, FileStorageService fileStorage)
         {
             _eventService = eventService;
+            _fileStorage = fileStorage;
         }
 
-        // GET: /Events
+        // GET: /Events — public
         [HttpGet]
         public async Task<IActionResult> Index(string? search, string? category, DateTime? date)
         {
@@ -25,7 +28,8 @@ namespace golenWeb.Controllers
             return View(events);
         }
 
-        // GET: /Events/Create
+        // GET: /Events/Create — requires login
+        [Authorize]
         [HttpGet]
         public IActionResult Create()
         {
@@ -40,14 +44,20 @@ namespace golenWeb.Controllers
             });
         }
 
-        // POST: /Events/Create
+        // POST: /Events/Create — requires login
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(EventModel ev)
+        public async Task<IActionResult> Create(EventModel ev, IFormFile? imageFile)
         {
             if (!ModelState.IsValid)
             {
                 return View(ev);
+            }
+
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                ev.ImageUrl = await _fileStorage.SaveImageAsync(imageFile, "uploads/events");
             }
 
             await _eventService.CreateAsync(ev);
@@ -55,7 +65,8 @@ namespace golenWeb.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: /Events/Edit/5
+        // GET: /Events/Edit/5 — requires login
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -67,16 +78,30 @@ namespace golenWeb.Controllers
             return View(ev);
         }
 
-        // POST: /Events/Edit/5
+        // POST: /Events/Edit/5 — requires login
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, EventModel ev)
+        public async Task<IActionResult> Edit(int id, EventModel ev, IFormFile? imageFile)
         {
             if (id != ev.Id) return BadRequest();
 
             if (!ModelState.IsValid)
             {
                 return View(ev);
+            }
+
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                ev.ImageUrl = await _fileStorage.SaveImageAsync(imageFile, "uploads/events");
+            }
+            else
+            {
+                var existing = await _eventService.GetByIdAsync(id);
+                if (existing != null)
+                {
+                    ev.ImageUrl = existing.ImageUrl;
+                }
             }
 
             var updated = await _eventService.UpdateAsync(ev);
@@ -86,7 +111,8 @@ namespace golenWeb.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: /Events/Delete/5
+        // GET: /Events/Delete/5 — requires login
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
@@ -95,7 +121,8 @@ namespace golenWeb.Controllers
             return View(ev);
         }
 
-        // POST: /Events/DeleteConfirmed/5
+        // POST: /Events/DeleteConfirmed/5 — requires login
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -108,7 +135,8 @@ namespace golenWeb.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // POST: /Events/DeleteAll
+        // POST: /Events/DeleteAll — requires login
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteAll()

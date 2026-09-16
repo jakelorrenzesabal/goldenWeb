@@ -33,6 +33,9 @@ namespace golenWeb.Models
 
         public bool IsFeatured { get; set; } = true;
 
+        [StringLength(500)]
+        public string? ImageUrl { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

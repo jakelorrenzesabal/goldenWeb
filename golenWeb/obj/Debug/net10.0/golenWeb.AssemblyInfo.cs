@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("golenWeb")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9cfd6a14bd4ab9dbc386a8b1a221148fdc199ad9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1046a69d1a8d6b1b4f4ea8d1a21a6a232730725e")]
 [assembly: System.Reflection.AssemblyProductAttribute("golenWeb")]
 [assembly: System.Reflection.AssemblyTitleAttribute("golenWeb")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
