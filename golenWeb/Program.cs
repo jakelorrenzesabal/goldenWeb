@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using golenWeb.Data;
 using golenWeb.Filters;
 using golenWeb.Services;
@@ -28,6 +30,7 @@ builder.Services.AddScoped<FileStorageService>();
 builder.Services.AddTransient<DbInitializer>();
 
 var app = builder.Build();
+// Ensure unhandled exceptions during app.Run are logged to console/crash.log for easier diagnosis.
 
 // Auto-create database and tables on startup
 using (var scope = app.Services.CreateScope())
@@ -64,4 +67,26 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
-app.Run();
+try
+{
+    app.Run();
+}
+catch (Exception ex)
+{
+    try
+    {
+        var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Host");
+        logger.LogCritical(ex, "Host terminated unexpectedly");
+    }
+    catch { }
+
+    try
+    {
+        Console.WriteLine(ex.ToString());
+        File.WriteAllText("crash.log", ex.ToString());
+    }
+    catch { }
+
+    Environment.ExitCode = -1;
+    throw;
+}

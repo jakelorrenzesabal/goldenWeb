@@ -56,10 +56,6 @@
               "target": "Package",
               "version": "[13.5.3, )"
             },
-            "Microsoft.Data.Sqlite": {
-              "target": "Package",
-              "version": "[9.0.0, )"
-            },
             "MySql.Data": {
               "target": "Package",
               "version": "[26.7.0, )"
@@ -84,7 +80,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.400/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.401/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

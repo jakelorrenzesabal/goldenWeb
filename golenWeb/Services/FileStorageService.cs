@@ -4,32 +4,47 @@ namespace golenWeb.Services
 {
     public class FileStorageService
     {
-        private readonly IWebHostEnvironment _env;
         private readonly ILogger<FileStorageService> _logger;
 
-        public FileStorageService(IWebHostEnvironment env, ILogger<FileStorageService> logger)
+        // Maximum allowed photo size in bytes (2 MB = 2,097,152 bytes)
+        public const long MaxPhotoSizeBytes = 2 * 1024 * 1024; // 2 MB
+        public const double MaxPhotoSizeMB = 2.0;
+
+        public FileStorageService(ILogger<FileStorageService> logger)
         {
-            _env = env;
             _logger = logger;
         }
 
         /// <summary>
-        /// Saves an uploaded image file using a SHA-256 hash of its contents for fast, content-addressable storage & deduplication.
-        /// Returns relative URL path e.g. "/uploads/images/a3f89b...jpg"
+        /// Validates photo size (Max 2MB) and format, then returns the binary data, content type, and SHA256 hash to be stored DIRECTLY inside the database.
         /// </summary>
-        public async Task<string?> SaveImageAsync(IFormFile? file, string subFolder = "uploads/images")
+        public async Task<(byte[]? ImageData, string? ContentType, string? ImageHash, string? ErrorMessage)> ProcessAndStoreImageInDbAsync(IFormFile? file)
         {
-            if (file == null || file.Length == 0) return null;
-
-            // Validate extension
-            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg" };
-            if (!allowedExtensions.Contains(ext))
+            if (file == null || file.Length == 0)
             {
-                _logger.LogWarning("Rejected file upload with invalid extension: {ext}", ext);
-                return null;
+                return (null, null, null, null);
             }
 
+            // 1. Validate File Size (Maximum 2 MB limit)
+            if (file.Length > MaxPhotoSizeBytes)
+            {
+                double fileSizeMb = Math.Round((double)file.Length / (1024 * 1024), 2);
+                string error = $"Photo file size ({fileSizeMb} MB) exceeds the maximum allowed limit of {MaxPhotoSizeMB} MB. Please select a smaller photo.";
+                _logger.LogWarning("Photo upload rejected due to size limit: {size} bytes ({mb} MB)", file.Length, fileSizeMb);
+                return (null, null, null, error);
+            }
+
+            // 2. Validate Image File Extension
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg" };
+            if (!allowedExtensions.Contains(ext))
+            {
+                string error = "Invalid photo format. Supported formats: JPG, JPEG, PNG, GIF, WEBP, SVG.";
+                _logger.LogWarning("Photo upload rejected due to invalid format: {ext}", ext);
+                return (null, null, null, error);
+            }
+
+            // 3. Extract photo binary data, determine Content-Type, and calculate Hash
             byte[] fileBytes;
             using (var ms = new MemoryStream())
             {
@@ -37,35 +52,29 @@ namespace golenWeb.Services
                 fileBytes = ms.ToArray();
             }
 
-            // Calculate SHA-256 content hash
-            byte[] hashBytes = SHA256.HashData(fileBytes);
-            string hashHex = Convert.ToHexString(hashBytes).ToLowerInvariant();
-            string hashedFileName = $"{hashHex}{ext}";
-
-            // Ensure directory exists in wwwroot
-            string webRootPath = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-            string targetDir = Path.Combine(webRootPath, subFolder.Replace('/', Path.DirectorySeparatorChar));
-            if (!Directory.Exists(targetDir))
+            string contentType = file.ContentType;
+            if (string.IsNullOrWhiteSpace(contentType) || !contentType.StartsWith("image/"))
             {
-                Directory.CreateDirectory(targetDir);
+                contentType = ext switch
+                {
+                    ".png" => "image/png",
+                    ".gif" => "image/gif",
+                    ".webp" => "image/webp",
+                    ".svg" => "image/svg+xml",
+                    _ => "image/jpeg"
+                };
             }
 
-            string fullPath = Path.Combine(targetDir, hashedFileName);
-
-            // Fast deduplication: save to disk only if not already cached/existing
-            if (!File.Exists(fullPath))
+            string imageHash;
+            using (var sha256 = SHA256.Create())
             {
-                await File.WriteAllBytesAsync(fullPath, fileBytes);
-                _logger.LogInformation("Stored new hashed image: {hashedFileName} ({size} bytes)", hashedFileName, fileBytes.Length);
-            }
-            else
-            {
-                _logger.LogInformation("Hashed image already exists (deduplicated): {hashedFileName}", hashedFileName);
+                byte[] hashBytes = sha256.ComputeHash(fileBytes);
+                imageHash = Convert.ToHexString(hashBytes).ToLowerInvariant();
             }
 
-            // Return relative web URL
-            string relativeUrl = $"/{subFolder.Trim('/')}/{hashedFileName}";
-            return relativeUrl;
+            _logger.LogInformation("Successfully processed photo for direct database storage. File size: {size} bytes, Hash: {hash}", fileBytes.Length, imageHash);
+
+            return (fileBytes, contentType, imageHash, null);
         }
     }
 }

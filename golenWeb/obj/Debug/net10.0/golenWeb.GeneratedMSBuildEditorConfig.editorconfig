@@ -51,6 +51,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQnVsbGV0aW5zXENyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[D:/goldenWebsitePro/golenWeb/golenWeb/Views/Bulletins/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQnVsbGV0aW5zXERldGFpbHMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/goldenWebsitePro/golenWeb/golenWeb/Views/Bulletins/Edit.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQnVsbGV0aW5zXEVkaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -73,6 +77,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [D:/goldenWebsitePro/golenWeb/golenWeb/Views/Events/Delete.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXZlbnRzXERlbGV0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/goldenWebsitePro/golenWeb/golenWeb/Views/Events/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRXZlbnRzXERldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/goldenWebsitePro/golenWeb/golenWeb/Views/Events/Edit.cshtml]

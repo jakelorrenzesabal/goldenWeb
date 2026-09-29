@@ -1,5 +1,5 @@
 using System.Data.Common;
-using Microsoft.Data.Sqlite;
+// Sqlite support removed from this project. To re-enable, add the Microsoft.Data.Sqlite package.
 using Microsoft.Extensions.Configuration;
 using MySqlConnector;
 
@@ -49,7 +49,7 @@ namespace golenWeb.Data
             }
             else
             {
-                return new SqliteConnection(_connectionString);
+                throw new NotSupportedException("Sqlite provider support was removed. Set Database:Provider to 'MySql' or add Microsoft.Data.Sqlite package to re-enable Sqlite.");
             }
         }
 
@@ -64,7 +64,7 @@ namespace golenWeb.Data
             }
             else
             {
-                return new SqliteConnection(_connectionString);
+                throw new NotSupportedException("Sqlite provider support was removed. Set Database:Provider to 'MySql' or add Microsoft.Data.Sqlite package to re-enable Sqlite.");
             }
         }
 
@@ -77,7 +77,7 @@ namespace golenWeb.Data
             }
             else
             {
-                return "golenWeb.db";
+                throw new NotSupportedException("Sqlite provider support was removed. Set Database:Provider to 'MySql' or add Microsoft.Data.Sqlite package to re-enable Sqlite.");
             }
         }
     }

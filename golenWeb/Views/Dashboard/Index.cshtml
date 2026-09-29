@@ -236,9 +236,9 @@
                 {
                     <div class="col-md-6 col-lg-4">
                         <div class="card h-100 border-0 shadow-sm overflow-hidden bg-light">
-                            @if (!string.IsNullOrEmpty(ev.ImageUrl))
+                            @if (ev.ImageData != null)
                             {
-                                <img src="@ev.ImageUrl" alt="@ev.Title" class="w-100" style="height: 140px; object-fit: cover;" />
+                                <img src="/Events/Image/@ev.Id" alt="@ev.Title" class="w-100" style="height: 140px; object-fit: cover;" />
                             }
                             else
                             {
@@ -258,9 +258,9 @@
                 {
                     <div class="col-md-6 col-lg-4">
                         <div class="card h-100 border-0 shadow-sm overflow-hidden bg-light">
-                            @if (!string.IsNullOrEmpty(b.ImageUrl))
+                            @if (b.ImageData != null)
                             {
-                                <img src="@b.ImageUrl" alt="@b.Title" class="w-100" style="height: 140px; object-fit: cover;" />
+                                <img src="/Bulletins/Image/@b.Id" alt="@b.Title" class="w-100" style="height: 140px; object-fit: cover;" />
                             }
                             else
                             {

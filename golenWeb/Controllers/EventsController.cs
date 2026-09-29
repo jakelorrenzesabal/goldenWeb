@@ -28,6 +28,45 @@ namespace golenWeb.Controllers
             return View(events);
         }
 
+        // GET: /Events/Details/5 — public
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var ev = await _eventService.GetByIdAsync(id);
+            if (ev == null)
+            {
+                return NotFound();
+            }
+            return View(ev);
+        }
+
+        // GET: /Events/GetJson/5 — public API for modal
+        [HttpGet]
+        public async Task<IActionResult> GetJson(int id)
+        {
+            var ev = await _eventService.GetByIdAsync(id);
+            if (ev == null)
+            {
+                return NotFound();
+            }
+
+            return Json(new
+            {
+                id = ev.Id,
+                title = ev.Title,
+                description = ev.Description,
+                eventDate = ev.EventDate.ToString("yyyy-MM-dd"),
+                formattedDate = ev.EventDate.ToString("MMMM dd, yyyy (ddd)"),
+                startTime = ev.StartTime,
+                endTime = ev.EndTime,
+                location = ev.Location,
+                organizer = ev.Organizer,
+                category = ev.Category,
+                hasImage = ev.ImageData != null && ev.ImageData.Length > 0,
+                imageUrl = ev.ImageData != null && ev.ImageData.Length > 0 ? $"/Events/Image/{ev.Id}" : null
+            });
+        }
+
         // GET: /Events/Create — requires login
         [Authorize]
         [HttpGet]
@@ -50,14 +89,22 @@ namespace golenWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(EventModel ev, IFormFile? imageFile)
         {
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                var (data, contentType, hash, error) = await _fileStorage.ProcessAndStoreImageInDbAsync(imageFile);
+                if (!string.IsNullOrEmpty(error))
+                {
+                    ModelState.AddModelError(string.Empty, error);
+                    return View(ev);
+                }
+                ev.ImageData = data;
+                ev.ImageContentType = contentType;
+                ev.ImageHash = hash;
+            }
+
             if (!ModelState.IsValid)
             {
                 return View(ev);
-            }
-
-            if (imageFile != null && imageFile.Length > 0)
-            {
-                ev.ImageUrl = await _fileStorage.SaveImageAsync(imageFile, "uploads/events");
             }
 
             await _eventService.CreateAsync(ev);
@@ -86,22 +133,32 @@ namespace golenWeb.Controllers
         {
             if (id != ev.Id) return BadRequest();
 
-            if (!ModelState.IsValid)
-            {
-                return View(ev);
-            }
-
             if (imageFile != null && imageFile.Length > 0)
             {
-                ev.ImageUrl = await _fileStorage.SaveImageAsync(imageFile, "uploads/events");
+                var (data, contentType, hash, error) = await _fileStorage.ProcessAndStoreImageInDbAsync(imageFile);
+                if (!string.IsNullOrEmpty(error))
+                {
+                    ModelState.AddModelError(string.Empty, error);
+                    return View(ev);
+                }
+                ev.ImageData = data;
+                ev.ImageContentType = contentType;
+                ev.ImageHash = hash;
             }
             else
             {
                 var existing = await _eventService.GetByIdAsync(id);
                 if (existing != null)
                 {
-                    ev.ImageUrl = existing.ImageUrl;
+                    ev.ImageData = existing.ImageData;
+                    ev.ImageContentType = existing.ImageContentType;
+                    ev.ImageHash = existing.ImageHash;
                 }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(ev);
             }
 
             var updated = await _eventService.UpdateAsync(ev);
@@ -144,6 +201,28 @@ namespace golenWeb.Controllers
             var count = await _eventService.DeleteAllAsync();
             TempData["SuccessMessage"] = $"All campus events ({count}) have been deleted successfully!";
             return RedirectToAction(nameof(Index));
+        }
+
+        // GET: /Events/Image/5 — public
+        [HttpGet("Events/Image/{id}")]
+        public async Task<IActionResult> Image(int id)
+        {
+            var ev = await _eventService.GetByIdAsync(id);
+            if (ev == null || ev.ImageData == null || ev.ImageData.Length == 0)
+                return NotFound();
+
+            if (!string.IsNullOrEmpty(ev.ImageHash))
+            {
+                var eTag = $"\"{ev.ImageHash}\"";
+                if (Request.Headers.IfNoneMatch == eTag)
+                {
+                    return StatusCode(StatusCodes.Status304NotModified);
+                }
+                Response.Headers.ETag = eTag;
+                Response.Headers.CacheControl = "public,max-age=86400";
+            }
+
+            return File(ev.ImageData, ev.ImageContentType ?? "image/jpeg");
         }
     }
 }

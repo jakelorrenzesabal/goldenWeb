@@ -20,7 +20,7 @@ namespace golenWeb.Services
             await conn.OpenAsync();
 
             await using var cmd = conn.CreateCommand();
-            var sql = "SELECT Id, Title, Description, EventDate, StartTime, EndTime, Location, Organizer, Category, IsFeatured, CreatedAt, ImageUrl FROM Events WHERE 1=1";
+            var sql = "SELECT Id, Title, Description, EventDate, StartTime, EndTime, Location, Organizer, Category, IsFeatured, CreatedAt, ImageData, ImageContentType, ImageHash FROM Events WHERE 1=1";
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -63,7 +63,7 @@ namespace golenWeb.Services
             await conn.OpenAsync();
 
             await using var cmd = conn.CreateCommand();
-            cmd.CommandText = "SELECT Id, Title, Description, EventDate, StartTime, EndTime, Location, Organizer, Category, IsFeatured, CreatedAt, ImageUrl FROM Events WHERE Id = @id LIMIT 1";
+            cmd.CommandText = "SELECT Id, Title, Description, EventDate, StartTime, EndTime, Location, Organizer, Category, IsFeatured, CreatedAt, ImageData, ImageContentType, ImageHash FROM Events WHERE Id = @id LIMIT 1";
             AddParam(cmd, "@id", id);
 
             await using var reader = await cmd.ExecuteReaderAsync();
@@ -81,15 +81,15 @@ namespace golenWeb.Services
             if (_factory.ProviderType == DbProviderType.Sqlite)
             {
                 cmd.CommandText = @"
-INSERT INTO Events (Title, Description, EventDate, StartTime, EndTime, Location, Organizer, Category, IsFeatured, CreatedAt, ImageUrl)
-VALUES (@t, @d, @ed, @st, @et, @loc, @org, @cat, @feat, @dt, @img);
+INSERT INTO Events (Title, Description, EventDate, StartTime, EndTime, Location, Organizer, Category, IsFeatured, CreatedAt, ImageData, ImageContentType, ImageHash)
+VALUES (@t, @d, @ed, @st, @et, @loc, @org, @cat, @feat, @dt, @imgData, @imgType, @imgHash);
 SELECT last_insert_rowid();";
             }
             else
             {
                 cmd.CommandText = @"
-INSERT INTO Events (Title, Description, EventDate, StartTime, EndTime, Location, Organizer, Category, IsFeatured, CreatedAt, ImageUrl)
-VALUES (@t, @d, @ed, @st, @et, @loc, @org, @cat, @feat, @dt, @img);
+INSERT INTO Events (Title, Description, EventDate, StartTime, EndTime, Location, Organizer, Category, IsFeatured, CreatedAt, ImageData, ImageContentType, ImageHash)
+VALUES (@t, @d, @ed, @st, @et, @loc, @org, @cat, @feat, @dt, @imgData, @imgType, @imgHash);
 SELECT LAST_INSERT_ID();";
             }
 
@@ -103,7 +103,9 @@ SELECT LAST_INSERT_ID();";
             AddParam(cmd, "@cat", ev.Category);
             AddParam(cmd, "@feat", ev.IsFeatured ? 1 : 0);
             AddParam(cmd, "@dt", DateTime.UtcNow);
-            AddParam(cmd, "@img", (object?)ev.ImageUrl ?? DBNull.Value);
+            AddParam(cmd, "@imgData", (object?)ev.ImageData ?? DBNull.Value);
+            AddParam(cmd, "@imgType", (object?)ev.ImageContentType ?? DBNull.Value);
+            AddParam(cmd, "@imgHash", (object?)ev.ImageHash ?? DBNull.Value);
 
             var idObj = await cmd.ExecuteScalarAsync();
             ev.Id = Convert.ToInt32(idObj);
@@ -118,7 +120,7 @@ SELECT LAST_INSERT_ID();";
             await using var cmd = conn.CreateCommand();
             cmd.CommandText = @"
 UPDATE Events
-SET Title=@t, Description=@d, EventDate=@ed, StartTime=@st, EndTime=@et, Location=@loc, Organizer=@org, Category=@cat, IsFeatured=@feat, ImageUrl=@img
+SET Title=@t, Description=@d, EventDate=@ed, StartTime=@st, EndTime=@et, Location=@loc, Organizer=@org, Category=@cat, IsFeatured=@feat, ImageData=@imgData, ImageContentType=@imgType, ImageHash=@imgHash
 WHERE Id=@id";
 
             AddParam(cmd, "@t", ev.Title);
@@ -130,7 +132,9 @@ WHERE Id=@id";
             AddParam(cmd, "@org", ev.Organizer);
             AddParam(cmd, "@cat", ev.Category);
             AddParam(cmd, "@feat", ev.IsFeatured ? 1 : 0);
-            AddParam(cmd, "@img", (object?)ev.ImageUrl ?? DBNull.Value);
+            AddParam(cmd, "@imgData", (object?)ev.ImageData ?? DBNull.Value);
+            AddParam(cmd, "@imgType", (object?)ev.ImageContentType ?? DBNull.Value);
+            AddParam(cmd, "@imgHash", (object?)ev.ImageHash ?? DBNull.Value);
             AddParam(cmd, "@id", ev.Id);
 
             var rows = await cmd.ExecuteNonQueryAsync();
@@ -175,7 +179,9 @@ WHERE Id=@id";
                 Category = r.IsDBNull(8) ? "Academic" : r.GetString(8),
                 IsFeatured = r.IsDBNull(9) ? true : Convert.ToBoolean(r.GetValue(9)),
                 CreatedAt = r.IsDBNull(10) ? DateTime.UtcNow : Convert.ToDateTime(r.GetValue(10)),
-                ImageUrl = r.FieldCount > 11 && !r.IsDBNull(11) ? r.GetString(11) : null
+                ImageData = r.FieldCount > 11 && !r.IsDBNull(11) ? (byte[])r.GetValue(11) : null,
+                ImageContentType = r.FieldCount > 12 && !r.IsDBNull(12) ? r.GetString(12) : null,
+                ImageHash = r.FieldCount > 13 && !r.IsDBNull(13) ? r.GetString(13) : null
             };
         }
 

@@ -4,8 +4,19 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Golden Success College - Official Website featuring Campus Events Calendar and Bulletin Board System" />
+    @if (ViewData["OgTitle"] != null)
+    {
+        <meta property="og:title" content="@ViewData["OgTitle"]" />
+        <meta property="og:description" content="@ViewData["OgDescription"]" />
+        <meta property="og:image" content="@ViewData["OgImage"]" />
+        <meta property="og:url" content="@ViewData["OgUrl"]" />
+        <meta property="og:type" content="article" />
+    }
     <title>@(ViewData["SiteTitle"] ?? ViewData["Title"]) - @(ViewData["CollegeName"] ?? "Golden Success College")</title>
     <script type="importmap"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -14,106 +25,133 @@
         :root {
             --gsc-green: @(ViewData["PrimaryColor"] ?? "#0b5e28");
             --gsc-dark-green: @(ViewData["NavBackground"] ?? "#073d1a");
-            --gsc-gold: @(ViewData["AccentColor"] ?? "#e6b800");
-            --gsc-navy: #1b2a4a;
+            --gsc-gold: @(ViewData["AccentColor"] ?? "#f59e0b");
+            --gsc-gold-hover: #d97706;
+            --gsc-navy: #0f172a;
+            --gsc-bg: #f8fafc;
+            --gsc-card-border: rgba(226, 232, 240, 0.9);
         }
 
-        body { background-color: #f5f7f5; }
+        body {
+            background-color: var(--gsc-bg);
+            color: #1e293b;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+        }
 
         .gsc-navbar {
-            background: linear-gradient(90deg, var(--gsc-dark-green) 0%, var(--gsc-navy) 100%);
+            background: linear-gradient(135deg, var(--gsc-dark-green) 0%, #0d5225 60%, var(--gsc-navy) 100%);
             border-bottom: 3px solid var(--gsc-gold);
-            box-shadow: 0 2px 16px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
         }
 
-        .gsc-brand-text { line-height: 1.15; }
+        .gsc-brand-text { line-height: 1.2; }
 
         .gsc-brand-text .college-name {
-            font-size: 1.05rem;
+            font-size: 1.15rem;
             font-weight: 800;
-            color: #fff;
-            letter-spacing: 0.5px;
+            color: #ffffff;
+            letter-spacing: -0.2px;
         }
 
         .gsc-brand-text .tagline {
-            font-size: 0.68rem;
+            font-size: 0.72rem;
             color: var(--gsc-gold);
-            letter-spacing: 0.5px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
         }
 
         .nav-link.gsc-link {
-            color: rgba(255,255,255,0.85) !important;
+            color: rgba(255,255,255,0.9) !important;
             font-weight: 600;
             padding: 0.5rem 0.9rem !important;
-            border-radius: 6px;
-            transition: all 0.2s;
+            border-radius: 8px;
+            position: relative;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .nav-link.gsc-link:hover, .nav-link.gsc-link.active {
-            color: var(--gsc-gold) !important;
-            background: rgba(255,255,255,0.08);
+            color: #ffffff !important;
+            background: rgba(255,255,255,0.12);
+            transform: translateY(-1px);
         }
 
-        .nav-link.gsc-link i { margin-right: 4px; }
+        .nav-link.gsc-link i {
+            transition: transform 0.25s ease;
+            margin-right: 5px;
+            display: inline-block;
+        }
+
+        .nav-link.gsc-link:hover i {
+            transform: scale(1.2);
+        }
 
         .role-badge-admin {
-            font-size: 0.6rem;
-            background: linear-gradient(135deg, #e6b800, #f5d020);
-            color: #1a1a1a;
+            font-size: 0.65rem;
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: #0f172a;
             font-weight: 800;
-            padding: 2px 7px;
+            padding: 3px 9px;
             border-radius: 20px;
-            letter-spacing: 0.5px;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 6px rgba(245, 158, 11, 0.3);
         }
 
         .role-badge-user {
-            font-size: 0.6rem;
-            background: rgba(255,255,255,0.2);
-            color: rgba(255,255,255,0.9);
+            font-size: 0.65rem;
+            background: rgba(255,255,255,0.25);
+            color: #ffffff;
             font-weight: 700;
-            padding: 2px 7px;
+            padding: 3px 9px;
             border-radius: 20px;
-            letter-spacing: 0.5px;
             text-transform: uppercase;
         }
 
         .user-info-nav {
             display: flex;
             align-items: center;
-            gap: 6px;
-            color: rgba(255,255,255,0.9);
-            font-size: 0.85rem;
+            gap: 10px;
+            color: #ffffff;
+            font-size: 0.88rem;
             font-weight: 600;
         }
 
         .user-avatar {
-            width: 30px;
-            height: 30px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
-            background: var(--gsc-gold);
-            color: #1a1a1a;
+            background: linear-gradient(135deg, var(--gsc-gold), #fbbf24);
+            color: #0f172a;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 800;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1) rotate(5deg);
         }
 
         footer.gsc-footer {
-            background: linear-gradient(90deg, var(--gsc-dark-green), var(--gsc-navy));
-            color: rgba(255,255,255,0.8);
+            background: linear-gradient(135deg, var(--gsc-dark-green) 0%, var(--gsc-navy) 100%);
+            color: rgba(255,255,255,0.85);
             border-top: 3px solid var(--gsc-gold);
         }
 
         .announcement-banner {
-            background: linear-gradient(90deg, var(--gsc-gold), #f5d020);
-            color: #1a1a1a;
-            font-weight: 600;
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+            color: #0f172a;
+            font-weight: 700;
             font-size: 0.9rem;
-            padding: 8px 0;
+            padding: 9px 0;
             text-align: center;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
         }
 
         .toast-success {
@@ -122,12 +160,57 @@
             right: 20px;
             z-index: 9999;
             min-width: 320px;
-            animation: slideInRight 0.3s ease;
+            animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @@keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
+            from { transform: translateX(110%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* --- GLOBAL ANIMATION CLASSES --- */
+        .animate-fade-up {
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .animate-delay-1 { animation-delay: 0.1s; }
+        .animate-delay-2 { animation-delay: 0.2s; }
+        .animate-delay-3 { animation-delay: 0.3s; }
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Modern Card Micro-interactions */
+        .card-modern {
+            background: #ffffff;
+            border: 1px solid var(--gsc-card-border);
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .card-modern:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 32px rgba(11, 94, 40, 0.1);
+            border-color: rgba(11, 94, 40, 0.3);
+        }
+
+        .btn-modern {
+            border-radius: 10px;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
         }
     </style>
 </head>
@@ -284,6 +367,89 @@
             if (t) t.remove();
         }, 4000);
     </script>
+    <!-- GLOBAL EVENT DETAILS MODAL -->
+    <div class="modal fade" id="gscEventModal" tabindex="-1" aria-labelledby="gscEventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header bg-success text-white border-0 py-3">
+                    <h5 class="modal-title fw-bold" id="gscEventModalLabel">
+                        <i class="bi bi-calendar-event me-2"></i><span id="evtModalCategory" class="badge bg-warning text-dark me-2">Category</span><span id="evtModalTitle">Event Title</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="evtModalImageContainer" class="mb-3 text-center d-none">
+                        <img id="evtModalImage" src="" alt="Event" class="img-fluid rounded-3 shadow-sm w-100" style="max-height:350px; object-fit:cover;" />
+                    </div>
+                    <div class="row g-2 bg-light p-3 rounded-3 mb-3 border small">
+                        <div class="col-md-6">
+                            <i class="bi bi-calendar3 text-success me-1"></i><strong>Date:</strong> <span id="evtModalDate">---</span>
+                        </div>
+                        <div class="col-md-6">
+                            <i class="bi bi-clock text-primary me-1"></i><strong>Time:</strong> <span id="evtModalTime">---</span>
+                        </div>
+                        <div class="col-md-6">
+                            <i class="bi bi-geo-alt-fill text-danger me-1"></i><strong>Venue:</strong> <span id="evtModalLocation">---</span>
+                        </div>
+                        <div class="col-md-6">
+                            <i class="bi bi-person-badge text-dark me-1"></i><strong>Organizer:</strong> <span id="evtModalOrganizer">---</span>
+                        </div>
+                    </div>
+                    <h6 class="fw-bold text-success"><i class="bi bi-info-circle me-1"></i>Description & Info:</h6>
+                    <p id="evtModalDescription" class="text-secondary" style="white-space: pre-line;">---</p>
+                </div>
+                <div class="modal-footer bg-light border-0 d-flex justify-content-between">
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary fw-bold rounded-pill" id="evtModalFbBtn">
+                            <i class="bi bi-facebook me-1"></i> Share to FB
+                        </button>
+                        <button type="button" class="btn btn-outline-success fw-bold rounded-pill" id="evtModalCopyBtn">
+                            <i class="bi bi-link-45deg me-1"></i> Copy Link
+                        </button>
+                    </div>
+                    <a id="evtModalFullLink" href="#" class="btn btn-secondary rounded-pill">View Full Page</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GLOBAL BULLETIN DETAILS MODAL -->
+    <div class="modal fade" id="gscBulletinModal" tabindex="-1" aria-labelledby="gscBulletinModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header bg-dark text-white border-0 py-3">
+                    <h5 class="modal-title fw-bold" id="gscBulletinModalLabel">
+                        <i class="bi bi-megaphone me-2 text-warning"></i><span id="bulModalPriority" class="badge bg-danger me-2">Priority</span><span id="bulModalTitle">Bulletin Title</span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="bulModalImageContainer" class="mb-3 text-center d-none">
+                        <img id="bulModalImage" src="" alt="Bulletin" class="img-fluid rounded-3 shadow-sm w-100" style="max-height:350px; object-fit:cover;" />
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-3 mb-3 border small">
+                        <div><i class="bi bi-tag text-warning me-1"></i>Category: <strong id="bulModalCategory">---</strong></div>
+                        <div><i class="bi bi-person-fill text-success me-1"></i>Author: <strong id="bulModalAuthor">---</strong></div>
+                        <div><i class="bi bi-calendar-event me-1"></i>Date: <strong id="bulModalDate">---</strong></div>
+                    </div>
+                    <h6 class="fw-bold text-dark"><i class="bi bi-card-text me-1 text-warning"></i>Notice Content:</h6>
+                    <p id="bulModalContent" class="text-secondary" style="white-space: pre-line;">---</p>
+                </div>
+                <div class="modal-footer bg-light border-0 d-flex justify-content-between">
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary fw-bold rounded-pill" id="bulModalFbBtn">
+                            <i class="bi bi-facebook me-1"></i> Share to FB
+                        </button>
+                        <button type="button" class="btn btn-outline-success fw-bold rounded-pill" id="bulModalCopyBtn">
+                            <i class="bi bi-link-45deg me-1"></i> Copy Link
+                        </button>
+                    </div>
+                    <a id="bulModalFullLink" href="#" class="btn btn-secondary rounded-pill">View Full Page</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

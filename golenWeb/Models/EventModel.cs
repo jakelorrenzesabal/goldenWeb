@@ -33,7 +33,10 @@ namespace golenWeb.Models
 
         public bool IsFeatured { get; set; } = true;
 
-        [StringLength(500)]
+        public byte[]? ImageData { get; set; }
+        public string? ImageContentType { get; set; }
+        public string? ImageHash { get; set; }
+        // URL for external or previously uploaded image (used by Views)
         public string? ImageUrl { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

@@ -44,13 +44,13 @@
         {
             var priorityBadge = b.Priority == "High" ? "bg-danger" : "bg-primary";
             <div class="col-12">
-                <div class="card border-0 shadow-sm overflow-hidden border-start border-4 @(b.Priority == "High" ? "border-danger" : "border-success")">
-                    @if (!string.IsNullOrEmpty(b.ImageUrl))
+                <div class="card border-0 shadow-sm overflow-hidden card-modern border-start border-4 @(b.Priority == "High" ? "border-danger" : "border-success")" style="cursor: pointer;" onclick="openBulletinModal(@b.Id)">
+                    @if (b.ImageData != null)
                     {
                         <div style="position:relative; max-height: 220px; overflow: hidden; background: #073d1a;">
-                            <img src="@b.ImageUrl" alt="@b.Title" class="w-100" style="height: 220px; object-fit: cover;" loading="lazy" />
+                            <img src="/Bulletins/Image/@b.Id" alt="@b.Title" class="w-100" style="height: 220px; object-fit: cover;" loading="lazy" />
                             <span class="badge bg-dark bg-opacity-75 position-absolute top-0 end-0 m-2 px-2 py-1 small">
-                                <i class="bi bi-lightning-charge-fill text-warning me-1"></i>Hashed Picture Attachment
+                                <i class="bi bi-database-fill-check text-warning me-1"></i>Database Stored Photo
                             </span>
                         </div>
                     }
@@ -67,11 +67,14 @@
                             <div>
                                 <i class="bi bi-person-fill me-1 text-success"></i> Posted by <strong>@b.Author</strong> on @b.PublishDate.ToString("MMMM dd, yyyy")
                             </div>
-                            <div class="d-flex gap-2">
-                                <a asp-action="Edit" asp-route-id="@b.Id" class="btn btn-sm btn-outline-primary">
+                            <div class="d-flex gap-2 align-items-center">
+                                <button type="button" class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3" onclick="event.stopPropagation(); openBulletinModal(@b.Id);">
+                                    <i class="bi bi-info-circle me-1"></i> View Info & Share
+                                </button>
+                                <a asp-action="Edit" asp-route-id="@b.Id" onclick="event.stopPropagation();" class="btn btn-sm btn-outline-primary">
                                     <i class="bi bi-pencil me-1"></i>Edit
                                 </a>
-                                <form asp-action="Delete" asp-route-id="@b.Id" method="post" onsubmit="return confirm('Remove this bulletin notice?');">
+                                <form asp-action="Delete" asp-route-id="@b.Id" method="post" onclick="event.stopPropagation();" onsubmit="return confirm('Remove this bulletin notice?');">
                                     <button type="submit" class="btn btn-sm btn-outline-danger">
                                         <i class="bi bi-trash me-1"></i>Remove
                                     </button>

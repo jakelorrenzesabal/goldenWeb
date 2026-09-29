@@ -24,7 +24,8 @@ namespace golenWeb.Models
         [StringLength(100)]
         public string Author { get; set; } = "Office of Student Affairs";
 
-        [StringLength(500)]
-        public string? ImageUrl { get; set; }
+        public byte[]? ImageData { get; set; }
+        public string? ImageContentType { get; set; }
+        public string? ImageHash { get; set; }
     }
 }

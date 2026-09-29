@@ -85,7 +85,9 @@ CREATE TABLE IF NOT EXISTS Events (
   Organizer TEXT,
   Category TEXT,
   IsFeatured INTEGER DEFAULT 1,
-  ImageUrl TEXT,
+  ImageData BLOB,
+  ImageContentType TEXT,
+  ImageHash TEXT,
   CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 "
@@ -101,7 +103,9 @@ CREATE TABLE IF NOT EXISTS `Events` (
   `Organizer` VARCHAR(100) NULL,
   `Category` VARCHAR(100) NULL,
   `IsFeatured` TINYINT(1) NOT NULL DEFAULT 1,
-  `ImageUrl` VARCHAR(500) NULL,
+  `ImageData` LONGBLOB NULL,
+  `ImageContentType` VARCHAR(100) NULL,
+  `ImageHash` VARCHAR(64) NULL,
   `CreatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -120,7 +124,9 @@ CREATE TABLE IF NOT EXISTS Bulletins (
   Priority TEXT,
   PublishDate TEXT,
   Author TEXT,
-  ImageUrl TEXT
+  ImageData BLOB,
+  ImageContentType TEXT,
+  ImageHash TEXT
 );
 "
                     : @"
@@ -132,15 +138,17 @@ CREATE TABLE IF NOT EXISTS `Bulletins` (
   `Priority` VARCHAR(50) NULL,
   `PublishDate` VARCHAR(50) NULL,
   `Author` VARCHAR(100) NULL,
-  `ImageUrl` VARCHAR(500) NULL,
+  `ImageData` LONGBLOB NULL,
+  `ImageContentType` VARCHAR(100) NULL,
+  `ImageHash` VARCHAR(64) NULL,
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ";
                 await ExecuteSqlAsync(conn, createBulletinsTableSql);
                 _logger.LogInformation("Bulletins table verified.");
 
-                // Migration: Ensure ImageUrl column exists in Events & Bulletins tables
-                await AddImageUrlColumnsIfMissingAsync(conn, isSqlite);
+                // Migration: Ensure image columns exist in Events & Bulletins tables
+                await AddImageColumnsIfMissingAsync(conn, isSqlite);
 
                 // 4. Create SiteSettings Table
                 string createSiteSettingsTableSql = isSqlite
@@ -227,7 +235,7 @@ WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Users' AND COLUMN_NAME = 'Role
             }
         }
 
-        private async Task AddImageUrlColumnsIfMissingAsync(DbConnection conn, bool isSqlite)
+        private async Task AddImageColumnsIfMissingAsync(DbConnection conn, bool isSqlite)
         {
             try
             {
@@ -240,7 +248,7 @@ WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Users' AND COLUMN_NAME = 'Role
                         await using var reader = await cmd.ExecuteReaderAsync();
                         while (await reader.ReadAsync())
                         {
-                            if (reader.GetString(1).Equals("ImageUrl", StringComparison.OrdinalIgnoreCase))
+                            if (reader.GetString(1).Equals("ImageData", StringComparison.OrdinalIgnoreCase))
                             {
                                 hasImage = true;
                                 break;
@@ -248,8 +256,10 @@ WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Users' AND COLUMN_NAME = 'Role
                         }
                         if (!hasImage)
                         {
-                            await ExecuteSqlAsync(conn, "ALTER TABLE Events ADD COLUMN ImageUrl TEXT;");
-                            _logger.LogInformation("Added ImageUrl column to Events table (SQLite).");
+                            await ExecuteSqlAsync(conn, "ALTER TABLE Events ADD COLUMN ImageData BLOB;");
+                            await ExecuteSqlAsync(conn, "ALTER TABLE Events ADD COLUMN ImageContentType TEXT;");
+                            await ExecuteSqlAsync(conn, "ALTER TABLE Events ADD COLUMN ImageHash TEXT;");
+                            _logger.LogInformation("Added image columns to Events table (SQLite).");
                         }
                     }
 
@@ -260,7 +270,7 @@ WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Users' AND COLUMN_NAME = 'Role
                         await using var reader = await cmd.ExecuteReaderAsync();
                         while (await reader.ReadAsync())
                         {
-                            if (reader.GetString(1).Equals("ImageUrl", StringComparison.OrdinalIgnoreCase))
+                            if (reader.GetString(1).Equals("ImageData", StringComparison.OrdinalIgnoreCase))
                             {
                                 hasImage = true;
                                 break;
@@ -268,8 +278,10 @@ WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Users' AND COLUMN_NAME = 'Role
                         }
                         if (!hasImage)
                         {
-                            await ExecuteSqlAsync(conn, "ALTER TABLE Bulletins ADD COLUMN ImageUrl TEXT;");
-                            _logger.LogInformation("Added ImageUrl column to Bulletins table (SQLite).");
+                            await ExecuteSqlAsync(conn, "ALTER TABLE Bulletins ADD COLUMN ImageData BLOB;");
+                            await ExecuteSqlAsync(conn, "ALTER TABLE Bulletins ADD COLUMN ImageContentType TEXT;");
+                            await ExecuteSqlAsync(conn, "ALTER TABLE Bulletins ADD COLUMN ImageHash TEXT;");
+                            _logger.LogInformation("Added image columns to Bulletins table (SQLite).");
                         }
                     }
                 }
@@ -277,30 +289,30 @@ WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Users' AND COLUMN_NAME = 'Role
                 {
                     await using (var cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Events' AND COLUMN_NAME = 'ImageUrl'";
+                        cmd.CommandText = "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Events' AND COLUMN_NAME = 'ImageData'";
                         var count = Convert.ToInt32(await cmd.ExecuteScalarAsync());
                         if (count == 0)
                         {
-                            await ExecuteSqlAsync(conn, "ALTER TABLE `Events` ADD COLUMN `ImageUrl` VARCHAR(500) NULL;");
-                            _logger.LogInformation("Added ImageUrl column to Events table (MySQL).");
+                            await ExecuteSqlAsync(conn, "ALTER TABLE `Events` ADD COLUMN `ImageData` LONGBLOB NULL, ADD COLUMN `ImageContentType` VARCHAR(100) NULL, ADD COLUMN `ImageHash` VARCHAR(64) NULL;");
+                            _logger.LogInformation("Added image columns to Events table (MySQL).");
                         }
                     }
 
                     await using (var cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Bulletins' AND COLUMN_NAME = 'ImageUrl'";
+                        cmd.CommandText = "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Bulletins' AND COLUMN_NAME = 'ImageData'";
                         var count = Convert.ToInt32(await cmd.ExecuteScalarAsync());
                         if (count == 0)
                         {
-                            await ExecuteSqlAsync(conn, "ALTER TABLE `Bulletins` ADD COLUMN `ImageUrl` VARCHAR(500) NULL;");
-                            _logger.LogInformation("Added ImageUrl column to Bulletins table (MySQL).");
+                            await ExecuteSqlAsync(conn, "ALTER TABLE `Bulletins` ADD COLUMN `ImageData` LONGBLOB NULL, ADD COLUMN `ImageContentType` VARCHAR(100) NULL, ADD COLUMN `ImageHash` VARCHAR(64) NULL;");
+                            _logger.LogInformation("Added image columns to Bulletins table (MySQL).");
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Could not check/add ImageUrl columns.");
+                _logger.LogWarning(ex, "Could not check/add image columns.");
             }
         }
 

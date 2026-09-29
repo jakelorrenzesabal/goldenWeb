@@ -15,8 +15,7 @@
                 <form asp-action="Edit" method="post" enctype="multipart/form-data">
                     @Html.AntiForgeryToken()
                     <input type="hidden" asp-for="Id" />
-                    <input type="hidden" asp-for="ImageUrl" />
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-bold"></div>
 
                     <div class="mb-3">
                         <label asp-for="Title" class="form-label fw-semibold">Notice Title</label>
@@ -24,18 +23,18 @@
                         <span asp-validation-for="Title" class="text-danger"></span>
                     </div>
 
-                    <!-- Bulletin Picture Upload -->
+                    <!-- Bulletin Photo Upload (Database Stored, Max 2MB) -->
                     <div class="mb-3">
-                        <label class="form-label fw-semibold"><i class="bi bi-image text-success me-1"></i>Notice Attachment Picture / Banner</label>
-                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                        <label class="form-label fw-semibold"><i class="bi bi-database-fill-check text-success me-1"></i>Notice Attachment Photo</label>
+                        @if (Model.ImageData != null)
                         {
                             <div class="mb-2">
-                                <img src="@Model.ImageUrl" alt="Current Bulletin Image" class="img-fluid rounded-3 shadow-sm" style="max-height: 180px; width: 100%; object-fit: cover; border: 2px solid #0b5e28;" />
-                                <div class="small text-muted mt-1"><i class="bi bi-check-circle-fill text-success me-1"></i>Current picture loaded from SHA-256 hash path: <code>@Model.ImageUrl</code></div>
+                                <img src="/Bulletins/Image/@Model.Id" alt="Current Bulletin Image" class="img-fluid rounded-3 shadow-sm" style="max-height: 180px; width: 100%; object-fit: cover; border: 2px solid #0b5e28;" />
+                                <div class="small text-muted mt-1"><i class="bi bi-check-circle-fill text-success me-1"></i>Current photo loaded directly from database table.</div>
                             </div>
                         }
                         <input type="file" name="imageFile" accept="image/*" class="form-control" id="bulletinImgInput" onchange="previewBulletinImg(this)" />
-                        <div class="form-text text-muted small"><i class="bi bi-info-circle me-1"></i>Upload a new image to replace the current picture (hashed with SHA-256).</div>
+                        <div class="form-text text-muted small"><i class="bi bi-info-circle me-1"></i>Upload a new image to replace the current database photo. <strong>Maximum photo size limit: 2 MB</strong>.</div>
                         <div class="mt-2 text-center d-none" id="bulletinImgPreviewContainer">
                             <img id="bulletinImgPreview" src="#" alt="New Notice Preview" class="img-fluid rounded-3 shadow-sm" style="max-height: 200px; object-fit: cover; border: 2px dashed #0b5e28;" />
                         </div>
@@ -93,6 +92,14 @@
 <script>
     function previewBulletinImg(input) {
         if (input.files && input.files[0]) {
+            var file = input.files[0];
+            var maxBytes = 2 * 1024 * 1024; // 2 MB
+            if (file.size > maxBytes) {
+                alert('Photo file size exceeds the 2 MB maximum limit! Selected file is ' + (file.size / (1024 * 1024)).toFixed(2) + ' MB. Please select a smaller photo.');
+                input.value = '';
+                document.getElementById('bulletinImgPreviewContainer').classList.add('d-none');
+                return;
+            }
             var reader = new FileReader();
             reader.onload = function (e) {
                 var preview = document.getElementById('bulletinImgPreview');
@@ -100,7 +107,7 @@
                 preview.src = e.target.result;
                 container.classList.remove('d-none');
             };
-            reader.readAsDataURL(input.files[0]);
+            reader.readAsDataURL(file);
         }
     }
 </script>

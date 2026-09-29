@@ -13,7 +13,7 @@
             </div>
             <div class="card-body p-4">
                 <form asp-action="Create" method="post" enctype="multipart/form-data">
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-bold"></div>
 
                     <div class="mb-3">
                         <label asp-for="Title" class="form-label fw-semibold">Notice Title</label>
@@ -21,11 +21,11 @@
                         <span asp-validation-for="Title" class="text-danger"></span>
                     </div>
 
-                    <!-- Bulletin Picture Upload -->
+                    <!-- Bulletin Photo Upload (Stored in DB, Max 2MB) -->
                     <div class="mb-3">
-                        <label class="form-label fw-semibold"><i class="bi bi-image text-success me-1"></i>Notice Attachment Picture / Banner</label>
+                        <label class="form-label fw-semibold"><i class="bi bi-database-fill-check text-success me-1"></i>Notice Attachment Photo</label>
                         <input type="file" name="imageFile" accept="image/*" class="form-control" id="bulletinImgInput" onchange="previewBulletinImg(this)" />
-                        <div class="form-text text-muted small"><i class="bi bi-shield-check text-success me-1"></i>Hashed with SHA-256 for fast loading & deduplicated storage.</div>
+                        <div class="form-text text-muted small"><i class="bi bi-shield-check text-success me-1"></i>Stored directly inside database table. <strong>Maximum photo size limit: 2 MB (2,048 KB)</strong>.</div>
                         <div class="mt-3 text-center d-none" id="bulletinImgPreviewContainer">
                             <img id="bulletinImgPreview" src="#" alt="Bulletin Image Preview" class="img-fluid rounded-3 shadow-sm" style="max-height: 220px; object-fit: cover; border: 2px dashed #0b5e28;" />
                         </div>
@@ -81,6 +81,14 @@
 <script>
     function previewBulletinImg(input) {
         if (input.files && input.files[0]) {
+            var file = input.files[0];
+            var maxBytes = 2 * 1024 * 1024; // 2 MB
+            if (file.size > maxBytes) {
+                alert('Photo file size exceeds the 2 MB maximum limit! Selected file is ' + (file.size / (1024 * 1024)).toFixed(2) + ' MB. Please select a smaller photo.');
+                input.value = '';
+                document.getElementById('bulletinImgPreviewContainer').classList.add('d-none');
+                return;
+            }
             var reader = new FileReader();
             reader.onload = function (e) {
                 var preview = document.getElementById('bulletinImgPreview');
@@ -88,7 +96,7 @@
                 preview.src = e.target.result;
                 container.classList.remove('d-none');
             };
-            reader.readAsDataURL(input.files[0]);
+            reader.readAsDataURL(file);
         }
     }
 </script>
