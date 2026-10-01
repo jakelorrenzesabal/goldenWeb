@@ -4,7 +4,7 @@ namespace golenWeb.Models
 {
     public class Bulletin
     {
-        public int Id { get; set; }
+        public int BulletinId { get; set; }
 
         [Required(ErrorMessage = "Notice title is required")]
         [StringLength(200)]
@@ -27,5 +27,6 @@ namespace golenWeb.Models
         public byte[]? ImageData { get; set; }
         public string? ImageContentType { get; set; }
         public string? ImageHash { get; set; }
+        public int? CreatedByUserId { get; set; }
     }
 }

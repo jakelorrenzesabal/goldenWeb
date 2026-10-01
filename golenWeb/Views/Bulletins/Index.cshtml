@@ -2,39 +2,66 @@
 
 @{
     ViewData["Title"] = "Campus Bulletin Board";
+    var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-    <div>
-        <h2 class="fw-bold mb-1 text-success">
-            <i class="bi bi-megaphone me-2"></i>Campus Bulletin Board
-        </h2>
-        <p class="text-muted mb-0">Official Notices, Academic Updates & Campus Announcements</p>
+<!-- Page Header Card (design-system.md) -->
+<div class="card cc-card border-0 shadow-sm mb-4">
+    <div class="card-body px-4 py-3">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                     style="width: 44px; height: 44px; background-color: var(--cc-orange-surface);">
+                    <i class="bi bi-megaphone-fill" style="color: var(--cc-orange-text); font-size: 1.25rem;"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0" style="color: var(--cc-slate-900); font-size: 1.25rem;">
+                        Campus Bulletin Board
+                    </h4>
+                    <p class="mb-0" style="font-size: 0.75rem; color: var(--cc-slate-400); text-transform: uppercase; letter-spacing: 0.07em;">
+                        Golden Success College · Official Notices &amp; Announcements
+                    </p>
+                </div>
+            </div>
+
+            @if (isAuthenticated)
+            {
+                <div>
+                    <a asp-action="Create" class="btn btn-soft-warning">
+                        <i class="bi bi-plus-circle-fill"></i> Post New Bulletin
+                    </a>
+                </div>
+            }
+        </div>
     </div>
-    <div>
-        <a asp-action="Create" class="btn btn-success btn-lg shadow-sm px-4 fw-bold">
-            <i class="bi bi-plus-circle me-2"></i>Post New Bulletin
-        </a>
-    </div>
+    <div class="cc-gradient-bar-orange"></div>
 </div>
 
 @if (TempData["SuccessMessage"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert" style="background-color: var(--cc-green-surface); color: var(--cc-green-text); border-left: 4px solid var(--cc-green-text) !important;">
         <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
 
-<div class="row g-4">
+<div class="row g-3">
     @if (!Model.Any())
     {
         <div class="col-12">
-            <div class="card border-0 shadow-sm text-center py-5">
-                <div class="card-body text-muted">
-                    <i class="bi bi-card-checklist fs-1 d-block mb-2"></i>
-                    <h5>No Bulletins Currently Posted</h5>
+            <div class="card cc-card border-0 shadow-sm text-center py-5">
+                <div class="card-body">
+                    <i class="bi bi-card-checklist fs-1 mb-2" style="color: var(--cc-slate-300);"></i>
+                    <h5 class="fw-bold" style="color: var(--cc-slate-900);">No Bulletins Posted</h5>
+                    <p class="mb-3" style="font-size: 0.85rem; color: var(--cc-slate-600);">There are no bulletin notices posted at this time.</p>
+                    @if (isAuthenticated)
+                    {
+                        <a asp-action="Create" class="btn btn-soft-warning">
+                            <i class="bi bi-plus-circle-fill"></i> Post Bulletin Now
+                        </a>
+                    }
                 </div>
+                <div class="cc-gradient-bar-rainbow"></div>
             </div>
         </div>
     }
@@ -42,48 +69,63 @@
     {
         @foreach (var b in Model)
         {
-            var priorityBadge = b.Priority == "High" ? "bg-danger" : "bg-primary";
+            var isHigh = b.Priority == "High";
             <div class="col-12">
-                <div class="card border-0 shadow-sm overflow-hidden card-modern border-start border-4 @(b.Priority == "High" ? "border-danger" : "border-success")" style="cursor: pointer;" onclick="openBulletinModal(@b.Id)">
+                <div class="card cc-card border-0 shadow-sm overflow-hidden" style="cursor: pointer;" onclick="openBulletinModal(@b.BulletinId)">
                     @if (b.ImageData != null)
                     {
-                        <div style="position:relative; max-height: 220px; overflow: hidden; background: #073d1a;">
-                            <img src="/Bulletins/Image/@b.Id" alt="@b.Title" class="w-100" style="height: 220px; object-fit: cover;" loading="lazy" />
-                            <span class="badge bg-dark bg-opacity-75 position-absolute top-0 end-0 m-2 px-2 py-1 small">
-                                <i class="bi bi-database-fill-check text-warning me-1"></i>Database Stored Photo
+                        <div style="position:relative; max-height: 220px; overflow: hidden; background: var(--cc-slate-900);">
+                            <img src="/Bulletins/Image/@b.BulletinId" alt="@b.Title" class="w-100" style="height: 220px; object-fit: cover;" loading="lazy" />
+                            <span class="pill-cc-slate position-absolute top-0 end-0 m-2">
+                                <i class="bi bi-database-fill-check text-warning me-1"></i>Database Photo
                             </span>
                         </div>
                     }
-                    <div class="card-body p-4">
+                    <div class="card-body px-4 py-3">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h4 class="fw-bold text-dark mb-0">@b.Title</h4>
+                            <h5 class="fw-bold mb-0" style="color: var(--cc-slate-900); font-size: 1.15rem;">@b.Title</h5>
                             <div class="d-flex gap-2">
-                                <span class="badge @priorityBadge">@b.Priority Priority</span>
-                                <span class="badge bg-secondary">@b.Category</span>
+                                @if (isHigh)
+                                {
+                                    <span class="pill-cc-red"><i class="bi bi-exclamation-triangle-fill me-1"></i>HIGH PRIORITY</span>
+                                }
+                                else
+                                {
+                                    <span class="pill-cc-blue">NORMAL</span>
+                                }
+                                <span class="pill-cc-slate">@b.Category</span>
                             </div>
                         </div>
-                        <p class="text-secondary fs-6 mb-3" style="white-space: pre-line;">@b.Content</p>
-                        <div class="d-flex justify-content-between align-items-center text-muted small pt-2 border-top">
-                            <div>
-                                <i class="bi bi-person-fill me-1 text-success"></i> Posted by <strong>@b.Author</strong> on @b.PublishDate.ToString("MMMM dd, yyyy")
+
+                        <p class="mb-3" style="font-size: 0.88rem; color: var(--cc-slate-600); line-height: 1.6; white-space: pre-line;">@b.Content</p>
+
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="border-color: var(--cc-slate-100) !important;">
+                            <div style="font-size: 0.78rem; color: var(--cc-slate-500);">
+                                <i class="bi bi-person-fill me-1 text-success"></i> Posted by <strong style="color: var(--cc-slate-900);">@b.Author</strong> on @b.PublishDate.ToString("MMMM dd, yyyy")
                             </div>
                             <div class="d-flex gap-2 align-items-center">
-                                <button type="button" class="btn btn-sm btn-warning text-dark fw-bold rounded-pill px-3" onclick="event.stopPropagation(); openBulletinModal(@b.Id);">
-                                    <i class="bi bi-info-circle me-1"></i> View Info & Share
+                                <button type="button" class="btn btn-soft-warning" onclick="event.stopPropagation(); openBulletinModal(@b.BulletinId);">
+                                    <i class="bi bi-info-circle"></i> View Info &amp; Share
                                 </button>
-                                <a asp-action="Edit" asp-route-id="@b.Id" onclick="event.stopPropagation();" class="btn btn-sm btn-outline-primary">
-                                    <i class="bi bi-pencil me-1"></i>Edit
-                                </a>
-                                <form asp-action="Delete" asp-route-id="@b.Id" method="post" onclick="event.stopPropagation();" onsubmit="return confirm('Remove this bulletin notice?');">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                                        <i class="bi bi-trash me-1"></i>Remove
-                                    </button>
-                                </form>
+                                @if (isAuthenticated)
+                                {
+                                    <a asp-action="Edit" asp-route-id="@b.BulletinId" onclick="event.stopPropagation();" class="btn btn-soft-primary">
+                                        <i class="bi bi-pencil-fill"></i> Edit
+                                    </a>
+                                    <form asp-action="Delete" asp-route-id="@b.BulletinId" method="post" onclick="event.stopPropagation();" onsubmit="return confirm('Remove this bulletin notice?');" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-soft-danger">
+                                            <i class="bi bi-trash-fill"></i> Remove
+                                        </button>
+                                    </form>
+                                }
                             </div>
                         </div>
                     </div>
+                    <div class="cc-gradient-bar-orange"></div>
                 </div>
             </div>
         }
     }
 </div>
+

@@ -33,53 +33,67 @@
     }
 </style>
 
-<div class="d-flex justify-content-center">
-    <div class="form-card w-100">
-        <div class="d-flex align-items-center gap-3 mb-4">
-            <div class="user-avatar-lg">@Model.Username.Substring(0, 1).ToUpper()</div>
-            <div>
-                <h2 class="mb-0" style="font-size:1.4rem;font-weight:800;">Edit User</h2>
-                <p class="mb-0 text-muted" style="font-size:0.82rem;">ID #@Model.Id — Update account details and role</p>
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm position-relative overflow-hidden">
+            <div class="cc-gradient-bar cc-gradient-bar-blue"></div>
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div style="width:52px;height:52px;border-radius:50%;background:#dbeafe;color:#2563eb;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.4rem;">
+                        @Model.Username.Substring(0, 1).ToUpper()
+                    </div>
+                    <div>
+                        <div class="cc-section-label text-primary">User Administration</div>
+                        <h2 class="h4 fw-bold text-dark mb-0">Edit User Account</h2>
+                        <p class="text-muted extra-small mb-0">Account ID #@Model.UserId</p>
+                    </div>
+                </div>
+
+                <form method="post" asp-action="Edit">
+                    <input type="hidden" name="id" value="@Model.UserId" />
+
+                    <div class="form-floating mb-3">
+                        <input name="username" value="@Model.Username" class="form-control cc-input" id="username" placeholder="Username" required />
+                        <label for="username">Username *</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input name="email" type="email" value="@Model.Email" class="form-control cc-input" id="email" placeholder="Email Address" />
+                        <label for="email">Email Address</label>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Security Role *</label>
+                        <select name="role" class="form-select cc-input">
+                            @if (Model.Role == "User")
+                            {
+                                <option value="User" selected>👤 User — Content Editor</option>
+                                <option value="Admin">🛡️ Admin — Full Administrator Access</option>
+                            }
+                            else
+                            {
+                                <option value="User">👤 User — Content Editor</option>
+                                <option value="Admin" selected>🛡️ Admin — Full Administrator Access</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        <input name="newPassword" type="password" class="form-control cc-input" id="newPassword" placeholder="New Password" />
+                        <label for="newPassword">New Password (leave blank to keep current)</label>
+                    </div>
+
+                    @if (User?.Identity?.IsAuthenticated ?? false)
+                    {
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-soft-primary fw-bold px-4">
+                                <i class="bi bi-floppy me-1"></i>Save Changes
+                            </button>
+                            <a asp-action="Index" class="btn btn-soft-secondary text-secondary px-4">Cancel</a>
+                        </div>
+                    }
+                </form>
             </div>
         </div>
-
-        <form method="post" asp-action="Edit">
-            <input type="hidden" name="id" value="@Model.Id" />
-
-            <div class="mb-3">
-                <label class="form-label">Username <span class="text-danger">*</span></label>
-                <input name="username" value="@Model.Username" class="form-control" required />
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input name="email" type="email" value="@Model.Email" class="form-control" />
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Role</label>
-                <select name="role" class="form-select">
-                    @if (Model.Role == "User")
-                    {
-                        <option value="User" selected>👤 User — Content editor only</option>
-                        <option value="Admin">🛡️ Admin — Full access</option>
-                    }
-                    else
-                    {
-                        <option value="User">👤 User — Content editor only</option>
-                        <option value="Admin" selected>🛡️ Admin — Full access</option>
-                    }
-                </select>
-            </div>
-            <div class="mb-4">
-                <label class="form-label">New Password <span class="text-muted fw-normal">(leave blank to keep current)</span></label>
-                <input name="newPassword" type="password" class="form-control" placeholder="Leave empty to keep existing password" />
-            </div>
-
-            <div class="d-flex gap-3">
-                <button type="submit" class="btn btn-save">
-                    <i class="bi bi-floppy me-2"></i>Save Changes
-                </button>
-                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
-            </div>
-        </form>
     </div>
 </div>

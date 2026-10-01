@@ -35,7 +35,7 @@ namespace golenWeb.Controllers.Api
         public async Task<ActionResult<IEnumerable<object>>> GetAll()
         {
             var users = await _authService.GetAllAsync();
-            var sanitized = users.Select(u => new { u.Id, u.Username, u.Email });
+            var sanitized = users.Select(u => new { u.UserId, u.Username, u.Email });
             return Ok(sanitized);
         }
 
@@ -48,7 +48,7 @@ namespace golenWeb.Controllers.Api
             {
                 return NotFound(new { message = $"User with ID {id} was not found." });
             }
-            return Ok(new { user.Id, user.Username, user.Email });
+            return Ok(new { user.UserId, user.Username, user.Email });
         }
 
         // POST: api/users

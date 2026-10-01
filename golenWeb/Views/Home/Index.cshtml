@@ -2,264 +2,389 @@
 @{
     ViewData["Title"] = "Golden Success College - Official Website";
     var todayEvents = ViewData["TodayEvents"] as List<EventModel> ?? new List<EventModel>();
+    var allEvents = ViewData["AllEvents"] as List<EventModel> ?? new List<EventModel>();
     var bulletins = ViewData["Bulletins"] as List<Bulletin> ?? new List<Bulletin>();
     var todayStr = DateTime.Today.ToString("dddd, MMMM dd, yyyy");
+    var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
+    var displayEvents = todayEvents.Any() ? todayEvents : allEvents.Take(4).ToList();
 }
 
-<style>
-    .hero-container {
-        background: linear-gradient(135deg, #073d1a 0%, #0b5e28 55%, #0f172a 100%);
-        border-radius: 20px;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 12px 36px rgba(7, 61, 26, 0.2);
-    }
-    .hero-badge {
-        animation: pulseGlow 2.5s infinite;
-    }
-    @@keyframes pulseGlow {
-        0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.5); }
-        70% { box-shadow: 0 0 0 12px rgba(245, 158, 11, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
-    }
-    .hero-img {
-        transition: transform 0.5s ease;
-    }
-    .hero-container:hover .hero-img {
-        transform: scale(1.06) rotate(2deg);
-    }
-
-    .modern-item {
-        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        border-left: 4px solid transparent;
-    }
-    .modern-item:hover {
-        background-color: #f8fafc;
-        border-left-color: #0b5e28;
-        transform: translateX(4px);
-    }
-
-    .quick-card {
-        border-radius: 16px;
-        border: 1px solid #e2e8f0;
-        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .quick-card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 20px 30px rgba(0, 0, 0, 0.07);
-        border-color: rgba(11, 94, 40, 0.3);
-    }
-    .quick-card .icon-box {
-        transition: transform 0.3s ease;
-    }
-    .quick-card:hover .icon-box {
-        transform: scale(1.2) rotate(6deg);
-    }
-</style>
-
-<!-- HERO BANNER WITH ANIMATION -->
-<section class="hero-container mb-4 p-4 p-md-5 text-white animate-fade-up">
-    <div class="row align-items-center">
+<!-- HERO BANNER -->
+<section class="card cc-card border-0 shadow-sm mb-4 p-4 p-md-5 overflow-hidden" style="background: linear-gradient(135deg, var(--gsc-dark-green) 0%, #0d5225 55%, var(--cc-slate-900) 100%);">
+    <div class="row align-items-center position-relative" style="z-index: 1;">
         <div class="col-md-3 text-center mb-4 mb-md-0">
-            <img src="~/images/logo.png" alt="Golden Success College Logo" class="img-fluid hero-img" style="max-height: 190px; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.4));" />
+            <img src="~/images/logo.png" alt="Golden Success College Logo" class="img-fluid" style="max-height: 160px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));" />
         </div>
         <div class="col-md-9">
-            <span class="badge bg-warning text-dark fw-bold mb-2 hero-badge px-3 py-2 rounded-pill">
+            <span class="pill-cc-orange mb-2 d-inline-block">
                 <i class="bi bi-star-fill me-1"></i> OFFICIAL COLLEGE WEBSITE
             </span>
-            <h1 class="display-5 fw-extrabold mb-2 text-white" style="letter-spacing:-0.5px;">Golden Success College</h1>
-            <p class="fs-5 text-light opacity-90 mb-1 fw-semibold"><em>"Determination &bull; Courage &bull; Hardwork"</em></p>
+            <h1 class="fw-bold mb-2 text-white" style="letter-spacing: -0.5px; font-size: 2.2rem;">Golden Success College</h1>
+            <p class="fs-6 text-light opacity-90 mb-1 fw-semibold"><em>"Determination &bull; Courage &bull; Hardwork"</em></p>
             <p class="small text-warning opacity-75 mb-4">Isa. 33:6</p>
-            <div class="d-flex flex-wrap gap-3">
-                <a asp-controller="Events" asp-action="Index" class="btn btn-warning text-dark fw-bold px-4 py-2 rounded-pill shadow-sm btn-modern">
-                    <i class="bi bi-calendar-event me-2"></i>Events Calendar
+            <div class="d-flex flex-wrap gap-2">
+                <a asp-controller="Events" asp-action="Index" class="btn btn-soft-success px-3 py-2">
+                    <i class="bi bi-calendar-event"></i> Events Calendar
                 </a>
-                <a asp-controller="Bulletins" asp-action="Index" class="btn btn-light fw-bold text-success px-4 py-2 rounded-pill shadow-sm btn-modern">
-                    <i class="bi bi-megaphone me-2"></i>Campus Bulletins
+                <a asp-controller="Bulletins" asp-action="Index" class="btn btn-soft-gold px-3 py-2">
+                    <i class="bi bi-megaphone"></i> Campus Bulletins
                 </a>
-                <a asp-controller="Events" asp-action="Create" class="btn btn-outline-light fw-bold px-4 py-2 rounded-pill btn-modern">
-                    <i class="bi bi-plus-circle me-2"></i>Post an Event
-                </a>
+                @if (isAuthenticated)
+                {
+                    <a asp-controller="Events" asp-action="Create" class="btn btn-soft-amber px-3 py-2">
+                        <i class="bi bi-plus-circle-fill"></i> Post an Event
+                    </a>
+                }
             </div>
         </div>
     </div>
+    <div class="cc-gradient-bar-emerald"></div>
 </section>
 
 <!-- TODAY'S DATE & SCHEDULE BANNER -->
-<div class="card border-0 shadow-sm mb-4 animate-fade-up animate-delay-1" style="background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border-left: 6px solid #0b5e28 !important; border-radius:14px;">
+<div class="card cc-card border-0 shadow-sm mb-4">
     <div class="card-body d-flex flex-wrap align-items-center justify-content-between py-3 px-4">
         <div class="d-flex align-items-center mb-2 mb-md-0">
-            <div class="p-2 rounded-circle bg-success text-white me-3 d-flex align-items-center justify-content-center shadow-sm" style="width:45px; height:45px;">
-                <i class="bi bi-calendar3 fs-4"></i>
+            <div class="rounded-circle d-flex align-items-center justify-content-center me-3" style="width:40px; height:40px; background-color: var(--cc-green-surface);">
+                <i class="bi bi-calendar3" style="color: var(--cc-green-text); font-size: 1.1rem;"></i>
             </div>
             <div>
-                <strong class="fs-6 text-dark">Today is <span class="text-success fw-bold">@todayStr</span></strong>
-                <div class="small text-muted">@todayEvents.Count scheduled campus event(s) today</div>
+                <strong style="color: var(--cc-slate-900); font-size: 0.95rem;">Today is <span style="color: var(--cc-green-text);" class="fw-bold">@todayStr</span></strong>
+                <div class="small" style="color: var(--cc-slate-500);">@allEvents.Count scheduled campus event(s) in calendar</div>
             </div>
         </div>
-        <a asp-controller="Events" asp-action="Index" asp-route-date="@DateTime.Today.ToString("yyyy-MM-dd")" class="btn btn-sm btn-success fw-bold px-3 py-2 rounded-pill btn-modern">
-            <i class="bi bi-clock-history me-1"></i>View Today's Schedule
+        <a asp-controller="Events" asp-action="Index" class="btn btn-soft-success">
+            <i class="bi bi-calendar-event"></i> View All Events Calendar
         </a>
     </div>
+    <div class="cc-gradient-bar-green"></div>
 </div>
 
-<div class="row g-4">
-    <!-- TODAY'S EVENTS WIDGET -->
-    <div class="col-lg-7 animate-fade-up animate-delay-2">
-        <div class="card card-modern h-100 overflow-hidden">
-            <div class="card-header bg-success text-white py-3 d-flex justify-content-between align-items-center border-0">
-                <span class="fw-bold fs-6"><i class="bi bi-calendar-check me-2"></i>Today's Campus Events</span>
-                <a asp-controller="Events" asp-action="Create" class="btn btn-sm btn-light text-success fw-bold rounded-pill btn-modern">
-                    <i class="bi bi-plus-lg me-1"></i>Add Event
-                </a>
-            </div>
-            <div class="card-body p-0">
-                @if (!todayEvents.Any())
-                {
-                    <div class="text-center py-5 text-muted">
-                        <i class="bi bi-calendar-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
-                        <p class="mb-2 fw-semibold">No events scheduled for today.</p>
-                        <a asp-controller="Events" asp-action="Create" class="btn btn-sm btn-outline-success rounded-pill btn-modern">
-                            <i class="bi bi-plus-circle me-1"></i>Schedule Event
+<div class="row g-3 mb-4">
+    <!-- CAMPUS EVENTS WIDGET -->
+    <div class="col-lg-7">
+        <div class="card cc-card border-0 shadow-sm h-100 overflow-hidden">
+            <div class="card-body px-4 py-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <p class="cc-section-label mb-0"><i class="bi bi-calendar-check me-1"></i> Campus Events &amp; Schedule</p>
+                    @if (isAuthenticated)
+                    {
+                        <a asp-controller="Events" asp-action="Create" class="btn btn-soft-success">
+                            <i class="bi bi-plus-circle-fill"></i> Add Event
                         </a>
+                    }
+                </div>
+
+                @if (!displayEvents.Any())
+                {
+                    <div class="text-center py-5">
+                        <i class="bi bi-calendar-x fs-1 mb-2" style="color: var(--cc-slate-300);"></i>
+                        <p class="mb-2 fw-semibold" style="color: var(--cc-slate-600); font-size: 0.88rem;">No campus events scheduled yet.</p>
+                        @if (isAuthenticated)
+                        {
+                            <a asp-controller="Events" asp-action="Create" class="btn btn-soft-success">
+                                <i class="bi bi-plus-circle-fill"></i> Schedule Event
+                            </a>
+                        }
                     </div>
                 }
                 else
                 {
-                    <ul class="list-group list-group-flush">
-                        @foreach (var ev in todayEvents)
+                    <div class="d-flex flex-column gap-2 mb-3">
+                        @foreach (var ev in displayEvents)
                         {
-                            <li class="list-group-item px-4 py-3 modern-item" style="cursor: pointer;" onclick="openEventModal(@ev.Id)">
-                                <div class="d-flex align-items-center gap-3">
-                                    @if (ev.ImageData != null)
-                                    {
-                                        <img src="/Events/Image/@ev.Id" alt="@ev.Title" class="rounded-3 shadow-sm flex-shrink-0" style="width: 62px; height: 62px; object-fit: cover; border: 2px solid #0b5e28;" />
-                                    }
-                                    else
-                                    {
-                                        <div class="rounded-3 flex-shrink-0 d-flex align-items-center justify-content-center bg-success text-warning shadow-sm" style="width: 62px; height: 62px; font-size: 1.6rem;">
-                                            <i class="bi bi-calendar-event"></i>
-                                        </div>
-                                    }
-                                    <div class="flex-grow-1">
-                                        <span class="badge bg-success mb-1 rounded-pill">@ev.Category</span>
-                                        <div class="fw-bold text-dark fs-6">@ev.Title</div>
-                                        <small class="text-muted d-block mt-1">
-                                            <i class="bi bi-clock me-1 text-primary"></i>@ev.StartTime – @ev.EndTime
-                                            &bull; <i class="bi bi-geo-alt me-1 text-danger"></i>@ev.Location
-                                        </small>
+                            var isToday = ev.EventDate.ToString("yyyy-MM-dd") == DateTime.Today.ToString("yyyy-MM-dd");
+                            <div class="p-3 rounded-3 border d-flex align-items-center gap-3" style="background-color: var(--cc-slate-50); border-color: var(--cc-slate-200) !important; cursor: pointer;" onclick="openEventModal(@ev.EventId)">
+                                @if (ev.ImageData != null)
+                                {
+                                    <img src="/Events/Image/@ev.EventId" alt="@ev.Title" class="rounded-3 flex-shrink-0" style="width: 54px; height: 54px; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <div class="rounded-circle flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px; background-color: var(--cc-blue-surface); color: var(--cc-blue-text); font-size: 1.25rem;">
+                                        <i class="bi bi-calendar-event"></i>
                                     </div>
-                                    <a asp-controller="Events" asp-action="Edit" asp-route-id="@ev.Id" onclick="event.stopPropagation();" class="btn btn-sm btn-light border flex-shrink-0 rounded-circle p-2" title="Edit Event">
-                                        <i class="bi bi-pencil text-secondary"></i>
-                                    </a>
+                                }
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center gap-1 mb-1">
+                                        @if (isToday)
+                                        {
+                                            <span class="pill-cc-red"><i class="bi bi-record-fill me-1"></i>TODAY</span>
+                                        }
+                                        <span class="pill-cc-amber">@ev.Category</span>
+                                        <span class="small text-muted ms-auto">@ev.EventDate.ToString("MMM dd, yyyy")</span>
+                                    </div>
+                                    <div class="fw-bold" style="color: var(--cc-slate-900); font-size: 0.95rem;">@ev.Title</div>
+                                    <small style="color: var(--cc-slate-500);" class="d-block mt-1">
+                                        <i class="bi bi-clock me-1 text-primary"></i>@ev.StartTime – @ev.EndTime
+                                        &bull; <i class="bi bi-geo-alt me-1 text-danger"></i>@ev.Location
+                                    </small>
                                 </div>
-                            </li>
+                                @if (isAuthenticated)
+                                {
+                                    <a asp-controller="Events" asp-action="Edit" asp-route-id="@ev.EventId" onclick="event.stopPropagation();" class="btn btn-soft-amber" title="Edit Event">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
+                                }
+                            </div>
                         }
-                    </ul>
+                    </div>
                 }
+
+                <div class="pt-2 border-top" style="border-color: var(--cc-slate-100) !important;">
+                    <a asp-controller="Events" asp-action="Index" class="fw-bold text-decoration-none small" style="color: var(--cc-blue-text);">
+                        View All Events Calendar (@allEvents.Count) <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
             </div>
-            <div class="card-footer bg-light border-0 py-3 px-4">
-                <a asp-controller="Events" asp-action="Index" class="text-success fw-bold text-decoration-none small">
-                    View Full Event Calendar <i class="bi bi-arrow-right ms-1"></i>
-                </a>
-            </div>
+            <div class="cc-gradient-bar-blue"></div>
         </div>
     </div>
 
     <!-- BULLETIN BOARD WIDGET -->
-    <div class="col-lg-5 animate-fade-up animate-delay-2">
-        <div class="card card-modern h-100 overflow-hidden">
-            <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center border-0">
-                <span class="fw-bold fs-6"><i class="bi bi-megaphone me-2 text-warning"></i>Latest Bulletins</span>
-                <a asp-controller="Bulletins" asp-action="Create" class="btn btn-sm btn-warning text-dark fw-bold rounded-pill btn-modern">
-                    <i class="bi bi-plus-lg me-1"></i>Post Notice
-                </a>
-            </div>
-            <div class="card-body p-0">
+    <div class="col-lg-5">
+        <div class="card cc-card border-0 shadow-sm h-100 overflow-hidden">
+            <div class="card-body px-4 py-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <p class="cc-section-label mb-0"><i class="bi bi-megaphone me-1"></i> Latest Bulletins</p>
+                    @if (isAuthenticated)
+                    {
+                        <a asp-controller="Bulletins" asp-action="Create" class="btn btn-soft-warning">
+                            <i class="bi bi-plus-circle-fill"></i> Post Notice
+                        </a>
+                    }
+                </div>
+
                 @if (!bulletins.Any())
                 {
-                    <div class="text-center py-5 text-muted">
-                        <i class="bi bi-card-checklist fs-1 d-block mb-2 text-secondary opacity-50"></i>
-                        <p class="mb-0 fw-semibold">No bulletins posted yet.</p>
+                    <div class="text-center py-5">
+                        <i class="bi bi-card-checklist fs-1 mb-2" style="color: var(--cc-slate-300);"></i>
+                        <p class="mb-0 fw-semibold" style="color: var(--cc-slate-600); font-size: 0.88rem;">No bulletins posted yet.</p>
                     </div>
                 }
                 else
                 {
-                    <ul class="list-group list-group-flush">
+                    <div class="d-flex flex-column gap-2 mb-3">
                         @foreach (var b in bulletins.Take(4))
                         {
-                            var badge = b.Priority == "High" ? "bg-danger" : "bg-secondary";
-                            <li class="list-group-item px-4 py-3 modern-item" style="cursor: pointer;" onclick="openBulletinModal(@b.Id)">
-                                <div class="d-flex align-items-center gap-3">
-                                    @if (b.ImageData != null)
-                                    {
-                                        <img src="/Bulletins/Image/@b.Id" alt="@b.Title" class="rounded-3 shadow-sm flex-shrink-0" style="width: 58px; height: 58px; object-fit: cover;" />
-                                    }
-                                    else
-                                    {
-                                        <div class="rounded-3 flex-shrink-0 d-flex align-items-center justify-content-center bg-dark text-warning shadow-sm" style="width: 58px; height: 58px; font-size: 1.4rem;">
-                                            <i class="bi bi-megaphone-fill"></i>
-                                        </div>
-                                    }
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex align-items-center gap-1 mb-1">
-                                            <span class="badge @badge rounded-pill">@b.Priority</span>
-                                            <span class="badge bg-light text-dark border rounded-pill">@b.Category</span>
-                                        </div>
-                                        <div class="fw-bold text-dark" style="font-size:0.95rem;">@b.Title</div>
-                                        <small class="text-muted d-block mt-1">@b.Author &bull; @b.PublishDate.ToString("MMM dd, yyyy")</small>
+                            var isHigh = b.Priority == "High";
+                            <div class="p-3 rounded-3 border d-flex align-items-center gap-3" style="background-color: var(--cc-slate-50); border-color: var(--cc-slate-200) !important; cursor: pointer;" onclick="openBulletinModal(@b.BulletinId)">
+                                @if (b.ImageData != null)
+                                {
+                                    <img src="/Bulletins/Image/@b.BulletinId" alt="@b.Title" class="rounded-3 flex-shrink-0" style="width: 50px; height: 50px; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <div class="rounded-circle flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background-color: var(--cc-orange-surface); color: var(--cc-orange-text); font-size: 1.1rem;">
+                                        <i class="bi bi-megaphone"></i>
                                     </div>
+                                }
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center gap-1 mb-1">
+                                        @if (isHigh)
+                                        {
+                                            <span class="pill-cc-red">HIGH</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="pill-cc-slate">NORMAL</span>
+                                        }
+                                        <span class="pill-cc-slate">@b.Category</span>
+                                    </div>
+                                    <div class="fw-bold text-truncate" style="color: var(--cc-slate-900); font-size: 0.90rem; max-width: 220px;" title="@b.Title">@b.Title</div>
+                                    <small style="color: var(--cc-slate-500);" class="d-block mt-1">@b.Author &bull; @b.PublishDate.ToString("MMM dd, yyyy")</small>
                                 </div>
-                            </li>
+                            </div>
                         }
-                    </ul>
+                    </div>
                 }
+
+                <div class="pt-2 border-top" style="border-color: var(--cc-slate-100) !important;">
+                    <a asp-controller="Bulletins" asp-action="Index" class="fw-bold text-decoration-none small" style="color: var(--cc-orange-text);">
+                        View All Bulletins <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
             </div>
-            <div class="card-footer bg-light border-0 py-3 px-4">
-                <a asp-controller="Bulletins" asp-action="Index" class="text-dark fw-bold text-decoration-none small">
-                    View All Bulletins <i class="bi bi-arrow-right ms-1"></i>
-                </a>
-            </div>
+            <div class="cc-gradient-bar-orange"></div>
         </div>
     </div>
 </div>
 
 <!-- QUICK ACCESS CARDS -->
-<div class="row g-4 mt-2 animate-fade-up animate-delay-3">
-    <div class="col-md-4">
-        <div class="card quick-card h-100 text-center p-4">
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card cc-card border-0 shadow-sm text-center p-3 h-100">
             <div class="card-body">
-                <div class="fs-1 text-success mb-3 icon-box"><i class="bi bi-calendar-event-fill"></i></div>
-                <h5 class="fw-bold">Event Calendar</h5>
-                <p class="text-muted small mb-4">Schedule, view, and manage campus events with uploaded pictures.</p>
-                <a asp-controller="Events" asp-action="Create" class="btn btn-success btn-sm px-4 py-2 rounded-pill fw-bold btn-modern">
-                    <i class="bi bi-plus-lg me-1"></i>Add Event
-                </a>
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 52px; height: 52px; background-color: var(--cc-green-surface);">
+                    <i class="bi bi-calendar-event-fill" style="color: var(--cc-green-text); font-size: 1.4rem;"></i>
+                </div>
+                <h5 class="fw-bold" style="color: var(--cc-slate-900);">Event Calendar</h5>
+                <p class="mb-4" style="font-size: 0.82rem; color: var(--cc-slate-600);">Schedule, view, and manage campus events with database-stored photos.</p>
+                @if (isAuthenticated)
+                {
+                    <a asp-controller="Events" asp-action="Create" class="btn btn-soft-success w-100 justify-content-center">
+                        <i class="bi bi-plus-circle-fill"></i> Add Event
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="Events" asp-action="Index" class="btn btn-soft-success w-100 justify-content-center">
+                        <i class="bi bi-calendar-event"></i> View Events
+                    </a>
+                }
             </div>
+            <div class="cc-gradient-bar-emerald"></div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card quick-card h-100 text-center p-4">
+
+    <div class="col-md-6">
+        <div class="card cc-card border-0 shadow-sm text-center p-3 h-100">
             <div class="card-body">
-                <div class="fs-1 text-warning mb-3 icon-box"><i class="bi bi-megaphone-fill"></i></div>
-                <h5 class="fw-bold">Bulletin Board</h5>
-                <p class="text-muted small mb-4">Post official college announcements and campus notices.</p>
-                <a asp-controller="Bulletins" asp-action="Create" class="btn btn-warning text-dark btn-sm px-4 py-2 rounded-pill fw-bold btn-modern">
-                    <i class="bi bi-plus-lg me-1"></i>Post Bulletin
-                </a>
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 52px; height: 52px; background-color: var(--cc-amber-surface);">
+                    <i class="bi bi-megaphone-fill" style="color: var(--cc-amber-text); font-size: 1.4rem;"></i>
+                </div>
+                <h5 class="fw-bold" style="color: var(--cc-slate-900);">Bulletin Board</h5>
+                <p class="mb-4" style="font-size: 0.82rem; color: var(--cc-slate-600);">Post official college announcements and important campus notices.</p>
+                @if (isAuthenticated)
+                {
+                    <a asp-controller="Bulletins" asp-action="Create" class="btn btn-soft-gold w-100 justify-content-center">
+                        <i class="bi bi-plus-circle-fill"></i> Post Bulletin
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="Bulletins" asp-action="Index" class="btn btn-soft-gold w-100 justify-content-center">
+                        <i class="bi bi-megaphone"></i> View Bulletins
+                    </a>
+                }
             </div>
+            <div class="cc-gradient-bar-gold"></div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card quick-card h-100 text-center p-4">
-            <div class="card-body">
-                <div class="fs-1 text-dark mb-3 icon-box"><i class="bi bi-code-slash"></i></div>
-                <h5 class="fw-bold">API Tester</h5>
-                <p class="text-muted small mb-4">Send live HTTP GET, POST, PUT, DELETE requests to the REST API.</p>
-                <a asp-controller="CrudTest" asp-action="Index" class="btn btn-dark btn-sm px-4 py-2 rounded-pill fw-bold btn-modern">
-                    <i class="bi bi-send me-1"></i>Test API
-                </a>
+</div>
+
+<!-- ========== EVENT DETAIL MODAL ========== -->
+<div class="modal fade" id="eventDetailModal" tabindex="-1" aria-labelledby="eventDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg overflow-hidden">
+            <div style="height: 4px; background: linear-gradient(90deg, #f59e0b, #0b5e28, #22c55e);"></div>
+            <div class="modal-header border-0 px-4 pt-4 pb-2">
+                <div class="d-flex align-items-center gap-2 flex-wrap w-100">
+                    <div id="modalCategoryBadge"></div>
+                    <h5 class="modal-title fw-bold mb-0" id="eventDetailModalLabel" style="font-size:1.1rem;"></h5>
+                </div>
+                <button type="button" class="btn-close ms-2 flex-shrink-0" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-4 pt-0 pb-3">
+                <div id="modalImageWrap" class="mb-3 rounded-3 overflow-hidden" style="max-height:220px; display:none;">
+                    <img id="modalImage" src="" alt="Event photo" class="w-100" style="height:220px; object-fit:cover;">
+                </div>
+                <p id="modalDescription" class="text-muted mb-3" style="font-size:0.9rem; line-height:1.65;"></p>
+                <div class="p-3 rounded-3 border mb-1" style="background-color:var(--cc-slate-50); border-color:var(--cc-slate-200) !important; font-size:0.875rem;">
+                    <div class="row g-2">
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="bi bi-calendar3 text-success mt-1"></i>
+                                <div>
+                                    <div class="text-muted" style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Date</div>
+                                    <div class="fw-semibold text-dark" id="modalDate"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="bi bi-clock text-warning mt-1"></i>
+                                <div>
+                                    <div class="text-muted" style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Time</div>
+                                    <div class="fw-semibold text-dark" id="modalTime"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="bi bi-geo-alt-fill text-danger mt-1"></i>
+                                <div>
+                                    <div class="text-muted" style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Venue</div>
+                                    <div class="fw-semibold text-dark" id="modalLocation"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="bi bi-person-badge text-secondary mt-1"></i>
+                                <div>
+                                    <div class="text-muted" style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Organizer</div>
+                                    <div class="fw-semibold text-dark" id="modalOrganizer"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 px-4 pb-4 pt-2 gap-2 justify-content-start">
+                <div id="modalAuthButtons" class="d-none d-flex gap-2"></div>
+                <button type="button" class="btn btn-soft-secondary ms-auto" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Close
+                </button>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+<script>
+    const _isAuthenticated = @(isAuthenticated ? "true" : "false");
+
+    function openEventModal(id) {
+        const modal = new bootstrap.Modal(document.getElementById('eventDetailModal'));
+        document.getElementById('eventDetailModalLabel').textContent = 'Loading\u2026';
+        document.getElementById('modalDescription').textContent = '';
+        document.getElementById('modalDate').textContent = '';
+        document.getElementById('modalTime').textContent = '';
+        document.getElementById('modalLocation').textContent = '';
+        document.getElementById('modalOrganizer').textContent = '';
+        document.getElementById('modalCategoryBadge').innerHTML = '';
+        document.getElementById('modalImageWrap').style.display = 'none';
+        document.getElementById('modalAuthButtons').innerHTML = '';
+        document.getElementById('modalAuthButtons').classList.add('d-none');
+        modal.show();
+
+        fetch('/Events/GetJson/' + id)
+            .then(function(r) {
+                if (!r.ok) throw new Error('Not found');
+                return r.json();
+            })
+            .then(function(ev) {
+                document.getElementById('eventDetailModalLabel').textContent = ev.title;
+                document.getElementById('modalDescription').textContent = ev.description || 'No description provided.';
+                document.getElementById('modalDate').textContent = ev.formattedDate;
+                document.getElementById('modalTime').textContent = ev.startTime + ' \u2013 ' + ev.endTime;
+                document.getElementById('modalLocation').textContent = ev.location;
+                document.getElementById('modalOrganizer').textContent = ev.organizer;
+                document.getElementById('modalCategoryBadge').innerHTML =
+                    '<span class="pill-cc-amber">' + ev.category + '</span>';
+                if (ev.hasImage) {
+                    document.getElementById('modalImage').src = ev.imageUrl;
+                    document.getElementById('modalImageWrap').style.display = 'block';
+                }
+                if (_isAuthenticated) {
+                    var btns = document.getElementById('modalAuthButtons');
+                    btns.classList.remove('d-none');
+                    btns.innerHTML =
+                        '<a href="/Events/Edit/' + ev.id + '" class="btn btn-soft-amber btn-sm"><i class="bi bi-pencil-fill"></i> Edit</a>' +
+                        '<a href="/Events/Delete/' + ev.id + '" class="btn btn-soft-danger btn-sm"><i class="bi bi-trash-fill"></i> Delete</a>';
+                }
+            })
+            .catch(function() {
+                document.getElementById('eventDetailModalLabel').textContent = 'Error';
+                document.getElementById('modalDescription').textContent = 'Could not load event details. Please try again.';
+            });
+    }
+
+    function openBulletinModal(id) {
+        window.location.href = '/Bulletins/Index';
+    }
+</script>
+}
+
+

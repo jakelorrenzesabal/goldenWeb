@@ -26,58 +26,70 @@
     .btn-create:hover { color:white; opacity:0.9; }
 </style>
 
-<div class="d-flex justify-content-center">
-    <div class="form-card w-100">
-        <div class="d-flex align-items-center gap-3 mb-4">
-            <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#0b5e28,#1a8c45);display:flex;align-items:center;justify-content:center;">
-                <i class="bi bi-person-plus-fill text-white" style="font-size:1.3rem;"></i>
-            </div>
-            <div>
-                <h2 class="mb-0" style="font-size:1.4rem;font-weight:800;">Create New User</h2>
-                <p class="mb-0 text-muted" style="font-size:0.82rem;">Admin can assign any role</p>
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm position-relative overflow-hidden">
+            <div class="cc-gradient-bar cc-gradient-bar-emerald"></div>
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="p-3 bg-light-emerald rounded-3 text-success">
+                        <i class="bi bi-person-plus-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <div class="cc-section-label text-success">User Administration</div>
+                        <h2 class="h4 fw-bold text-dark mb-0">Create New Account</h2>
+                    </div>
+                </div>
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger mb-4 rounded-3 small">
+                        @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <div><i class="bi bi-exclamation-circle me-1"></i>@err.ErrorMessage</div>
+                        }
+                    </div>
+                }
+
+                <form method="post" asp-action="Create">
+                    <div class="form-floating mb-3">
+                        <input name="username" class="form-control cc-input" id="username" placeholder="Username" required />
+                        <label for="username">Username *</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input name="email" type="email" class="form-control cc-input" id="email" placeholder="Email Address" />
+                        <label for="email">Email Address</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input name="password" type="password" class="form-control cc-input" id="password" placeholder="Password" required />
+                        <label for="password">Password *</label>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-secondary">Assigned Security Role *</label>
+                        <select name="role" class="form-select cc-input">
+                            <option value="User" selected>👤 User — Content Editor</option>
+                            <option value="Admin">🛡️ Admin — Full Administrator Access</option>
+                        </select>
+                        <div class="form-text extra-small text-muted mt-1">
+                            <strong>User:</strong> Standard access to modify events and bulletins. &nbsp;
+                            <strong>Admin:</strong> System-wide control and user account management.
+                        </div>
+                    </div>
+
+                    @if (User?.Identity?.IsAuthenticated ?? false)
+                    {
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-soft-success fw-bold px-4">
+                                <i class="bi bi-person-plus me-1"></i>Create User
+                            </button>
+                            <a asp-action="Index" class="btn btn-soft-secondary text-secondary px-4">Cancel</a>
+                        </div>
+                    }
+                </form>
             </div>
         </div>
-
-        @if (!ViewData.ModelState.IsValid)
-        {
-            <div class="alert alert-danger mb-3">
-                @foreach (var err in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    <div>@err.ErrorMessage</div>
-                }
-            </div>
-        }
-
-        <form method="post" asp-action="Create">
-            <div class="mb-3">
-                <label class="form-label">Username <span class="text-danger">*</span></label>
-                <input name="username" class="form-control" placeholder="e.g. john.doe" required />
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input name="email" type="email" class="form-control" placeholder="user@goldensuccess.edu" />
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Password <span class="text-danger">*</span></label>
-                <input name="password" type="password" class="form-control" placeholder="Minimum 6 characters" required />
-            </div>
-            <div class="mb-4">
-                <label class="form-label">Role <span class="text-danger">*</span></label>
-                <select name="role" class="form-select">
-                    <option value="User" selected>👤 User — Content editor only</option>
-                    <option value="Admin">🛡️ Admin — Full access</option>
-                </select>
-                <div class="form-text text-muted mt-1">
-                    <strong>User:</strong> Can create/edit events & bulletins, customize site. &nbsp;
-                    <strong>Admin:</strong> All of the above + manage users.
-                </div>
-            </div>
-            <div class="d-flex gap-3">
-                <button type="submit" class="btn btn-create">
-                    <i class="bi bi-person-plus me-2"></i>Create User
-                </button>
-                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
-            </div>
-        </form>
     </div>
 </div>

@@ -4,7 +4,7 @@ namespace golenWeb.Models
 {
     public class EventModel
     {
-        public int Id { get; set; }
+        public int EventId { get; set; }
 
         [Required(ErrorMessage = "Event title is required")]
         [StringLength(200)]
@@ -40,5 +40,6 @@ namespace golenWeb.Models
         public string? ImageUrl { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public int? CreatedByUserId { get; set; }
     }
 }

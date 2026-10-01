@@ -18,14 +18,18 @@ namespace golenWeb.Controllers
 
         // GET: /Events — public
         [HttpGet]
-        public async Task<IActionResult> Index(string? search, string? category, DateTime? date)
+        public async Task<IActionResult> Index(string? search, string? category, DateTime? date, int page = 1)
         {
-            ViewData["CurrentSearch"] = search;
-            ViewData["CurrentCategory"] = category;
-            ViewData["SelectedDate"] = date?.ToString("yyyy-MM-dd");
+            var pagedVm = await _eventService.GetPagedEventsViewModelAsync(search, category, date, page);
 
-            var events = await _eventService.GetAllAsync(search, category, date);
-            return View(events);
+            ViewData["CurrentSearch"] = pagedVm.CurrentSearch;
+            ViewData["CurrentCategory"] = pagedVm.CurrentCategory;
+            ViewData["SelectedDate"] = pagedVm.SelectedDate;
+            ViewData["CurrentPage"] = pagedVm.CurrentPage;
+            ViewData["TotalPages"] = pagedVm.TotalPages;
+            ViewData["TotalCount"] = pagedVm.TotalCount;
+
+            return View(pagedVm.Events);
         }
 
         // GET: /Events/Details/5 — public
@@ -44,27 +48,12 @@ namespace golenWeb.Controllers
         [HttpGet]
         public async Task<IActionResult> GetJson(int id)
         {
-            var ev = await _eventService.GetByIdAsync(id);
-            if (ev == null)
+            var dto = await _eventService.GetEventJsonDtoAsync(id);
+            if (dto == null)
             {
                 return NotFound();
             }
-
-            return Json(new
-            {
-                id = ev.Id,
-                title = ev.Title,
-                description = ev.Description,
-                eventDate = ev.EventDate.ToString("yyyy-MM-dd"),
-                formattedDate = ev.EventDate.ToString("MMMM dd, yyyy (ddd)"),
-                startTime = ev.StartTime,
-                endTime = ev.EndTime,
-                location = ev.Location,
-                organizer = ev.Organizer,
-                category = ev.Category,
-                hasImage = ev.ImageData != null && ev.ImageData.Length > 0,
-                imageUrl = ev.ImageData != null && ev.ImageData.Length > 0 ? $"/Events/Image/{ev.Id}" : null
-            });
+            return Json(dto);
         }
 
         // GET: /Events/Create — requires login
@@ -72,15 +61,7 @@ namespace golenWeb.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            return View(new EventModel
-            {
-                EventDate = DateTime.Today,
-                StartTime = "09:00 AM",
-                EndTime = "04:00 PM",
-                Location = "Golden Success College Main Auditorium",
-                Organizer = "Student Affairs Office",
-                Category = "Academic"
-            });
+            return View(_eventService.GetDefaultEventModel());
         }
 
         // POST: /Events/Create — requires login
@@ -89,25 +70,18 @@ namespace golenWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(EventModel ev, IFormFile? imageFile)
         {
-            if (imageFile != null && imageFile.Length > 0)
-            {
-                var (data, contentType, hash, error) = await _fileStorage.ProcessAndStoreImageInDbAsync(imageFile);
-                if (!string.IsNullOrEmpty(error))
-                {
-                    ModelState.AddModelError(string.Empty, error);
-                    return View(ev);
-                }
-                ev.ImageData = data;
-                ev.ImageContentType = contentType;
-                ev.ImageHash = hash;
-            }
-
             if (!ModelState.IsValid)
             {
                 return View(ev);
             }
 
-            await _eventService.CreateAsync(ev);
+            var (success, error) = await _eventService.ProcessAndSaveEventAsync(ev, imageFile, _fileStorage);
+            if (!success)
+            {
+                ModelState.AddModelError(string.Empty, error ?? "Failed to create event");
+                return View(ev);
+            }
+
             TempData["SuccessMessage"] = $"Event '{ev.Title}' has been scheduled successfully!";
             return RedirectToAction(nameof(Index));
         }
@@ -131,38 +105,18 @@ namespace golenWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, EventModel ev, IFormFile? imageFile)
         {
-            if (id != ev.Id) return BadRequest();
-
-            if (imageFile != null && imageFile.Length > 0)
-            {
-                var (data, contentType, hash, error) = await _fileStorage.ProcessAndStoreImageInDbAsync(imageFile);
-                if (!string.IsNullOrEmpty(error))
-                {
-                    ModelState.AddModelError(string.Empty, error);
-                    return View(ev);
-                }
-                ev.ImageData = data;
-                ev.ImageContentType = contentType;
-                ev.ImageHash = hash;
-            }
-            else
-            {
-                var existing = await _eventService.GetByIdAsync(id);
-                if (existing != null)
-                {
-                    ev.ImageData = existing.ImageData;
-                    ev.ImageContentType = existing.ImageContentType;
-                    ev.ImageHash = existing.ImageHash;
-                }
-            }
-
             if (!ModelState.IsValid)
             {
                 return View(ev);
             }
 
-            var updated = await _eventService.UpdateAsync(ev);
-            if (!updated) return NotFound();
+            var (success, error) = await _eventService.ProcessAndUpdateEventAsync(id, ev, imageFile, _fileStorage);
+            if (!success)
+            {
+                if (error == "ID mismatch" || error == "Event not found") return NotFound();
+                ModelState.AddModelError(string.Empty, error ?? "Failed to update event");
+                return View(ev);
+            }
 
             TempData["SuccessMessage"] = $"Event '{ev.Title}' updated successfully!";
             return RedirectToAction(nameof(Index));

@@ -12,6 +12,12 @@
         <meta property="og:url" content="@ViewData["OgUrl"]" />
         <meta property="og:type" content="article" />
     }
+    <script>
+        (function() {
+            var theme = localStorage.getItem('gsc_theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', theme);
+        })();
+    </script>
     <title>@(ViewData["SiteTitle"] ?? ViewData["Title"]) - @(ViewData["CollegeName"] ?? "Golden Success College")</title>
     <script type="importmap"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -226,19 +232,21 @@
         </div>
     }
 
-    <header>
-        <nav class="navbar navbar-expand-lg gsc-navbar py-2">
-            <div class="container">
+    <header style="background-color: #fff; border-bottom: 1px solid var(--cc-slate-200); position: sticky; top: 0; z-index: 1030;" class="shadow-sm">
+        <nav class="navbar navbar-expand-lg py-2">
+            <div class="container-fluid px-4">
                 <!-- Brand Logo & Name -->
-                <a class="navbar-brand d-flex align-items-center gap-3 text-decoration-none" asp-area="" asp-controller="Home" asp-action="Index">
-                    <img src="~/images/logo.png" alt="Golden Success College Logo" style="height:52px; width:52px; object-fit:contain; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));" />
-                    <div class="gsc-brand-text">
-                        <div class="college-name">@(ViewData["CollegeName"] ?? "Golden Success College")</div>
-                        <div class="tagline">@(ViewData["NavTagline"] ?? "Determination &bull; Courage &bull; Hardwork &bull; Isa. 33:6")</div>
+                <a class="navbar-brand d-flex align-items-center gap-2 text-decoration-none" asp-area="" asp-controller="Home" asp-action="Index">
+                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 36px; height: 36px; background-color: var(--cc-green-surface); border: 1px solid var(--cc-green-border);">
+                        <img src="~/images/logo.png" alt="GSC Logo" style="height:26px; width:26px; object-fit:contain;" />
+                    </span>
+                    <div>
+                        <span style="font-size: 0.95rem; font-weight: 800; color: var(--cc-slate-900); display: block; line-height: 1.1;">@(ViewData["CollegeName"] ?? "Golden Success College")</span>
+                        <span style="font-size: 0.65rem; color: var(--cc-slate-500); font-weight: 600; letter-spacing: 0.04em;">CAMPUS EVENTS &amp; BULLETIN SYSTEM</span>
                     </div>
                 </a>
 
-                <button class="navbar-toggler border-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#navbarGSC"
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarGSC"
                         aria-controls="navbarGSC" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -246,18 +254,18 @@
                 <div class="collapse navbar-collapse" id="navbarGSC">
                     <ul class="navbar-nav ms-auto align-items-center gap-1">
                         <li class="nav-item">
-                            <a class="nav-link gsc-link" asp-controller="Home" asp-action="Index">
-                                <i class="bi bi-house-door"></i>Home
+                            <a class="nav-link px-3 py-2 fw-semibold text-secondary rounded" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house-door me-1 text-success"></i>Home
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link gsc-link" asp-controller="Events" asp-action="Index">
-                                <i class="bi bi-calendar-event text-warning"></i>Events Calendar
+                            <a class="nav-link px-3 py-2 fw-semibold text-secondary rounded" asp-controller="Events" asp-action="Index">
+                                <i class="bi bi-calendar-event me-1 text-primary"></i>Events Calendar
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link gsc-link" asp-controller="Bulletins" asp-action="Index">
-                                <i class="bi bi-megaphone text-warning"></i>Bulletin Board
+                            <a class="nav-link px-3 py-2 fw-semibold text-secondary rounded" asp-controller="Bulletins" asp-action="Index">
+                                <i class="bi bi-megaphone me-1 text-warning"></i>Bulletin Board
                             </a>
                         </li>
 
@@ -265,61 +273,85 @@
                         {
                             <!-- Dashboard link for all logged-in users -->
                             <li class="nav-item">
-                                <a class="nav-link gsc-link" asp-controller="Dashboard" asp-action="Index">
-                                    <i class="bi bi-speedometer2 text-warning"></i>Dashboard
+                                <a class="nav-link px-3 py-2 fw-semibold text-secondary rounded" asp-controller="Dashboard" asp-action="Index">
+                                    <i class="bi bi-speedometer2 me-1 text-info"></i>Dashboard
                                 </a>
                             </li>
                             <!-- Customize Site — both roles -->
                             <li class="nav-item">
-                                <a class="nav-link gsc-link" asp-controller="SiteSettings" asp-action="Index">
-                                    <i class="bi bi-palette text-warning"></i>Customize
+                                <a class="nav-link px-3 py-2 fw-semibold text-secondary rounded" asp-controller="SiteSettings" asp-action="Index">
+                                    <i class="bi bi-palette me-1 text-purple" style="color:#9333ea;"></i>Customize
                                 </a>
                             </li>
                             @if (User.IsInRole("Admin"))
                             {
                                 <!-- Admin-only: Manage Users -->
                                 <li class="nav-item">
-                                    <a class="nav-link gsc-link" asp-controller="Account" asp-action="Index">
-                                        <i class="bi bi-people-fill text-warning"></i>Users
+                                    <a class="nav-link px-3 py-2 fw-semibold text-secondary rounded" asp-controller="Account" asp-action="Index">
+                                        <i class="bi bi-people-fill me-1 text-danger"></i>Users
                                     </a>
                                 </li>
                             }
 
-                            <!-- User info + logout -->
-                            <li class="nav-item ms-2">
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="user-info-nav">
-                                        <div class="user-avatar">
-                                            @User.Identity!.Name!.Substring(0, 1).ToUpper()
-                                        </div>
-                                        <div>
-                                            <div style="font-size:0.8rem;">@User.Identity!.Name</div>
-                                            @if (User.IsInRole("Admin"))
-                                            {
-                                                <span class="role-badge-admin">Admin</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="role-badge-user">User</span>
-                                            }
-                                        </div>
-                                    </div>
-                                    <form method="post" asp-controller="Account" asp-action="Logout" class="d-inline">
-                                        <button type="submit" class="btn btn-sm btn-outline-warning fw-bold">
-                                            <i class="bi bi-box-arrow-right me-1"></i>Logout
-                                        </button>
-                                    </form>
-                                </div>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item ms-1">
-                                <a class="btn btn-sm btn-outline-light" asp-controller="Account" asp-action="Login">
-                                    <i class="bi bi-person-circle me-1"></i>Login
+                            <!-- User Dropdown Menu -->
+                            <li class="nav-item dropdown ms-2">
+                                <a class="text-decoration-none d-inline-flex align-items-center gap-2 px-3 py-1 rounded border"
+                                   href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+                                   style="background-color: var(--cc-slate-50); border-color: var(--cc-slate-200) !important; font-size: 0.85rem; color: var(--cc-slate-600);">
+                                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle fw-bold"
+                                          style="width: 28px; height: 28px; background-color: var(--cc-blue-surface); color: var(--cc-blue-text); border: 1px solid var(--cc-blue-border); font-size: 0.80rem;">
+                                        @User.Identity!.Name!.Substring(0, 1).ToUpper()
+                                    </span>
+                                    <span class="fw-bold" style="color: var(--cc-slate-900);">@User.Identity!.Name</span>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <span class="pill-cc-orange ms-1">ADMIN</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="pill-cc-blue ms-1">USER</span>
+                                    }
+                                    <i class="bi bi-chevron-down ms-1" style="font-size: 0.68rem; color: var(--cc-slate-400);"></i>
                                 </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2"
+                                    aria-labelledby="userMenu" style="min-width: 240px; border-radius: 12px; overflow: hidden;">
+                                    <li>
+                                        <div class="px-3 py-2 bg-light">
+                                            <div class="cc-section-label mb-1">Signed in as</div>
+                                            <div class="fw-bold" style="font-size: 0.85rem; color: var(--cc-slate-900);">@User.Identity!.Name</div>
+                                        </div>
+                                    </li>
+                                    <li><hr class="dropdown-divider my-0" style="border-color: var(--cc-slate-100);"></li>
+                                    <li>
+                                        <a class="dropdown-item py-2 d-flex align-items-center gap-2 small" asp-controller="Dashboard" asp-action="Index">
+                                            <i class="bi bi-speedometer2 text-muted"></i> Dashboard Overview
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-2 d-flex align-items-center gap-2 small" asp-controller="SiteSettings" asp-action="Index">
+                                            <i class="bi bi-palette text-muted"></i> Customize Website
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider my-0" style="border-color: var(--cc-slate-100);"></li>
+                                    <li>
+                                        <!-- Sign out is a POST form with token per design-system.md -->
+                                        <form method="post" asp-controller="Account" asp-action="Logout" class="px-2 py-2">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-soft-danger w-100 justify-content-center py-2">
+                                                <i class="bi bi-box-arrow-right"></i> Sign out
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
                             </li>
                         }
+                        <!-- Light/Dark Theme Toggle Button -->
+                        <li class="nav-item ms-2">
+                            <button class="btn btn-soft-secondary px-3 py-1 d-flex align-items-center gap-2" id="themeToggleBtn" onclick="toggleTheme()" type="button" title="Toggle Light/Dark Theme" style="height: 38px;">
+                                <i class="bi bi-moon-stars-fill text-warning" id="themeIcon"></i>
+                                <span class="d-none d-xl-inline small fw-bold" id="themeText">Dark</span>
+                            </button>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -347,13 +379,13 @@
         </main>
     </div>
 
-    <footer class="gsc-footer mt-5 py-4">
+    <footer class="mt-5 py-4 border-top" style="background-color: #ffffff; border-color: var(--cc-slate-200) !important;">
         <div class="container text-center">
             <div class="mb-2">
-                <img src="~/images/logo.png" alt="GSC Logo" style="height:40px; opacity:0.85;" />
+                <img src="~/images/logo.png" alt="GSC Logo" style="height:36px; opacity:0.85;" />
             </div>
-            <p class="mb-1 fw-bold" style="color: #f0c040;">@(ViewData["CollegeName"] ?? "Golden Success College")</p>
-            <p class="small mb-0 text-white-50">&copy; @DateTime.Now.Year @(ViewData["FooterText"] ?? "Golden Success College • All Rights Reserved") &bull; <em>Isa. 33:6</em></p>
+            <p class="mb-1 fw-bold" style="color: var(--cc-slate-900);">@(ViewData["CollegeName"] ?? "Golden Success College")</p>
+            <p class="small mb-0 text-muted">&copy; @DateTime.Now.Year @(ViewData["FooterText"] ?? "Golden Success College • All Rights Reserved") &bull; <em>Isa. 33:6</em></p>
         </div>
     </footer>
 
@@ -367,89 +399,131 @@
             if (t) t.remove();
         }, 4000);
     </script>
-    <!-- GLOBAL EVENT DETAILS MODAL -->
+
+    <!-- GLOBAL EVENT DETAILS MODAL (design-system.md aligned) -->
     <div class="modal fade" id="gscEventModal" tabindex="-1" aria-labelledby="gscEventModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-                <div class="modal-header bg-success text-white border-0 py-3">
-                    <h5 class="modal-title fw-bold" id="gscEventModalLabel">
-                        <i class="bi bi-calendar-event me-2"></i><span id="evtModalCategory" class="badge bg-warning text-dark me-2">Category</span><span id="evtModalTitle">Event Title</span>
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div id="evtModalImageContainer" class="mb-3 text-center d-none">
-                        <img id="evtModalImage" src="" alt="Event" class="img-fluid rounded-3 shadow-sm w-100" style="max-height:350px; object-fit:cover;" />
+            <div class="modal-content border-0 shadow rounded-3 overflow-hidden">
+                <div class="modal-header border-0 pb-0 px-4 pt-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 34px; height: 34px; background-color: var(--cc-blue-surface);">
+                            <i class="bi bi-calendar-event" style="color: var(--cc-blue-text); font-size: 0.95rem;"></i>
+                        </div>
+                        <div>
+                            <span id="evtModalCategory" class="pill-cc-blue me-2">Category</span>
+                            <h6 class="fw-bold mb-0 d-inline" id="evtModalTitle" style="color: var(--cc-slate-900); font-size: 1.05rem;">Event Title</h6>
+                        </div>
                     </div>
-                    <div class="row g-2 bg-light p-3 rounded-3 mb-3 border small">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4 py-3">
+                    <div id="evtModalImageContainer" class="mb-3 text-center d-none">
+                        <img id="evtModalImage" src="" alt="Event" class="img-fluid rounded-3 shadow-sm w-100" style="max-height:300px; object-fit:cover;" />
+                    </div>
+                    <div class="row g-2 p-3 rounded-3 mb-3 border small" style="background-color: var(--cc-slate-50); border-color: var(--cc-slate-200) !important;">
                         <div class="col-md-6">
-                            <i class="bi bi-calendar3 text-success me-1"></i><strong>Date:</strong> <span id="evtModalDate">---</span>
+                            <i class="bi bi-calendar3 text-primary me-1"></i><strong>Date:</strong> <span id="evtModalDate">---</span>
                         </div>
                         <div class="col-md-6">
-                            <i class="bi bi-clock text-primary me-1"></i><strong>Time:</strong> <span id="evtModalTime">---</span>
+                            <i class="bi bi-clock text-success me-1"></i><strong>Time:</strong> <span id="evtModalTime">---</span>
                         </div>
                         <div class="col-md-6">
                             <i class="bi bi-geo-alt-fill text-danger me-1"></i><strong>Venue:</strong> <span id="evtModalLocation">---</span>
                         </div>
                         <div class="col-md-6">
-                            <i class="bi bi-person-badge text-dark me-1"></i><strong>Organizer:</strong> <span id="evtModalOrganizer">---</span>
+                            <i class="bi bi-person-badge text-secondary me-1"></i><strong>Organizer:</strong> <span id="evtModalOrganizer">---</span>
                         </div>
                     </div>
-                    <h6 class="fw-bold text-success"><i class="bi bi-info-circle me-1"></i>Description & Info:</h6>
-                    <p id="evtModalDescription" class="text-secondary" style="white-space: pre-line;">---</p>
+                    <p class="cc-section-label mb-2"><i class="bi bi-info-circle me-1"></i> Description &amp; Details</p>
+                    <p id="evtModalDescription" style="white-space: pre-line; color: var(--cc-slate-600); font-size: 0.88rem;">---</p>
                 </div>
-                <div class="modal-footer bg-light border-0 d-flex justify-content-between">
+                <div class="modal-footer border-0 px-4 pb-4 d-flex justify-content-between">
                     <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-primary fw-bold rounded-pill" id="evtModalFbBtn">
-                            <i class="bi bi-facebook me-1"></i> Share to FB
+                        <button type="button" class="btn btn-soft-primary" id="evtModalFbBtn">
+                            <i class="bi bi-facebook"></i> Share to FB
                         </button>
-                        <button type="button" class="btn btn-outline-success fw-bold rounded-pill" id="evtModalCopyBtn">
-                            <i class="bi bi-link-45deg me-1"></i> Copy Link
+                        <button type="button" class="btn btn-soft-success" id="evtModalCopyBtn">
+                            <i class="bi bi-link-45deg"></i> Copy Link
                         </button>
                     </div>
-                    <a id="evtModalFullLink" href="#" class="btn btn-secondary rounded-pill">View Full Page</a>
+                    <a id="evtModalFullLink" href="#" class="btn btn-soft-secondary">View Full Details</a>
                 </div>
+                <div class="cc-gradient-bar-blue"></div>
             </div>
         </div>
     </div>
 
-    <!-- GLOBAL BULLETIN DETAILS MODAL -->
+    <!-- GLOBAL BULLETIN DETAILS MODAL (design-system.md aligned) -->
     <div class="modal fade" id="gscBulletinModal" tabindex="-1" aria-labelledby="gscBulletinModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-                <div class="modal-header bg-dark text-white border-0 py-3">
-                    <h5 class="modal-title fw-bold" id="gscBulletinModalLabel">
-                        <i class="bi bi-megaphone me-2 text-warning"></i><span id="bulModalPriority" class="badge bg-danger me-2">Priority</span><span id="bulModalTitle">Bulletin Title</span>
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div id="bulModalImageContainer" class="mb-3 text-center d-none">
-                        <img id="bulModalImage" src="" alt="Bulletin" class="img-fluid rounded-3 shadow-sm w-100" style="max-height:350px; object-fit:cover;" />
+            <div class="modal-content border-0 shadow rounded-3 overflow-hidden">
+                <div class="modal-header border-0 pb-0 px-4 pt-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 34px; height: 34px; background-color: var(--cc-orange-surface);">
+                            <i class="bi bi-megaphone-fill" style="color: var(--cc-orange-text); font-size: 0.95rem;"></i>
+                        </div>
+                        <div>
+                            <span id="bulModalPriority" class="pill-cc-red me-2">Priority</span>
+                            <h6 class="fw-bold mb-0 d-inline" id="bulModalTitle" style="color: var(--cc-slate-900); font-size: 1.05rem;">Bulletin Title</h6>
+                        </div>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-3 mb-3 border small">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4 py-3">
+                    <div id="bulModalImageContainer" class="mb-3 text-center d-none">
+                        <img id="bulModalImage" src="" alt="Bulletin" class="img-fluid rounded-3 shadow-sm w-100" style="max-height:300px; object-fit:cover;" />
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center p-3 rounded-3 mb-3 border small" style="background-color: var(--cc-slate-50); border-color: var(--cc-slate-200) !important;">
                         <div><i class="bi bi-tag text-warning me-1"></i>Category: <strong id="bulModalCategory">---</strong></div>
                         <div><i class="bi bi-person-fill text-success me-1"></i>Author: <strong id="bulModalAuthor">---</strong></div>
                         <div><i class="bi bi-calendar-event me-1"></i>Date: <strong id="bulModalDate">---</strong></div>
                     </div>
-                    <h6 class="fw-bold text-dark"><i class="bi bi-card-text me-1 text-warning"></i>Notice Content:</h6>
-                    <p id="bulModalContent" class="text-secondary" style="white-space: pre-line;">---</p>
+                    <p class="cc-section-label mb-2"><i class="bi bi-card-text me-1"></i> Notice Content</p>
+                    <p id="bulModalContent" style="white-space: pre-line; color: var(--cc-slate-600); font-size: 0.88rem;">---</p>
                 </div>
-                <div class="modal-footer bg-light border-0 d-flex justify-content-between">
+                <div class="modal-footer border-0 px-4 pb-4 d-flex justify-content-between">
                     <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-primary fw-bold rounded-pill" id="bulModalFbBtn">
-                            <i class="bi bi-facebook me-1"></i> Share to FB
+                        <button type="button" class="btn btn-soft-primary" id="bulModalFbBtn">
+                            <i class="bi bi-facebook"></i> Share to FB
                         </button>
-                        <button type="button" class="btn btn-outline-success fw-bold rounded-pill" id="bulModalCopyBtn">
-                            <i class="bi bi-link-45deg me-1"></i> Copy Link
+                        <button type="button" class="btn btn-soft-success" id="bulModalCopyBtn">
+                            <i class="bi bi-link-45deg"></i> Copy Link
                         </button>
                     </div>
-                    <a id="bulModalFullLink" href="#" class="btn btn-secondary rounded-pill">View Full Page</a>
+                    <a id="bulModalFullLink" href="#" class="btn btn-soft-secondary">View Full Notice</a>
                 </div>
+                <div class="cc-gradient-bar-orange"></div>
             </div>
         </div>
     </div>
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        function updateThemeUI(theme) {
+            const icon = document.getElementById('themeIcon');
+            const text = document.getElementById('themeText');
+            if (theme === 'dark') {
+                if (icon) icon.className = 'bi bi-sun-fill text-warning';
+                if (text) text.textContent = 'Light';
+            } else {
+                if (icon) icon.className = 'bi bi-moon-stars-fill text-warning';
+                if (text) text.textContent = 'Dark';
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'dark' : 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-bs-theme', newTheme);
+            localStorage.setItem('gsc_theme', newTheme);
+            updateThemeUI(newTheme);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const theme = localStorage.getItem('gsc_theme') || 'light';
+            updateThemeUI(theme);
+        });
+    </script>
 </body>
 </html>

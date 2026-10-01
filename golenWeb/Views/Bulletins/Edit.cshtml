@@ -6,85 +6,122 @@
 
 <div class="row justify-content-center">
     <div class="col-lg-8">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-warning text-dark p-3">
-                <h4 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>Edit Bulletin Notice</h4>
-                <small>Golden Success College Official Bulletin Board</small>
-            </div>
-            <div class="card-body p-4">
+        <div class="card cc-card border-0 shadow-sm">
+            <div class="card-body px-4 py-3">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width: 40px; height: 40px; background-color: var(--cc-orange-surface);">
+                        <i class="bi bi-pencil-fill" style="color: var(--cc-orange-text); font-size: 1rem;"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0" style="color: var(--cc-slate-900);">Edit Bulletin Notice #@Model.BulletinId</h5>
+                        <p class="cc-section-label mb-0" style="font-size: 0.68rem;">Golden Success College · Bulletin Board</p>
+                    </div>
+                </div>
+
+                <hr class="my-3" style="border-color: var(--cc-slate-100);" />
+
                 <form asp-action="Edit" method="post" enctype="multipart/form-data">
                     @Html.AntiForgeryToken()
-                    <input type="hidden" asp-for="Id" />
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-bold"></div>
+                    <input type="hidden" asp-for="BulletinId" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-bold small"></div>
 
-                    <div class="mb-3">
-                        <label asp-for="Title" class="form-label fw-semibold">Notice Title</label>
-                        <input asp-for="Title" class="form-control form-control-lg" placeholder="e.g. Midterm Examination Schedule Announcement" required />
-                        <span asp-validation-for="Title" class="text-danger"></span>
+                    <!-- Title -->
+                    <div class="form-floating mb-3">
+                        <input asp-for="Title" class="form-control cc-input" placeholder="Notice Title" required />
+                        <label asp-for="Title" style="font-size: 0.82rem; color: var(--cc-slate-500);">
+                            <i class="bi bi-card-heading me-1"></i> Notice Title
+                        </label>
+                        <span asp-validation-for="Title" class="text-danger small"></span>
                     </div>
 
-                    <!-- Bulletin Photo Upload (Database Stored, Max 2MB) -->
+                    <!-- Photo Upload -->
                     <div class="mb-3">
-                        <label class="form-label fw-semibold"><i class="bi bi-database-fill-check text-success me-1"></i>Notice Attachment Photo</label>
-                        @if (Model.ImageData != null)
+                        <label class="form-label text-uppercase fw-semibold" style="font-size: 0.72rem; color: var(--cc-slate-500); letter-spacing: 0.04em;">
+                            <i class="bi bi-image me-1"></i> Notice Attachment Photo
+                        </label>
+                        @if (Model.ImageData != null && Model.ImageData.Length > 0)
                         {
                             <div class="mb-2">
-                                <img src="/Bulletins/Image/@Model.Id" alt="Current Bulletin Image" class="img-fluid rounded-3 shadow-sm" style="max-height: 180px; width: 100%; object-fit: cover; border: 2px solid #0b5e28;" />
-                                <div class="small text-muted mt-1"><i class="bi bi-check-circle-fill text-success me-1"></i>Current photo loaded directly from database table.</div>
+                                <img src="/Bulletins/Image/@Model.BulletinId" alt="Current Photo" class="img-fluid rounded-3 shadow-sm" style="max-height: 180px; width: 100%; object-fit: cover; border: 1.5px solid var(--cc-orange-border);" />
+                                <div class="small text-muted mt-1"><i class="bi bi-check-circle-fill text-success me-1"></i>Current photo loaded from database.</div>
                             </div>
                         }
-                        <input type="file" name="imageFile" accept="image/*" class="form-control" id="bulletinImgInput" onchange="previewBulletinImg(this)" />
-                        <div class="form-text text-muted small"><i class="bi bi-info-circle me-1"></i>Upload a new image to replace the current database photo. <strong>Maximum photo size limit: 2 MB</strong>.</div>
+                        <input type="file" name="imageFile" accept="image/*" class="form-control cc-input" id="bulletinImgInput" onchange="previewBulletinImg(this)" />
+                        <div class="form-text text-muted" style="font-size: 0.75rem;">
+                            <i class="bi bi-info-circle me-1"></i>Upload a new image to replace current photo (Max 2 MB).
+                        </div>
                         <div class="mt-2 text-center d-none" id="bulletinImgPreviewContainer">
-                            <img id="bulletinImgPreview" src="#" alt="New Notice Preview" class="img-fluid rounded-3 shadow-sm" style="max-height: 200px; object-fit: cover; border: 2px dashed #0b5e28;" />
+                            <img id="bulletinImgPreview" src="#" alt="New Notice Preview" class="img-fluid rounded-3 shadow-sm" style="max-height: 200px; object-fit: cover; border: 1.5px dashed var(--cc-orange-border);" />
                         </div>
                     </div>
 
-                    <div class="row mb-3">
+                    <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label asp-for="Category" class="form-label fw-semibold">Category</label>
-                            <select asp-for="Category" class="form-select">
-                                <option value="Academic Notice">Academic Notice</option>
-                                <option value="General Notice">General Notice</option>
-                                <option value="Urgent Notice">Urgent Notice</option>
-                                <option value="Student Activity">Student Activity</option>
-                                <option value="Sports">Sports</option>
-                            </select>
+                            <div class="form-floating">
+                                <select asp-for="Category" class="form-select cc-input" id="bulletinCategorySelect">
+                                    <option value="Academic Notice">Academic Notice</option>
+                                    <option value="General Notice">General Notice</option>
+                                    <option value="Urgent Notice">Urgent Notice</option>
+                                    <option value="Student Activity">Student Activity</option>
+                                    <option value="Sports">Sports</option>
+                                </select>
+                                <label for="bulletinCategorySelect" style="font-size: 0.82rem; color: var(--cc-slate-500);">
+                                    <i class="bi bi-tag me-1"></i> Category
+                                </label>
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <label asp-for="Priority" class="form-label fw-semibold">Priority Level</label>
-                            <select asp-for="Priority" class="form-select">
-                                <option value="Normal">Normal Priority</option>
-                                <option value="High">High Priority (Urgent)</option>
-                                <option value="Low">Low Priority</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label asp-for="Author" class="form-label fw-semibold">Author / Office</label>
-                            <input asp-for="Author" class="form-control" placeholder="e.g. Office of Student Affairs" required />
-                        </div>
-                        <div class="col-md-6">
-                            <label asp-for="PublishDate" class="form-label fw-semibold">Publish Date</label>
-                            <input asp-for="PublishDate" type="date" class="form-control" required />
+                            <div class="form-floating">
+                                <select asp-for="Priority" class="form-select cc-input" id="bulletinPrioritySelect">
+                                    <option value="Normal">Normal Priority</option>
+                                    <option value="High">High Priority (Urgent)</option>
+                                    <option value="Low">Low Priority</option>
+                                </select>
+                                <label for="bulletinPrioritySelect" style="font-size: 0.82rem; color: var(--cc-slate-500);">
+                                    <i class="bi bi-exclamation-triangle me-1"></i> Priority Level
+                                </label>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="mb-4">
-                        <label asp-for="Content" class="form-label fw-semibold">Announcement Content</label>
-                        <textarea asp-for="Content" class="form-control" rows="6" placeholder="Enter complete announcement details..." required></textarea>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="Author" class="form-control cc-input" placeholder="Author" required />
+                                <label asp-for="Author" style="font-size: 0.82rem; color: var(--cc-slate-500);">
+                                    <i class="bi bi-person-badge me-1"></i> Author / Office
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="PublishDate" type="date" class="form-control cc-input" placeholder="Publish Date" required />
+                                <label asp-for="PublishDate" style="font-size: 0.82rem; color: var(--cc-slate-500);">
+                                    <i class="bi bi-calendar3 me-1"></i> Publish Date
+                                </label>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="d-flex justify-content-between pt-2">
-                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
-                        <button type="submit" class="btn btn-warning px-4 fw-bold">
-                            <i class="bi bi-floppy me-1"></i>Save Changes
+                    <div class="form-floating mb-4">
+                        <textarea asp-for="Content" class="form-control cc-input" placeholder="Announcement Content" style="height: 140px;" required></textarea>
+                        <label asp-for="Content" style="font-size: 0.82rem; color: var(--cc-slate-500);">
+                            <i class="bi bi-card-text me-1"></i> Announcement Content &amp; Details
+                        </label>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="border-color: var(--cc-slate-100) !important;">
+                        <a asp-action="Index" class="btn btn-soft-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-soft-primary">
+                            <i class="bi bi-floppy2-fill"></i> Save Changes
                         </button>
                     </div>
                 </form>
             </div>
+            <div class="cc-gradient-bar-orange"></div>
         </div>
     </div>
 </div>
@@ -93,7 +130,7 @@
     function previewBulletinImg(input) {
         if (input.files && input.files[0]) {
             var file = input.files[0];
-            var maxBytes = 2 * 1024 * 1024; // 2 MB
+            var maxBytes = 2 * 1024 * 1024;
             if (file.size > maxBytes) {
                 alert('Photo file size exceeds the 2 MB maximum limit! Selected file is ' + (file.size / (1024 * 1024)).toFixed(2) + ' MB. Please select a smaller photo.');
                 input.value = '';
@@ -111,3 +148,4 @@
         }
     }
 </script>
+

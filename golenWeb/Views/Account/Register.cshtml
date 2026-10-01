@@ -1,5 +1,6 @@
 @{
-    ViewData["Title"] = "Register";
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Portal Registration";
 }
 
 <style>
@@ -119,34 +120,34 @@
 
             <form method="post" asp-action="Register">
                 <div class="mb-3">
-                    <label class="form-label fw-bold text-dark small mb-1"><i class="bi bi-person-fill text-success me-1"></i>Username</label>
+                    <label class="form-label fw-bold text-secondary small mb-1"><i class="bi bi-person-fill text-success me-1"></i>Username</label>
                     <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-person"></i></span>
-                        <input name="username" class="form-control form-control-lg" placeholder="Choose a username" required autofocus style="font-size:0.95rem;" />
+                        <span class="input-group-text bg-light text-secondary border-0"><i class="bi bi-person"></i></span>
+                        <input name="username" class="form-control cc-input" placeholder="Choose a username" required autofocus />
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-bold text-dark small mb-1"><i class="bi bi-envelope-fill text-success me-1"></i>Email Address</label>
+                    <label class="form-label fw-bold text-secondary small mb-1"><i class="bi bi-envelope-fill text-success me-1"></i>Email Address</label>
                     <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                        <input name="email" type="email" class="form-control form-control-lg" placeholder="student@goldensuccess.edu" required style="font-size:0.95rem;" />
+                        <span class="input-group-text bg-light text-secondary border-0"><i class="bi bi-envelope"></i></span>
+                        <input name="email" type="email" class="form-control cc-input" placeholder="student@goldensuccess.edu" required />
                     </div>
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label fw-bold text-dark small mb-1"><i class="bi bi-lock-fill text-success me-1"></i>Password</label>
+                    <label class="form-label fw-bold text-secondary small mb-1"><i class="bi bi-lock-fill text-success me-1"></i>Password</label>
                     <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-key"></i></span>
-                        <input name="password" type="password" id="regPasswordInput" class="form-control form-control-lg" placeholder="Create a password" required style="font-size:0.95rem;" />
-                        <button class="btn btn-outline-secondary" type="button" id="regTogglePasswordBtn" title="Toggle password visibility">
+                        <span class="input-group-text bg-light text-secondary border-0"><i class="bi bi-key"></i></span>
+                        <input name="password" type="password" id="regPasswordInput" class="form-control cc-input" placeholder="Create a password" required />
+                        <button class="btn btn-soft-secondary" type="button" id="regTogglePasswordBtn" title="Toggle password visibility">
                             <i class="bi bi-eye" id="regToggleIcon"></i>
                         </button>
                     </div>
                 </div>
 
                 <div class="d-grid mb-3">
-                    <button type="submit" class="btn btn-gsc-primary">
+                    <button type="submit" class="btn btn-soft-primary py-2 fw-bold fs-6">
                         <i class="bi bi-person-check-fill me-2"></i>Create Account
                     </button>
                 </div>
@@ -154,7 +155,7 @@
 
             <div class="auth-footer">
                 <span class="text-muted">Already registered?</span>
-                <a asp-action="Login" class="ms-1">Sign In <i class="bi bi-arrow-right-short"></i></a>
+                <a asp-action="Login" class="ms-1 text-success fw-bold">Sign In <i class="bi bi-arrow-right-short"></i></a>
             </div>
         </div>
     </div>

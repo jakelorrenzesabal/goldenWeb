@@ -41,11 +41,15 @@ namespace golenWeb.Data
                 await using var conn = _factory.CreateConnection();
                 await conn.OpenAsync();
 
+                // 0. Remove legacy Products table if present & migrate column names
+                await DropProductsTableIfExistAsync(conn);
+                await RenameLegacyIdColumnsIfExistAsync(conn, isSqlite);
+
                 // 1. Create Users Table
                 string createUsersTableSql = isSqlite
                     ? @"
 CREATE TABLE IF NOT EXISTS Users (
-  Id INTEGER PRIMARY KEY AUTOINCREMENT,
+  UserId INTEGER PRIMARY KEY AUTOINCREMENT,
   Username TEXT NOT NULL UNIQUE,
   Email TEXT,
   PasswordHash TEXT NOT NULL,
@@ -55,13 +59,13 @@ CREATE TABLE IF NOT EXISTS Users (
 "
                     : @"
 CREATE TABLE IF NOT EXISTS `Users` (
-  `Id` INT NOT NULL AUTO_INCREMENT,
+  `UserId` INT NOT NULL AUTO_INCREMENT,
   `Username` VARCHAR(100) NOT NULL,
   `Email` VARCHAR(200) NULL,
   `PasswordHash` VARCHAR(512) NOT NULL,
   `Role` VARCHAR(20) NOT NULL DEFAULT 'User',
   `CreatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`Id`),
+  PRIMARY KEY (`UserId`),
   UNIQUE KEY `UX_Users_Username` (`Username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ";
@@ -71,11 +75,11 @@ CREATE TABLE IF NOT EXISTS `Users` (
                 // Safe migration: Add Role column if it doesn't exist yet
                 await AddRoleColumnIfMissingAsync(conn, isSqlite);
 
-                // 2. Create Events Table
+                // 2. Create Events Table (with Foreign Key relationship to Users)
                 string createEventsTableSql = isSqlite
                     ? @"
 CREATE TABLE IF NOT EXISTS Events (
-  Id INTEGER PRIMARY KEY AUTOINCREMENT,
+  EventId INTEGER PRIMARY KEY AUTOINCREMENT,
   Title TEXT NOT NULL,
   Description TEXT,
   EventDate TEXT NOT NULL,
@@ -88,12 +92,14 @@ CREATE TABLE IF NOT EXISTS Events (
   ImageData BLOB,
   ImageContentType TEXT,
   ImageHash TEXT,
-  CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+  CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  CreatedByUserId INTEGER,
+  FOREIGN KEY (CreatedByUserId) REFERENCES Users(UserId) ON DELETE SET NULL
 );
 "
                     : @"
 CREATE TABLE IF NOT EXISTS `Events` (
-  `Id` INT NOT NULL AUTO_INCREMENT,
+  `EventId` INT NOT NULL AUTO_INCREMENT,
   `Title` VARCHAR(200) NOT NULL,
   `Description` TEXT NULL,
   `EventDate` VARCHAR(50) NOT NULL,
@@ -107,17 +113,20 @@ CREATE TABLE IF NOT EXISTS `Events` (
   `ImageContentType` VARCHAR(100) NULL,
   `ImageHash` VARCHAR(64) NULL,
   `CreatedAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`Id`)
+  `CreatedByUserId` INT NULL,
+  PRIMARY KEY (`EventId`),
+  KEY `IX_Events_CreatedByUserId` (`CreatedByUserId`),
+  CONSTRAINT `FK_Events_Users_CreatedByUserId` FOREIGN KEY (`CreatedByUserId`) REFERENCES `Users` (`UserId`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ";
                 await ExecuteSqlAsync(conn, createEventsTableSql);
-                _logger.LogInformation("Events table verified.");
+                _logger.LogInformation("Events table verified with foreign key relationship to Users.");
 
-                // 3. Create Bulletins Table
+                // 3. Create Bulletins Table (with Foreign Key relationship to Users)
                 string createBulletinsTableSql = isSqlite
                     ? @"
 CREATE TABLE IF NOT EXISTS Bulletins (
-  Id INTEGER PRIMARY KEY AUTOINCREMENT,
+  BulletinId INTEGER PRIMARY KEY AUTOINCREMENT,
   Title TEXT NOT NULL,
   Content TEXT NOT NULL,
   Category TEXT,
@@ -126,12 +135,14 @@ CREATE TABLE IF NOT EXISTS Bulletins (
   Author TEXT,
   ImageData BLOB,
   ImageContentType TEXT,
-  ImageHash TEXT
+  ImageHash TEXT,
+  CreatedByUserId INTEGER,
+  FOREIGN KEY (CreatedByUserId) REFERENCES Users(UserId) ON DELETE SET NULL
 );
 "
                     : @"
 CREATE TABLE IF NOT EXISTS `Bulletins` (
-  `Id` INT NOT NULL AUTO_INCREMENT,
+  `BulletinId` INT NOT NULL AUTO_INCREMENT,
   `Title` VARCHAR(200) NOT NULL,
   `Content` TEXT NOT NULL,
   `Category` VARCHAR(100) NULL,
@@ -141,30 +152,34 @@ CREATE TABLE IF NOT EXISTS `Bulletins` (
   `ImageData` LONGBLOB NULL,
   `ImageContentType` VARCHAR(100) NULL,
   `ImageHash` VARCHAR(64) NULL,
-  PRIMARY KEY (`Id`)
+  `CreatedByUserId` INT NULL,
+  PRIMARY KEY (`BulletinId`),
+  KEY `IX_Bulletins_CreatedByUserId` (`CreatedByUserId`),
+  CONSTRAINT `FK_Bulletins_Users_CreatedByUserId` FOREIGN KEY (`CreatedByUserId`) REFERENCES `Users` (`UserId`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ";
                 await ExecuteSqlAsync(conn, createBulletinsTableSql);
-                _logger.LogInformation("Bulletins table verified.");
+                _logger.LogInformation("Bulletins table verified with foreign key relationship to Users.");
 
-                // Migration: Ensure image columns exist in Events & Bulletins tables
+                // Migration: Ensure image & relationship columns exist in Events & Bulletins tables
                 await AddImageColumnsIfMissingAsync(conn, isSqlite);
+                await AddCreatedByUserIdColumnIfMissingAsync(conn, isSqlite);
 
                 // 4. Create SiteSettings Table
                 string createSiteSettingsTableSql = isSqlite
                     ? @"
 CREATE TABLE IF NOT EXISTS SiteSettings (
-  Id INTEGER PRIMARY KEY AUTOINCREMENT,
+  SiteSettingId INTEGER PRIMARY KEY AUTOINCREMENT,
   Key TEXT NOT NULL UNIQUE,
   Value TEXT NOT NULL DEFAULT ''
 );
 "
                     : @"
 CREATE TABLE IF NOT EXISTS `SiteSettings` (
-  `Id` INT NOT NULL AUTO_INCREMENT,
+  `SiteSettingId` INT NOT NULL AUTO_INCREMENT,
   `Key` VARCHAR(100) NOT NULL,
   `Value` TEXT NULL,
-  PRIMARY KEY (`Id`),
+  PRIMARY KEY (`SiteSettingId`),
   UNIQUE KEY `UX_SiteSettings_Key` (`Key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ";
@@ -187,6 +202,87 @@ CREATE TABLE IF NOT EXISTS `SiteSettings` (
         }
 
         /// <summary>
+        /// Safely migrates existing database tables with generic 'Id' columns to specific primary key column names (UserId, EventId, BulletinId, SiteSettingId).
+        /// </summary>
+        private async Task RenameLegacyIdColumnsIfExistAsync(DbConnection conn, bool isSqlite)
+        {
+            var tablesToRename = new (string TableName, string NewColName)[]
+            {
+                ("Users", "UserId"),
+                ("Events", "EventId"),
+                ("Bulletins", "BulletinId"),
+                ("SiteSettings", "SiteSettingId")
+            };
+
+            foreach (var (tableName, newColName) in tablesToRename)
+            {
+                try
+                {
+                    if (isSqlite)
+                    {
+                        await using var checkCmd = conn.CreateCommand();
+                        checkCmd.CommandText = $"PRAGMA table_info({tableName})";
+                        bool hasOldId = false;
+                        bool hasNewId = false;
+                        await using (var reader = await checkCmd.ExecuteReaderAsync())
+                        {
+                            while (await reader.ReadAsync())
+                            {
+                                var colName = reader.GetString(1);
+                                if (colName.Equals("Id", StringComparison.OrdinalIgnoreCase)) hasOldId = true;
+                                if (colName.Equals(newColName, StringComparison.OrdinalIgnoreCase)) hasNewId = true;
+                            }
+                        }
+
+                        if (hasOldId && !hasNewId)
+                        {
+                            await ExecuteSqlAsync(conn, $"ALTER TABLE {tableName} RENAME COLUMN Id TO {newColName};");
+                            _logger.LogInformation("Migrated SQLite table '{tableName}': renamed Id column to {newColName}.", tableName, newColName);
+                        }
+                    }
+                    else
+                    {
+                        // MySQL migration
+                        await using var checkOldCmd = conn.CreateCommand();
+                        checkOldCmd.CommandText = $"SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{tableName}' AND COLUMN_NAME = 'Id'";
+                        var oldColCount = Convert.ToInt32(await checkOldCmd.ExecuteScalarAsync());
+
+                        await using var checkNewCmd = conn.CreateCommand();
+                        checkNewCmd.CommandText = $"SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{tableName}' AND COLUMN_NAME = '{newColName}'";
+                        var newColCount = Convert.ToInt32(await checkNewCmd.ExecuteScalarAsync());
+
+                        if (oldColCount > 0 && newColCount == 0)
+                        {
+                            await ExecuteSqlAsync(conn, $"ALTER TABLE `{tableName}` CHANGE `Id` `{newColName}` INT NOT NULL AUTO_INCREMENT;");
+                            _logger.LogInformation("Migrated MySQL table '{tableName}': renamed Id column to {newColName}.", tableName, newColName);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Could not check or rename legacy Id column in table {tableName}.", tableName);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Drops legacy Products / products table if present in the database.
+        /// </summary>
+        private async Task DropProductsTableIfExistAsync(DbConnection conn)
+        {
+            try
+            {
+                await ExecuteSqlAsync(conn, "DROP TABLE IF EXISTS Products;");
+                await ExecuteSqlAsync(conn, "DROP TABLE IF EXISTS products;");
+                _logger.LogInformation("Cleaned legacy Products table from database.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Could not drop legacy Products table.");
+            }
+        }
+
+        /// <summary>
         /// Safe migration: adds Role column to existing Users table if it doesn't exist.
         /// </summary>
         private async Task AddRoleColumnIfMissingAsync(DbConnection conn, bool isSqlite)
@@ -195,7 +291,6 @@ CREATE TABLE IF NOT EXISTS `SiteSettings` (
             {
                 if (isSqlite)
                 {
-                    // SQLite: check PRAGMA table_info
                     await using var checkCmd = conn.CreateCommand();
                     checkCmd.CommandText = "PRAGMA table_info(Users)";
                     bool hasRole = false;
@@ -216,7 +311,6 @@ CREATE TABLE IF NOT EXISTS `SiteSettings` (
                 }
                 else
                 {
-                    // MySQL: use information_schema to check
                     await using var checkCmd = conn.CreateCommand();
                     checkCmd.CommandText = @"
 SELECT COUNT(*) FROM information_schema.COLUMNS 
@@ -232,6 +326,87 @@ WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Users' AND COLUMN_NAME = 'Role
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Could not check/add Role column — it may already exist.");
+            }
+        }
+
+        private async Task AddCreatedByUserIdColumnIfMissingAsync(DbConnection conn, bool isSqlite)
+        {
+            try
+            {
+                if (isSqlite)
+                {
+                    // Events
+                    await using (var cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = "PRAGMA table_info(Events)";
+                        bool hasCol = false;
+                        await using var reader = await cmd.ExecuteReaderAsync();
+                        while (await reader.ReadAsync())
+                        {
+                            if (reader.GetString(1).Equals("CreatedByUserId", StringComparison.OrdinalIgnoreCase))
+                            {
+                                hasCol = true;
+                                break;
+                            }
+                        }
+                        if (!hasCol)
+                        {
+                            await ExecuteSqlAsync(conn, "ALTER TABLE Events ADD COLUMN CreatedByUserId INTEGER REFERENCES Users(UserId);");
+                            _logger.LogInformation("Added CreatedByUserId foreign key column to Events table (SQLite).");
+                        }
+                    }
+
+                    // Bulletins
+                    await using (var cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = "PRAGMA table_info(Bulletins)";
+                        bool hasCol = false;
+                        await using var reader = await cmd.ExecuteReaderAsync();
+                        while (await reader.ReadAsync())
+                        {
+                            if (reader.GetString(1).Equals("CreatedByUserId", StringComparison.OrdinalIgnoreCase))
+                            {
+                                hasCol = true;
+                                break;
+                            }
+                        }
+                        if (!hasCol)
+                        {
+                            await ExecuteSqlAsync(conn, "ALTER TABLE Bulletins ADD COLUMN CreatedByUserId INTEGER REFERENCES Users(UserId);");
+                            _logger.LogInformation("Added CreatedByUserId foreign key column to Bulletins table (SQLite).");
+                        }
+                    }
+                }
+                else
+                {
+                    // MySQL Events
+                    await using (var cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Events' AND COLUMN_NAME = 'CreatedByUserId'";
+                        var count = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                        if (count == 0)
+                        {
+                            await ExecuteSqlAsync(conn, "ALTER TABLE `Events` ADD COLUMN `CreatedByUserId` INT NULL, ADD CONSTRAINT `FK_Events_Users` FOREIGN KEY (`CreatedByUserId`) REFERENCES `Users`(`UserId`) ON DELETE SET NULL;");
+                            _logger.LogInformation("Added CreatedByUserId foreign key to Events table (MySQL).");
+                        }
+                    }
+
+                    // MySQL Bulletins
+                    await using (var cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = "SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Bulletins' AND COLUMN_NAME = 'CreatedByUserId'";
+                        var count = Convert.ToInt32(await cmd.ExecuteScalarAsync());
+                        if (count == 0)
+                        {
+                            await ExecuteSqlAsync(conn, "ALTER TABLE `Bulletins` ADD COLUMN `CreatedByUserId` INT NULL, ADD CONSTRAINT `FK_Bulletins_Users` FOREIGN KEY (`CreatedByUserId`) REFERENCES `Users`(`UserId`) ON DELETE SET NULL;");
+                            _logger.LogInformation("Added CreatedByUserId foreign key to Bulletins table (MySQL).");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Could not check/add CreatedByUserId relationship columns.");
             }
         }
 
@@ -367,7 +542,7 @@ WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Users' AND COLUMN_NAME = 'Role
                 foreach (var e in events)
                 {
                     await using var cmd = conn.CreateCommand();
-                    cmd.CommandText = "INSERT INTO Events (Title, Description, EventDate, StartTime, EndTime, Location, Organizer, Category, IsFeatured) VALUES (@t,@d,@ed,@st,@et,@l,@o,@c,@f);";
+                    cmd.CommandText = "INSERT INTO Events (Title, Description, EventDate, StartTime, EndTime, Location, Organizer, Category, IsFeatured, CreatedByUserId) VALUES (@t,@d,@ed,@st,@et,@l,@o,@c,@f, 1);";
                     AddParam(cmd, "@t", e.Item1);
                     AddParam(cmd, "@d", e.Item2);
                     AddParam(cmd, "@ed", e.Item3);
@@ -403,7 +578,7 @@ WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Users' AND COLUMN_NAME = 'Role
                 foreach (var n in notices)
                 {
                     await using var cmd = conn.CreateCommand();
-                    cmd.CommandText = "INSERT INTO Bulletins (Title, Content, Category, Priority, PublishDate, Author) VALUES (@t,@c,@cat,@pr,@pd,@a);";
+                    cmd.CommandText = "INSERT INTO Bulletins (Title, Content, Category, Priority, PublishDate, Author, CreatedByUserId) VALUES (@t,@c,@cat,@pr,@pd,@a, 1);";
                     AddParam(cmd, "@t", n.Item1);
                     AddParam(cmd, "@c", n.Item2);
                     AddParam(cmd, "@cat", n.Item3);

@@ -1,14 +1,41 @@
 @model golenWeb.Models.User
 @{
-    ViewData["Title"] = "Delete user";
+    ViewData["Title"] = "Delete User Account";
 }
 
-<h2>Delete user</h2>
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm position-relative overflow-hidden">
+            <div class="cc-gradient-bar cc-gradient-bar-rose"></div>
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="p-3 bg-light-danger rounded-3 text-danger">
+                        <i class="bi bi-exclamation-triangle-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <div class="cc-section-label text-danger">Security Warning</div>
+                        <h2 class="h4 fw-bold text-dark mb-0">Delete User Account</h2>
+                    </div>
+                </div>
 
-<div class="alert alert-danger">Are you sure you want to delete user <strong>@Model.Username</strong>?</div>
+                <div class="alert alert-danger bg-light-danger border-0 text-danger mb-4 small rounded-3">
+                    <i class="bi bi-shield-x me-2 fs-6"></i>
+                    Are you sure you want to permanently revoke access for user <strong>@Model.Username</strong> (Email: @Model.Email)? This action cannot be undone.
+                </div>
 
-<form method="post" asp-action="DeleteConfirmed">
-    <input type="hidden" name="id" value="@Model.Id" />
-    <button class="btn btn-danger">Delete</button>
-    <a class="btn btn-secondary" asp-action="Index">Cancel</a>
-</form>
+                @if (User?.Identity?.IsAuthenticated ?? false)
+                {
+                    <form method="post" asp-action="DeleteConfirmed">
+                        <input type="hidden" name="id" value="@Model.UserId" />
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-soft-danger fw-bold px-4">
+                                <i class="bi bi-trash me-1"></i>Delete Account
+                            </button>
+                            <a class="btn btn-soft-secondary text-secondary px-4" asp-action="Index">Cancel</a>
+                        </div>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>

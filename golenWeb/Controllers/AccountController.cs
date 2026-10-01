@@ -19,6 +19,10 @@ namespace golenWeb.Controllers
         // ─── Public: Login / Register / Logout ───────────────────────────
 
         [HttpGet]
+        [Route("login")]
+        [Route("portal")]
+        [Route("admin/login")]
+        [Route("Account/Login")]
         public IActionResult Login(string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
@@ -26,6 +30,10 @@ namespace golenWeb.Controllers
         }
 
         [HttpPost]
+        [Route("login")]
+        [Route("portal")]
+        [Route("admin/login")]
+        [Route("Account/Login")]
         public async Task<IActionResult> Login(string username, string password, string? returnUrl = null)
         {
             var user = await _auth.ValidateUserAsync(username, password);
@@ -35,14 +43,7 @@ namespace golenWeb.Controllers
                 return View();
             }
 
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, user.Role)   // ← role claim for IsInRole / [Authorize(Roles=...)]
-            };
-            var identity = new ClaimsIdentity(claims, "MyCookieAuth");
-            var principal = new ClaimsPrincipal(identity);
+            var principal = _auth.CreateClaimsPrincipal(user);
             await HttpContext.SignInAsync("MyCookieAuth", principal);
 
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
@@ -53,12 +54,16 @@ namespace golenWeb.Controllers
         }
 
         [HttpGet]
+        [Route("register")]
+        [Route("Account/Register")]
         public IActionResult Register()
         {
             return View();
         }
 
         [HttpPost]
+        [Route("register")]
+        [Route("Account/Register")]
         public async Task<IActionResult> Register(string username, string email, string password)
         {
             try

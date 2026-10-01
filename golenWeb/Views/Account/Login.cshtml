@@ -1,5 +1,6 @@
 @{
-    ViewData["Title"] = "Login";
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Portal Login";
 }
 
 <style>
@@ -148,40 +149,41 @@
                 }
 
                 <!-- Quick Demo Fill Box -->
-                <div class="demo-credentials-box">
-                    <div class="d-flex align-items-center justify-content-between mb-1">
-                        <span class="fw-bold text-success"><i class="bi bi-key-fill me-1"></i>Default Credentials</span>
-                        <span class="badge bg-success text-white" style="font-size:0.65rem;">Seeded</span>
+                <div class="card border-0 bg-light-emerald p-3 mb-4 rounded-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="fw-bold text-success small"><i class="bi bi-key-fill me-1"></i>Default Seeded Account</span>
+                        <span class="pill-cc pill-cc-emerald">System Admin</span>
                     </div>
-                    <div class="text-muted mb-2 small">Click to auto-fill default admin account:</div>
-                    <button type="button" class="demo-chip text-dark" onclick="fillCredentials('admin', 'Admin@123')">
-                        <i class="bi bi-shield-check text-warning me-1"></i><strong>Admin:</strong> admin / Admin@123
+                    <p class="text-muted extra-small mb-2">Click below to auto-fill administrative credentials:</p>
+                    <button type="button" class="btn btn-soft-success w-100 text-start d-flex align-items-center justify-content-between" onclick="fillCredentials('admin', 'Admin@123')">
+                        <span><i class="bi bi-shield-check me-2"></i><strong>Username:</strong> admin</span>
+                        <span class="badge bg-white text-dark shadow-sm">Pass: Admin@123</span>
                     </button>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-bold text-dark small mb-1"><i class="bi bi-person-fill text-success me-1"></i>Username</label>
+                    <label class="form-label fw-bold text-secondary small mb-1"><i class="bi bi-person-fill text-success me-1"></i>Username</label>
                     <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-person"></i></span>
-                        <input name="username" id="usernameInput" class="form-control form-control-lg" placeholder="Enter your username" required autofocus style="font-size:0.95rem;" />
+                        <span class="input-group-text bg-light text-secondary border-0"><i class="bi bi-person"></i></span>
+                        <input name="username" id="usernameInput" class="form-control cc-input" placeholder="Enter your username" required autofocus />
                     </div>
                 </div>
 
                 <div class="mb-4">
                     <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label class="form-label fw-bold text-dark small mb-0"><i class="bi bi-lock-fill text-success me-1"></i>Password</label>
+                        <label class="form-label fw-bold text-secondary small mb-0"><i class="bi bi-lock-fill text-success me-1"></i>Password</label>
                     </div>
                     <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-key"></i></span>
-                        <input name="password" type="password" id="passwordInput" class="form-control form-control-lg" placeholder="Enter your password" required style="font-size:0.95rem;" />
-                        <button class="btn btn-outline-secondary" type="button" id="togglePasswordBtn" title="Toggle password visibility">
+                        <span class="input-group-text bg-light text-secondary border-0"><i class="bi bi-key"></i></span>
+                        <input name="password" type="password" id="passwordInput" class="form-control cc-input" placeholder="Enter your password" required />
+                        <button class="btn btn-soft-secondary" type="button" id="togglePasswordBtn" title="Toggle password visibility">
                             <i class="bi bi-eye" id="toggleIcon"></i>
                         </button>
                     </div>
                 </div>
 
                 <div class="d-grid mb-3">
-                    <button type="submit" class="btn btn-gsc-primary">
+                    <button type="submit" class="btn btn-soft-primary py-2 fw-bold fs-6">
                         <i class="bi bi-box-arrow-in-right me-2"></i>Sign In to Portal
                     </button>
                 </div>
@@ -189,7 +191,7 @@
 
             <div class="auth-footer">
                 <span class="text-muted">Don't have an account yet?</span>
-                <a asp-action="Register" class="ms-1">Create an Account <i class="bi bi-arrow-right-short"></i></a>
+                <a asp-action="Register" class="ms-1 text-success fw-bold">Create an Account <i class="bi bi-arrow-right-short"></i></a>
             </div>
         </div>
     </div>

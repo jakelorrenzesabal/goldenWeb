@@ -54,14 +54,14 @@ namespace golenWeb.Controllers.Api
             }
 
             var created = await _eventService.CreateAsync(ev);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            return CreatedAtAction(nameof(GetById), new { id = created.EventId }, created);
         }
 
         // PUT: api/events/5
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] EventModel ev)
         {
-            ev.Id = id;
+            ev.EventId = id;
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewData["Title"]) - Portal Access | @(ViewData["CollegeName"] ?? "Golden Success College")</title>
+    <script>
+        (function() {
+            var theme = localStorage.getItem('gsc_theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', theme);
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        :root {
+            --gsc-green: @(ViewData["PrimaryColor"] ?? "#0b5e28");
+            --gsc-dark-green: @(ViewData["NavBackground"] ?? "#073d1a");
+            --gsc-gold: @(ViewData["AccentColor"] ?? "#f59e0b");
+            --gsc-navy: #0f172a;
+            --gsc-bg: #f8fafc;
+        }
+
+        body {
+            background: linear-gradient(135deg, #073d1a 0%, #0d5225 50%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #1e293b;
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        }
+
+        [data-bs-theme="dark"] body {
+            background: linear-gradient(135deg, #041d0c 0%, #082a13 50%, #090d16 100%);
+        }
+
+        .auth-nav {
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .auth-nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            text-decoration: none;
+        }
+
+        .auth-nav-brand img {
+            height: 38px;
+            width: 38px;
+            object-fit: contain;
+        }
+
+        .auth-main-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+
+        .auth-footer-simple {
+            text-align: center;
+            padding: 1.25rem;
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 0.82rem;
+        }
+
+        .btn-auth-back {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff !important;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(8px);
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-auth-back:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <header class="auth-nav">
+        <a href="/" class="auth-nav-brand">
+            <img src="~/images/logo.png" alt="GSC Logo" />
+            <div>
+                <div class="fw-bold" style="font-size: 1.05rem; line-height: 1.1;">@(ViewData["CollegeName"] ?? "Golden Success College")</div>
+                <div class="small" style="color: var(--gsc-gold); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px;">ADMINISTRATION &amp; PORTAL</div>
+            </div>
+        </a>
+
+        <div class="d-flex align-items-center gap-2">
+            <a href="/" class="btn btn-auth-back btn-sm px-3 py-2">
+                <i class="bi bi-globe me-1"></i> Return to Main Website
+            </a>
+            <button class="btn btn-auth-back btn-sm px-3 py-2" id="authThemeToggleBtn" onclick="toggleTheme()" type="button" title="Toggle Theme">
+                <i class="bi bi-moon-stars-fill text-warning" id="authThemeIcon"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="auth-main-wrapper">
+        @RenderBody()
+    </main>
+
+    <footer class="auth-footer-simple">
+        &copy; @DateTime.Now.Year @(ViewData["CollegeName"] ?? "Golden Success College") • Secure Portal System • <em>Isa. 33:6</em>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function updateThemeUI(theme) {
+            const icon = document.getElementById('authThemeIcon');
+            if (theme === 'dark') {
+                if (icon) icon.className = 'bi bi-sun-fill text-warning';
+            } else {
+                if (icon) icon.className = 'bi bi-moon-stars-fill text-warning';
+            }
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'dark' : 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-bs-theme', newTheme);
+            localStorage.setItem('gsc_theme', newTheme);
+            updateThemeUI(newTheme);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const theme = localStorage.getItem('gsc_theme') || 'light';
+            updateThemeUI(theme);
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

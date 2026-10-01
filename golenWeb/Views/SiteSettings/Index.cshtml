@@ -137,15 +137,15 @@
     .nav-tab-btn i { margin-right: 8px; width: 16px; }
 </style>
 
-<div class="d-flex align-items-center gap-3 mb-4">
-    <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#0b5e28,#1a8c45);display:flex;align-items:center;justify-content:center;">
-        <i class="bi bi-palette-fill text-white" style="font-size:1.3rem;"></i>
-    </div>
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
     <div>
-        <h1 class="mb-0" style="font-size:1.6rem;font-weight:800;">Site Customization</h1>
-        <p class="mb-0 text-muted" style="font-size:0.85rem;">Personalize your Golden Success College website</p>
+        <div class="cc-section-label text-success">
+            <i class="bi bi-palette-fill"></i> Site Configuration
+        </div>
+        <h1 class="h3 fw-bold mb-1 text-dark">Site Customization</h1>
+        <p class="text-muted small mb-0">Personalize branding, color tokens, and contact information for your institution.</p>
     </div>
-    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary ms-auto">
+    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-soft-secondary text-secondary">
         <i class="bi bi-arrow-left me-1"></i>Dashboard
     </a>
 </div>
@@ -157,157 +157,177 @@
         <div class="col-lg-8">
 
             <!-- Content & Text -->
-            <div class="settings-section">
-                <div class="settings-section-title">
-                    <i class="bi bi-fonts" style="color:#0b5e28;"></i>Content & Text
-                </div>
-                <div class="row g-3">
-                    <div class="col-12">
-                        <label class="form-label">Site / College Name</label>
-                        <input asp-for="SiteTitle" class="form-control" placeholder="Golden Success College" id="prev-sitename" oninput="updatePreview()" />
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Hero Title <span class="text-muted fw-normal">(main homepage heading)</span></label>
-                        <input asp-for="HeroTitle" class="form-control" placeholder="Welcome to Golden Success College" id="prev-herotitle" oninput="updatePreview()" />
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Hero Subtitle</label>
-                        <input asp-for="HeroSubtitle" class="form-control" placeholder="Your path to excellence starts here" id="prev-herosubtitle" oninput="updatePreview()" />
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Navbar Tagline <span class="text-muted fw-normal">(below college name in navbar)</span></label>
-                        <input asp-for="Tagline" class="form-control" placeholder="Determination • Courage • Hardwork" id="prev-tagline" oninput="updatePreview()" />
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">About Text</label>
-                        <textarea asp-for="AboutText" class="form-control" rows="3" placeholder="About the college..."></textarea>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Footer Text</label>
-                        <input asp-for="FooterText" class="form-control" placeholder="Golden Success College • All Rights Reserved" />
+            <div class="card border-0 shadow-sm position-relative overflow-hidden mb-4">
+                <div class="cc-gradient-bar cc-gradient-bar-emerald"></div>
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-dark mb-3">
+                        <i class="bi bi-fonts text-success me-2"></i>Content & Branding Text
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-secondary">Site / College Name</label>
+                            <input asp-for="SiteTitle" class="form-control cc-input" placeholder="Golden Success College" id="prev-sitename" oninput="updatePreview()" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-secondary">Hero Title <span class="text-muted fw-normal">(main homepage heading)</span></label>
+                            <input asp-for="HeroTitle" class="form-control cc-input" placeholder="Welcome to Golden Success College" id="prev-herotitle" oninput="updatePreview()" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-secondary">Hero Subtitle</label>
+                            <input asp-for="HeroSubtitle" class="form-control cc-input" placeholder="Your path to excellence starts here" id="prev-herosubtitle" oninput="updatePreview()" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-secondary">Navbar Tagline <span class="text-muted fw-normal">(below college name in navbar)</span></label>
+                            <input asp-for="Tagline" class="form-control cc-input" placeholder="Determination • Courage • Hardwork" id="prev-tagline" oninput="updatePreview()" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-secondary">About Text</label>
+                            <textarea asp-for="AboutText" class="form-control cc-input" rows="3" placeholder="About the college..."></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-secondary">Footer Text</label>
+                            <input asp-for="FooterText" class="form-control cc-input" placeholder="Golden Success College • All Rights Reserved" />
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Colors & Theme -->
-            <div class="settings-section">
-                <div class="settings-section-title">
-                    <i class="bi bi-palette" style="color:#c62828;"></i>Colors & Theme
-                </div>
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <label class="form-label">Primary Color <span class="text-muted fw-normal">(main green)</span></label>
-                        <div class="color-picker-wrapper">
-                            <input type="color" id="primaryColorPicker" value="@Model.PrimaryColor" oninput="syncColor('primaryColorPicker','PrimaryColor'); updatePreview();" />
-                            <input asp-for="PrimaryColor" id="PrimaryColor" class="form-control color-hex-input" oninput="syncColorFromHex('PrimaryColor','primaryColorPicker'); updatePreview();" />
+            <div class="card border-0 shadow-sm position-relative overflow-hidden mb-4">
+                <div class="cc-gradient-bar cc-gradient-bar-blue"></div>
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-dark mb-3">
+                        <i class="bi bi-palette text-primary me-2"></i>Colors & Theme Tokens
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-secondary">Primary Color <span class="text-muted fw-normal">(main green)</span></label>
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="primaryColorPicker" value="@Model.PrimaryColor" oninput="syncColor('primaryColorPicker','PrimaryColor'); updatePreview();" />
+                                <input asp-for="PrimaryColor" id="PrimaryColor" class="form-control cc-input color-hex-input" oninput="syncColorFromHex('PrimaryColor','primaryColorPicker'); updatePreview();" />
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Accent Color <span class="text-muted fw-normal">(gold)</span></label>
-                        <div class="color-picker-wrapper">
-                            <input type="color" id="accentColorPicker" value="@Model.AccentColor" oninput="syncColor('accentColorPicker','AccentColor'); updatePreview();" />
-                            <input asp-for="AccentColor" id="AccentColor" class="form-control color-hex-input" oninput="syncColorFromHex('AccentColor','accentColorPicker'); updatePreview();" />
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-secondary">Accent Color <span class="text-muted fw-normal">(gold)</span></label>
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="accentColorPicker" value="@Model.AccentColor" oninput="syncColor('accentColorPicker','AccentColor'); updatePreview();" />
+                                <input asp-for="AccentColor" id="AccentColor" class="form-control cc-input color-hex-input" oninput="syncColorFromHex('AccentColor','accentColorPicker'); updatePreview();" />
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Nav Background</label>
-                        <div class="color-picker-wrapper">
-                            <input type="color" id="navBgPicker" value="@Model.NavBackground" oninput="syncColor('navBgPicker','NavBackground'); updatePreview();" />
-                            <input asp-for="NavBackground" id="NavBackground" class="form-control color-hex-input" oninput="syncColorFromHex('NavBackground','navBgPicker'); updatePreview();" />
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-secondary">Nav Background</label>
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="navBgPicker" value="@Model.NavBackground" oninput="syncColor('navBgPicker','NavBackground'); updatePreview();" />
+                                <input asp-for="NavBackground" id="NavBackground" class="form-control cc-input color-hex-input" oninput="syncColorFromHex('NavBackground','navBgPicker'); updatePreview();" />
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Contact Info -->
-            <div class="settings-section">
-                <div class="settings-section-title">
-                    <i class="bi bi-envelope" style="color:#1565c0;"></i>Contact Information
-                </div>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Email Address</label>
-                        <input asp-for="ContactEmail" class="form-control" placeholder="info@goldensuccess.edu" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Phone Number</label>
-                        <input asp-for="ContactPhone" class="form-control" placeholder="+63 xxx xxx xxxx" />
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Address</label>
-                        <input asp-for="Address" class="form-control" placeholder="123 College Street, City, Province" />
+            <div class="card border-0 shadow-sm position-relative overflow-hidden mb-4">
+                <div class="cc-gradient-bar cc-gradient-bar-amber"></div>
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-dark mb-3">
+                        <i class="bi bi-envelope text-warning me-2"></i>Contact Information
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-secondary">Email Address</label>
+                            <input asp-for="ContactEmail" class="form-control cc-input" placeholder="info@goldensuccess.edu" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-secondary">Phone Number</label>
+                            <input asp-for="ContactPhone" class="form-control cc-input" placeholder="+63 xxx xxx xxxx" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-secondary">Address</label>
+                            <input asp-for="Address" class="form-control cc-input" placeholder="123 College Street, City, Province" />
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Announcement Banner -->
-            <div class="settings-section">
-                <div class="settings-section-title">
-                    <i class="bi bi-megaphone-fill" style="color:#e6a000;"></i>Announcement Banner
-                </div>
-                <div class="row g-3">
-                    <div class="col-12">
-                        <label class="form-label">Banner Message <span class="text-muted fw-normal">(shown at top of every page when enabled)</span></label>
-                        <input asp-for="AnnouncementBanner" class="form-control" placeholder="e.g. School holiday on Monday, September 20" />
-                    </div>
-                    <div class="col-12">
-                        <div class="form-check form-switch">
-                            <input asp-for="ShowAnnouncementBanner" class="form-check-input" type="checkbox" role="switch" id="showBannerSwitch" style="width:3em;height:1.5em;" />
-                            <label class="form-check-label fw-600 ms-2" for="showBannerSwitch" style="font-weight:600;">
-                                Show Announcement Banner on Site
-                            </label>
+            <div class="card border-0 shadow-sm position-relative overflow-hidden mb-4">
+                <div class="cc-gradient-bar cc-gradient-bar-purple"></div>
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-dark mb-3">
+                        <i class="bi bi-megaphone-fill text-purple me-2"></i>Announcement Banner
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-secondary">Banner Message <span class="text-muted fw-normal">(shown at top of every page when enabled)</span></label>
+                            <input asp-for="AnnouncementBanner" class="form-control cc-input" placeholder="e.g. School holiday on Monday, September 20" />
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input asp-for="ShowAnnouncementBanner" class="form-check-input" type="checkbox" role="switch" id="showBannerSwitch" style="width:3em;height:1.5em;" />
+                                <label class="form-check-label fw-bold ms-2 text-dark small" for="showBannerSwitch">
+                                    Show Announcement Banner across entire website
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Action Buttons -->
-            <div class="d-flex gap-3 flex-wrap">
-                <button type="submit" class="btn btn-save-settings">
-                    <i class="bi bi-check2-circle me-2"></i>Save All Changes
-                </button>
-                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary" target="_blank">
-                    <i class="bi bi-eye me-1"></i>Preview Site
-                </a>
-            </div>
+            @if (User?.Identity?.IsAuthenticated ?? false)
+            {
+                <div class="d-flex gap-3 flex-wrap">
+                    <button type="submit" class="btn btn-soft-success fw-bold px-4 py-2">
+                        <i class="bi bi-check2-circle me-2"></i>Save All Changes
+                    </button>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-soft-secondary text-secondary px-4 py-2" target="_blank">
+                        <i class="bi bi-eye me-1"></i>Preview Site
+                    </a>
+                </div>
+            }
         </div>
 
         <!-- Right: Live Preview + Reset -->
         <div class="col-lg-4">
-            <div class="settings-sidebar">
-                <div class="fw-bold mb-3" style="font-size:0.9rem;"><i class="bi bi-eye me-2" style="color:#0b5e28;"></i>Live Preview</div>
+            <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-body p-4">
+                    <div class="fw-bold mb-3 text-dark small"><i class="bi bi-eye me-2 text-success"></i>Live Preview</div>
 
-                <div class="preview-card mb-3" id="preview-card">
-                    <div class="preview-nav" id="prev-nav" style="background: linear-gradient(90deg, @Model.NavBackground, #1b2a4a); border-bottom: 2px solid @Model.AccentColor;">
-                        <div style="width:24px;height:24px;border-radius:50%;background:@Model.AccentColor;"></div>
-                        <div>
-                            <div id="prev-name" style="color:white;font-weight:800;font-size:0.75rem;">@Model.SiteTitle</div>
-                            <div id="prev-tag" style="color:@Model.AccentColor;font-size:0.55rem;">@Model.Tagline</div>
+                    <div class="preview-card mb-3" id="preview-card">
+                        <div class="preview-nav" id="prev-nav" style="background: linear-gradient(90deg, @Model.NavBackground, #1b2a4a); border-bottom: 2px solid @Model.AccentColor;">
+                            <div style="width:24px;height:24px;border-radius:50%;background:@Model.AccentColor;"></div>
+                            <div>
+                                <div id="prev-name" style="color:white;font-weight:800;font-size:0.75rem;">@Model.SiteTitle</div>
+                                <div id="prev-tag" style="color:@Model.AccentColor;font-size:0.55rem;">@Model.Tagline</div>
+                            </div>
+                        </div>
+                        <div class="preview-hero" id="prev-hero" style="background: linear-gradient(135deg, @Model.PrimaryColor, #1b2a4a);">
+                            <h2 id="prev-h2">@Model.HeroTitle</h2>
+                            <p id="prev-sub">@Model.HeroSubtitle</p>
+                        </div>
+                        <div style="padding:12px;background:#f8fafc;">
+                            <div style="height:8px;background:#e2e8f0;border-radius:4px;margin-bottom:6px;width:80%;"></div>
+                            <div style="height:8px;background:#e2e8f0;border-radius:4px;margin-bottom:6px;width:60%;"></div>
+                            <div style="height:8px;background:#e2e8f0;border-radius:4px;width:70%;"></div>
                         </div>
                     </div>
-                    <div class="preview-hero" id="prev-hero" style="background: linear-gradient(135deg, @Model.PrimaryColor, #1b2a4a);">
-                        <h2 id="prev-h2">@Model.HeroTitle</h2>
-                        <p id="prev-sub">@Model.HeroSubtitle</p>
-                    </div>
-                    <div style="padding:12px;background:#f9f9f9;">
-                        <div style="height:8px;background:#e0e0e0;border-radius:4px;margin-bottom:6px;width:80%;"></div>
-                        <div style="height:8px;background:#e0e0e0;border-radius:4px;margin-bottom:6px;width:60%;"></div>
-                        <div style="height:8px;background:#e0e0e0;border-radius:4px;width:70%;"></div>
-                    </div>
-                </div>
 
-                <hr />
+                    <hr class="my-3 text-secondary" />
 
-                <div class="fw-bold mb-2" style="font-size:0.85rem;color:#666;">
-                    <i class="bi bi-arrow-counterclockwise me-1"></i>Reset to Defaults
+                    @if (User?.Identity?.IsAuthenticated ?? false)
+                    {
+                        <div class="fw-bold mb-1 text-dark small">
+                            <i class="bi bi-arrow-counterclockwise me-1 text-danger"></i>Reset to Defaults
+                        </div>
+                        <p class="text-muted mb-3 extra-small">This will restore all branding settings to the original Golden Success College defaults.</p>
+                        <form asp-controller="SiteSettings" asp-action="ResetDefaults" method="post" onsubmit="return confirm('Reset all settings to defaults? This cannot be undone.');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-soft-danger w-100">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i>Reset to Defaults
+                            </button>
+                        </form>
+                    }
                 </div>
-                <p class="text-muted mb-3" style="font-size:0.78rem;">This will restore all settings to the original Golden Success College defaults.</p>
-                <form asp-controller="SiteSettings" asp-action="ResetDefaults" method="post" onsubmit="return confirm('Reset all settings to defaults? This cannot be undone.');">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
-                        <i class="bi bi-arrow-counterclockwise me-1"></i>Reset to Defaults
-                    </button>
-                </form>
             </div>
         </div>
     </div>

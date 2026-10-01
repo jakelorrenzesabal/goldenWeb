@@ -6,90 +6,139 @@
 
 <div class="row justify-content-center">
     <div class="col-lg-8">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-dark text-white p-3">
-                <h4 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i>Edit Event #@Model.Id</h4>
-            </div>
-            <div class="card-body p-4">
-                <form asp-action="Edit" method="post" enctype="multipart/form-data">
-                    <input type="hidden" asp-for="Id" />
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-bold"></div>
+        <div class="card cc-card border-0 shadow-sm">
+            <div class="card-body px-4 py-3">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width: 40px; height: 40px; background-color: var(--cc-blue-surface);">
+                        <i class="bi bi-pencil-fill" style="color: var(--cc-blue-text); font-size: 1rem;"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0" style="color: var(--cc-slate-900);">Edit Event #@Model.EventId</h5>
+                        <p class="cc-section-label mb-0" style="font-size: 0.68rem;">Golden Success College · Event Management</p>
+                    </div>
+                </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Title" class="form-label fw-semibold">Event Title</label>
-                        <input asp-for="Title" class="form-control form-control-lg" required />
-                        <span asp-validation-for="Title" class="text-danger"></span>
+                <hr class="my-3" style="border-color: var(--cc-slate-100);" />
+
+                <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="EventId" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-bold small"></div>
+
+                    <!-- Event Title -->
+                    <div class="form-floating mb-3">
+                        <input asp-for="Title" class="form-control cc-input" placeholder="Event Title" required />
+                        <label asp-for="Title" style="font-size: 0.82rem; color: var(--cc-slate-500);">
+                            <i class="bi bi-calendar-event me-1"></i> Event Title
+                        </label>
+                        <span asp-validation-for="Title" class="text-danger small"></span>
                     </div>
 
-                    <!-- Existing & New Photo Upload (Database Stored, Max 2MB) -->
+                    <!-- Existing & New Photo Upload -->
                     <div class="mb-3">
-                        <label class="form-label fw-semibold"><i class="bi bi-database-fill-check text-success me-1"></i>Event Banner Photo</label>
-                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                        <label class="form-label text-uppercase fw-semibold" style="font-size: 0.72rem; color: var(--cc-slate-500); letter-spacing: 0.04em;">
+                            <i class="bi bi-image me-1"></i> Event Banner Photo
+                        </label>
+                        @if (Model.ImageData != null && Model.ImageData.Length > 0)
                         {
                             <div class="mb-2">
-                                <img src="@Model.ImageUrl" alt="Current Event Banner" class="img-fluid rounded-3 shadow-sm" style="max-height: 180px; width: 100%; object-fit: cover; border: 2px solid #0b5e28;" />
-                                <div class="small text-muted mt-1"><i class="bi bi-check-circle-fill text-success me-1"></i>Current photo loaded directly from database table.</div>
+                                <img src="/Events/Image/@Model.EventId" alt="Current Banner" class="img-fluid rounded-3 shadow-sm" style="max-height: 180px; width: 100%; object-fit: cover; border: 1.5px solid var(--cc-blue-border);" />
+                                <div class="small text-muted mt-1"><i class="bi bi-check-circle-fill text-success me-1"></i>Current photo loaded from database.</div>
                             </div>
                         }
-                        <input type="file" name="imageFile" accept="image/*" class="form-control" id="eventImgInput" onchange="previewEventImg(this)" />
-                        <div class="form-text text-muted small"><i class="bi bi-info-circle me-1"></i>Upload a new image to replace the current database photo. <strong>Maximum photo size limit: 2 MB</strong>.</div>
+                        <input type="file" name="imageFile" accept="image/*" class="form-control cc-input" id="eventImgInput" onchange="previewEventImg(this)" />
+                        <div class="form-text text-muted" style="font-size: 0.75rem;">
+                            <i class="bi bi-info-circle me-1"></i>Upload a new image to replace current photo (Max 2 MB).
+                        </div>
                         <div class="mt-2 text-center d-none" id="eventImgPreviewContainer">
-                            <img id="eventImgPreview" src="#" alt="New Banner Preview" class="img-fluid rounded-3 shadow-sm" style="max-height: 200px; object-fit: cover; border: 2px dashed #0b5e28;" />
+                            <img id="eventImgPreview" src="#" alt="New Banner Preview" class="img-fluid rounded-3 shadow-sm" style="max-height: 200px; object-fit: cover; border: 1.5px dashed var(--cc-blue-border);" />
                         </div>
                     </div>
 
-                    <div class="row mb-3">
+                    <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label asp-for="EventDate" class="form-label fw-semibold">Event Date</label>
-                            <input asp-for="EventDate" type="date" class="form-control" required />
-                            <span asp-validation-for="EventDate" class="text-danger"></span>
+                            <div class="form-floating">
+                                <input asp-for="EventDate" type="date" class="form-control cc-input" placeholder="Event Date" required />
+                                <label asp-for="EventDate" style="font-size: 0.82rem; color: var(--cc-slate-500);">
+                                    <i class="bi bi-calendar3 me-1"></i> Event Date
+                                </label>
+                                <span asp-validation-for="EventDate" class="text-danger small"></span>
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <label asp-for="Category" class="form-label fw-semibold">Event Category</label>
-                            <select asp-for="Category" class="form-select">
-                                <option value="Academic">Academic</option>
-                                <option value="Ceremony">Ceremony</option>
-                                <option value="Seminar">Seminar / Workshop</option>
-                                <option value="Sports">Sports & Athletics</option>
-                                <option value="Cultural">Cultural & Arts</option>
-                                <option value="Club">Student Club Activity</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label asp-for="StartTime" class="form-label fw-semibold">Start Time</label>
-                            <input asp-for="StartTime" class="form-control" required />
-                        </div>
-                        <div class="col-md-6">
-                            <label asp-for="EndTime" class="form-label fw-semibold">End Time</label>
-                            <input asp-for="EndTime" class="form-control" required />
+                            <div class="form-floating">
+                                <select asp-for="Category" class="form-select cc-input" id="eventCategorySelect">
+                                    <option value="Academic">Academic</option>
+                                    <option value="Ceremony">Ceremony</option>
+                                    <option value="Seminar">Seminar / Workshop</option>
+                                    <option value="Sports">Sports &amp; Athletics</option>
+                                    <option value="Cultural">Cultural &amp; Arts</option>
+                                    <option value="Club">Student Club Activity</option>
+                                </select>
+                                <label for="eventCategorySelect" style="font-size: 0.82rem; color: var(--cc-slate-500);">
+                                    <i class="bi bi-tag me-1"></i> Event Category
+                                </label>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="row mb-3">
+                    <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label asp-for="Location" class="form-label fw-semibold">Venue / Location</label>
-                            <input asp-for="Location" class="form-control" required />
+                            <div class="form-floating">
+                                <input asp-for="StartTime" class="form-control cc-input" placeholder="Start Time" required />
+                                <label asp-for="StartTime" style="font-size: 0.82rem; color: var(--cc-slate-500);">
+                                    <i class="bi bi-clock me-1"></i> Start Time
+                                </label>
+                            </div>
                         </div>
                         <div class="col-md-6">
-                            <label asp-for="Organizer" class="form-label fw-semibold">Organizer</label>
-                            <input asp-for="Organizer" class="form-control" required />
+                            <div class="form-floating">
+                                <input asp-for="EndTime" class="form-control cc-input" placeholder="End Time" required />
+                                <label asp-for="EndTime" style="font-size: 0.82rem; color: var(--cc-slate-500);">
+                                    <i class="bi bi-clock-history me-1"></i> End Time
+                                </label>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="mb-4">
-                        <label asp-for="Description" class="form-label fw-semibold">Event Description</label>
-                        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="Location" class="form-control cc-input" placeholder="Venue" required />
+                                <label asp-for="Location" style="font-size: 0.82rem; color: var(--cc-slate-500);">
+                                    <i class="bi bi-geo-alt me-1"></i> Venue / Location
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="Organizer" class="form-control cc-input" placeholder="Organizer" required />
+                                <label asp-for="Organizer" style="font-size: 0.82rem; color: var(--cc-slate-500);">
+                                    <i class="bi bi-building me-1"></i> Organizer / Department
+                                </label>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="d-flex justify-content-between pt-2">
-                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
-                        <button type="submit" class="btn btn-dark px-4 fw-bold">Update Event</button>
+                    <div class="form-floating mb-4">
+                        <textarea asp-for="Description" class="form-control cc-input" placeholder="Description" style="height: 120px;"></textarea>
+                        <label asp-for="Description" style="font-size: 0.82rem; color: var(--cc-slate-500);">
+                            <i class="bi bi-chat-left-text me-1"></i> Event Details &amp; Program Description
+                        </label>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="border-color: var(--cc-slate-100) !important;">
+                        <a asp-action="Index" class="btn btn-soft-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-soft-primary">
+                            <i class="bi bi-floppy2-fill"></i> Save Changes
+                        </button>
                     </div>
                 </form>
             </div>
+            <div class="cc-gradient-bar-blue"></div>
         </div>
     </div>
 </div>
@@ -98,7 +147,7 @@
     function previewEventImg(input) {
         if (input.files && input.files[0]) {
             var file = input.files[0];
-            var maxBytes = 2 * 1024 * 1024; // 2 MB
+            var maxBytes = 2 * 1024 * 1024;
             if (file.size > maxBytes) {
                 alert('Photo file size exceeds the 2 MB maximum limit! Selected file is ' + (file.size / (1024 * 1024)).toFixed(2) + ' MB. Please select a smaller photo.');
                 input.value = '';
@@ -116,3 +165,4 @@
         }
     }
 </script>
+

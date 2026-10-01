@@ -2,10 +2,11 @@
 
 @{
     ViewData["Title"] = Model.Title + " - Campus Bulletin";
-    var absoluteUrl = $"{Context.Request.Scheme}://{Context.Request.Host}/Bulletins/Details/{Model.Id}";
-    var imageUrl = Model.ImageData != null ? $"{Context.Request.Scheme}://{Context.Request.Host}/Bulletins/Image/{Model.Id}" : $"{Context.Request.Scheme}://{Context.Request.Host}/images/logo.png";
+    var absoluteUrl = $"{Context.Request.Scheme}://{Context.Request.Host}/Bulletins/Details/{Model.BulletinId}";
+    var imageUrl = Model.ImageData != null ? $"{Context.Request.Scheme}://{Context.Request.Host}/Bulletins/Image/{Model.BulletinId}" : $"{Context.Request.Scheme}://{Context.Request.Host}/images/logo.png";
     var fbShareUrl = $"https://www.facebook.com/sharer/sharer.php?u={System.Net.WebUtility.UrlEncode(absoluteUrl)}";
-    var priorityBadge = Model.Priority == "High" ? "bg-danger" : "bg-primary";
+    var isHigh = Model.Priority == "High";
+    var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
 
     // Open Graph Meta Tags for Social Media / Facebook Sharing
     ViewData["OgTitle"] = Model.Title;
@@ -17,86 +18,95 @@
 <div class="container py-2">
     <!-- Breadcrumb & Back Navigation -->
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <a asp-action="Index" class="btn btn-outline-secondary btn-modern">
-            <i class="bi bi-arrow-left me-1"></i> Back to Bulletin Board
+        <a asp-action="Index" class="btn btn-soft-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Bulletin Board
         </a>
         <div class="d-flex gap-2">
-            <button class="btn btn-primary fw-bold shadow-sm rounded-pill px-3" onclick="window.open('@fbShareUrl', 'fbShareWindow', 'width=600,height=500'); return false;">
-                <i class="bi bi-facebook me-1"></i> Share to Facebook
+            <button class="btn btn-soft-primary" onclick="window.open('@fbShareUrl', 'fbShareWindow', 'width=600,height=500'); return false;">
+                <i class="bi bi-facebook"></i> Share to Facebook
             </button>
-            <button class="btn btn-outline-success fw-bold shadow-sm rounded-pill px-3" onclick="navigator.clipboard.writeText('@absoluteUrl'); alert('Bulletin link copied to clipboard!');">
-                <i class="bi bi-link-45deg me-1"></i> Copy Link
+            <button class="btn btn-soft-success" onclick="navigator.clipboard.writeText('@absoluteUrl'); alert('Bulletin link copied to clipboard!');">
+                <i class="bi bi-link-45deg"></i> Copy Link
             </button>
         </div>
     </div>
 
     <!-- Main Bulletin Details Card -->
-    <div class="card card-modern border-0 shadow-lg overflow-hidden animate-fade-up border-start border-5 @(Model.Priority == "High" ? "border-danger" : "border-success")">
+    <div class="card cc-card border-0 shadow-sm overflow-hidden">
         @if (Model.ImageData != null)
         {
-            <div class="position-relative bg-dark" style="max-height: 420px; overflow: hidden;">
-                <img src="/Bulletins/Image/@Model.Id" alt="@Model.Title" class="w-100" style="height: 420px; object-fit: cover;" />
-                <span class="badge bg-dark bg-opacity-75 position-absolute top-0 end-0 m-3 px-3 py-2 fs-6">
-                    <i class="bi bi-database-fill-check text-warning me-1"></i>Official Announcement Image
+            <div class="position-relative" style="max-height: 420px; overflow: hidden; background: var(--cc-slate-900);">
+                <img src="/Bulletins/Image/@Model.BulletinId" alt="@Model.Title" class="w-100" style="height: 420px; object-fit: cover;" />
+                <span class="pill-cc-slate position-absolute top-0 end-0 m-3">
+                    <i class="bi bi-database-fill-check text-warning me-1"></i>Official Notice Photo
                 </span>
             </div>
         }
 
         <div class="card-body p-4 p-md-5">
             <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-                <span class="badge @priorityBadge px-3 py-2 fs-6">@Model.Priority Priority</span>
-                <span class="badge bg-secondary px-3 py-2 fs-6">@Model.Category</span>
-                <span class="badge bg-light text-dark border px-3 py-2 fs-6">
-                    <i class="bi bi-clock me-1"></i>Posted on @Model.PublishDate.ToString("MMMM dd, yyyy")
+                @if (isHigh)
+                {
+                    <span class="pill-cc-red"><i class="bi bi-exclamation-triangle-fill me-1"></i>HIGH PRIORITY</span>
+                }
+                else
+                {
+                    <span class="pill-cc-blue">NORMAL PRIORITY</span>
+                }
+                <span class="pill-cc-slate">@Model.Category</span>
+                <span class="pill-cc-slate">
+                    <i class="bi bi-clock me-1"></i>Posted @Model.PublishDate.ToString("MMMM dd, yyyy")
                 </span>
             </div>
 
-            <h1 class="display-6 fw-extrabold text-dark mb-3">@Model.Title</h1>
+            <h1 class="fw-bold mb-3" style="color: var(--cc-slate-900); font-size: 1.75rem;">@Model.Title</h1>
 
             <!-- Author & Metadata -->
-            <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 mb-4 border">
-                <div class="p-2 rounded-circle bg-dark text-warning d-flex align-items-center justify-content-center" style="width:42px; height:42px;">
-                    <i class="bi bi-person-fill fs-5"></i>
+            <div class="d-flex align-items-center gap-3 p-3 rounded-3 mb-4 border" style="background-color: var(--cc-slate-50); border-color: var(--cc-slate-200) !important;">
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:40px; height:40px; background-color: var(--cc-orange-surface);">
+                    <i class="bi bi-person-fill" style="color: var(--cc-orange-text); font-size: 1rem;"></i>
                 </div>
                 <div>
-                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size:0.75rem;">Official Notice By</small>
-                    <strong class="text-dark fs-6">@Model.Author</strong>
+                    <p class="cc-section-label mb-0" style="font-size:0.65rem;">Official Notice Author</p>
+                    <strong style="color: var(--cc-slate-900); font-size: 0.90rem;">@Model.Author</strong>
                 </div>
             </div>
 
             <!-- Content -->
-            <h5 class="fw-bold text-dark mb-3"><i class="bi bi-megaphone me-2 text-warning"></i>Notice Content</h5>
-            <div class="fs-6 text-secondary mb-4 leading-relaxed" style="white-space: pre-line; line-height: 1.8;">
+            <p class="cc-section-label mb-2"><i class="bi bi-megaphone me-1"></i> Notice Content</p>
+            <div class="mb-4" style="white-space: pre-line; line-height: 1.8; color: var(--cc-slate-600); font-size: 0.90rem;">
                 @Model.Content
             </div>
 
-            <hr class="my-4" />
+            <hr class="my-4" style="border-color: var(--cc-slate-200);" />
 
             <!-- Social Share Bar -->
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 bg-white p-3 rounded-3 border">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 p-3 rounded-3 border" style="background-color: #ffffff; border-color: var(--cc-slate-200) !important;">
                 <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-share-fill text-warning fs-5"></i>
-                    <strong class="text-dark">Share Bulletin Notice:</strong>
+                    <i class="bi bi-share-fill text-warning"></i>
+                    <strong style="color: var(--cc-slate-900); font-size: 0.88rem;">Share Bulletin Notice:</strong>
                 </div>
                 <div class="d-flex gap-2 flex-wrap">
-                    <a href="@fbShareUrl" target="_blank" onclick="window.open('@fbShareUrl', 'fbShareWindow', 'width=600,height=500'); return false;" class="btn btn-primary fw-bold rounded-pill btn-modern">
-                        <i class="bi bi-facebook me-2"></i>Post to Facebook
+                    <a href="@fbShareUrl" target="_blank" onclick="window.open('@fbShareUrl', 'fbShareWindow', 'width=600,height=500'); return false;" class="btn btn-soft-primary">
+                        <i class="bi bi-facebook"></i> Post to Facebook
                     </a>
-                    <button type="button" class="btn btn-outline-dark fw-bold rounded-pill btn-modern" onclick="navigator.clipboard.writeText('@absoluteUrl'); alert('Permalink copied to clipboard!\n' + '@absoluteUrl');">
-                        <i class="bi bi-clipboard-check me-2"></i>Copy Bulletin Link
+                    <button type="button" class="btn btn-soft-secondary" onclick="navigator.clipboard.writeText('@absoluteUrl'); alert('Permalink copied to clipboard!\n' + '@absoluteUrl');">
+                        <i class="bi bi-clipboard-check"></i> Copy Bulletin Link
                     </button>
                 </div>
             </div>
 
-            <!-- Admin Actions -->
-            @if (User?.Identity?.IsAuthenticated ?? false)
+            <!-- Admin Actions: ONLY for logged-in users -->
+            @if (isAuthenticated)
             {
-                <div class="mt-4 pt-3 d-flex justify-content-end gap-2 border-top">
-                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary rounded-pill">
-                        <i class="bi bi-pencil me-1"></i> Edit Bulletin
+                <div class="mt-4 pt-3 d-flex justify-content-end gap-2 border-top" style="border-color: var(--cc-slate-100) !important;">
+                    <a asp-action="Edit" asp-route-id="@Model.BulletinId" class="btn btn-soft-primary">
+                        <i class="bi bi-pencil-fill"></i> Edit Bulletin
                     </a>
                 </div>
             }
         </div>
+        <div class="cc-gradient-bar-orange"></div>
     </div>
 </div>
+

@@ -41,25 +41,12 @@ namespace golenWeb.Controllers
         [HttpGet]
         public async Task<IActionResult> GetJson(int id)
         {
-            var b = await _bulletinService.GetByIdAsync(id);
-            if (b == null)
+            var dto = await _bulletinService.GetBulletinJsonDtoAsync(id);
+            if (dto == null)
             {
                 return NotFound();
             }
-
-            return Json(new
-            {
-                id = b.Id,
-                title = b.Title,
-                content = b.Content,
-                category = b.Category,
-                priority = b.Priority,
-                publishDate = b.PublishDate.ToString("yyyy-MM-dd"),
-                formattedDate = b.PublishDate.ToString("MMMM dd, yyyy"),
-                author = b.Author,
-                hasImage = b.ImageData != null && b.ImageData.Length > 0,
-                imageUrl = b.ImageData != null && b.ImageData.Length > 0 ? $"/Bulletins/Image/{b.Id}" : null
-            });
+            return Json(dto);
         }
 
         // GET: /Bulletins/Create — requires login
@@ -67,13 +54,7 @@ namespace golenWeb.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            return View(new Bulletin
-            {
-                PublishDate = DateTime.Today,
-                Category = "General Notice",
-                Priority = "Normal",
-                Author = "Office of Student Affairs"
-            });
+            return View(_bulletinService.GetDefaultBulletin());
         }
 
         // POST: /Bulletins/Create — requires login
@@ -82,22 +63,15 @@ namespace golenWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Bulletin bulletin, IFormFile? imageFile)
         {
-            if (imageFile != null && imageFile.Length > 0)
-            {
-                var (data, contentType, hash, error) = await _fileStorage.ProcessAndStoreImageInDbAsync(imageFile);
-                if (!string.IsNullOrEmpty(error))
-                {
-                    ModelState.AddModelError(string.Empty, error);
-                    return View(bulletin);
-                }
-                bulletin.ImageData = data;
-                bulletin.ImageContentType = contentType;
-                bulletin.ImageHash = hash;
-            }
-
             if (!ModelState.IsValid) return View(bulletin);
 
-            await _bulletinService.CreateAsync(bulletin);
+            var (success, error) = await _bulletinService.ProcessAndSaveBulletinAsync(bulletin, imageFile, _fileStorage);
+            if (!success)
+            {
+                ModelState.AddModelError(string.Empty, error ?? "Failed to create bulletin");
+                return View(bulletin);
+            }
+
             TempData["SuccessMessage"] = $"Bulletin '{bulletin.Title}' posted successfully!";
             return RedirectToAction(nameof(Index));
         }
@@ -118,35 +92,15 @@ namespace golenWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Bulletin bulletin, IFormFile? imageFile)
         {
-            if (id != bulletin.Id) return BadRequest();
-
-            if (imageFile != null && imageFile.Length > 0)
-            {
-                var (data, contentType, hash, error) = await _fileStorage.ProcessAndStoreImageInDbAsync(imageFile);
-                if (!string.IsNullOrEmpty(error))
-                {
-                    ModelState.AddModelError(string.Empty, error);
-                    return View(bulletin);
-                }
-                bulletin.ImageData = data;
-                bulletin.ImageContentType = contentType;
-                bulletin.ImageHash = hash;
-            }
-            else
-            {
-                var existing = await _bulletinService.GetByIdAsync(id);
-                if (existing != null)
-                {
-                    bulletin.ImageData = existing.ImageData;
-                    bulletin.ImageContentType = existing.ImageContentType;
-                    bulletin.ImageHash = existing.ImageHash;
-                }
-            }
-
             if (!ModelState.IsValid) return View(bulletin);
 
-            var updated = await _bulletinService.UpdateAsync(bulletin);
-            if (!updated) return NotFound();
+            var (success, error) = await _bulletinService.ProcessAndUpdateBulletinAsync(id, bulletin, imageFile, _fileStorage);
+            if (!success)
+            {
+                if (error == "ID mismatch" || error == "Bulletin notice not found") return NotFound();
+                ModelState.AddModelError(string.Empty, error ?? "Failed to update bulletin");
+                return View(bulletin);
+            }
 
             TempData["SuccessMessage"] = $"Bulletin '{bulletin.Title}' updated successfully!";
             return RedirectToAction(nameof(Index));

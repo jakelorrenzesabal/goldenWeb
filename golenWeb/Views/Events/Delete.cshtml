@@ -6,17 +6,29 @@
 
 <div class="row justify-content-center">
     <div class="col-md-6">
-        <div class="card border-danger shadow-sm">
-            <div class="card-header bg-danger text-white p-3">
-                <h4 class="mb-0 fw-bold"><i class="bi bi-exclamation-triangle me-2"></i>Delete Event Confirmation</h4>
-            </div>
-            <div class="card-body p-4">
-                <p class="fs-5 text-dark mb-4">Are you sure you want to permanently delete this campus event?</p>
+        <div class="card cc-card border-0 shadow-sm">
+            <div class="card-body px-4 py-3">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width: 40px; height: 40px; background-color: var(--cc-red-surface);">
+                        <i class="bi bi-exclamation-triangle-fill" style="color: var(--cc-red-text); font-size: 1rem;"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0" style="color: var(--cc-slate-900);">Delete Event Confirmation</h5>
+                        <p class="cc-section-label mb-0" style="font-size: 0.68rem;">Golden Success College · Destructive Action</p>
+                    </div>
+                </div>
 
-                <div class="bg-light p-3 rounded mb-4 border border-danger">
-                    <div class="fw-bold fs-4 text-dark mb-2">@Model.Title</div>
-                    <div class="text-muted mb-2">Category: <span class="badge bg-success">@Model.Category</span></div>
-                    <div class="row g-2 small">
+                <hr class="my-3" style="border-color: var(--cc-slate-100);" />
+
+                <p class="mb-3" style="font-size: 0.90rem; color: var(--cc-slate-600);">
+                    Are you sure you want to permanently delete this campus event record?
+                </p>
+
+                <div class="p-3 rounded-3 mb-4 border" style="background-color: var(--cc-red-surface); border-color: var(--cc-red-border) !important;">
+                    <div class="fw-bold mb-2" style="font-size: 1.05rem; color: var(--cc-slate-900);">@Model.Title</div>
+                    <div class="mb-2"><span class="pill-cc-blue">@Model.Category</span></div>
+                    <div class="row g-2 small" style="color: var(--cc-slate-600);">
                         <div class="col-6"><strong>Date:</strong> @Model.EventDate.ToString("MMM dd, yyyy")</div>
                         <div class="col-6"><strong>Time:</strong> @Model.StartTime - @Model.EndTime</div>
                         <div class="col-12 mt-1"><strong>Venue:</strong> @Model.Location</div>
@@ -24,13 +36,20 @@
                 </div>
 
                 <form asp-action="DeleteConfirmed" method="post">
-                    <input type="hidden" name="id" value="@Model.Id" />
-                    <div class="d-flex justify-content-between">
-                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
-                        <button type="submit" class="btn btn-danger px-4 fw-bold">Confirm Delete</button>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.EventId" />
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="border-color: var(--cc-slate-100) !important;">
+                        <a asp-action="Index" class="btn btn-soft-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-soft-danger">
+                            <i class="bi bi-trash-fill"></i> Confirm &amp; Delete Event
+                        </button>
                     </div>
                 </form>
             </div>
+            <div class="cc-gradient-bar-red"></div>
         </div>
     </div>
 </div>
+

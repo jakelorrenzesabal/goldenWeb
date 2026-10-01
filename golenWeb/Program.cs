@@ -15,7 +15,7 @@ builder.Services.AddControllersWithViews(options =>
 // Cookie authentication (simple custom auth, no Identity)
 builder.Services.AddAuthentication("MyCookieAuth").AddCookie("MyCookieAuth", options =>
 {
-    options.LoginPath = "/Account/Login";
+    options.LoginPath = "/login";
     options.Cookie.Name = "MyCookieAuth";
 });
 
@@ -27,6 +27,8 @@ builder.Services.AddScoped<EventService>();
 builder.Services.AddScoped<BulletinService>();
 builder.Services.AddScoped<SiteSettingsService>();
 builder.Services.AddScoped<FileStorageService>();
+builder.Services.AddScoped<DashboardService>();
+builder.Services.AddScoped<HomeService>();
 builder.Services.AddTransient<DbInitializer>();
 
 var app = builder.Build();
@@ -52,9 +54,8 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
+    app.UseHttpsRedirection();
 }
-
-app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthentication();

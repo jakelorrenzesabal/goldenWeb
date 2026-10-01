@@ -1,37 +1,665 @@
+/* ==========================================================================
+   CHEMICAL CARBON DESIGN SYSTEM — GSC COLLEGE IMPLEMENTATION
+   Based on design-system.md guidelines (Bootstrap 5.3 + Bootstrap Icons 1.11+)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* Neutral Scale (Tailwind Slate) */
+  --cc-slate-900: #1e293b;
+  --cc-slate-600: #475569;
+  --cc-slate-500: #64748b;
+  --cc-slate-400: #94a3b8;
+  --cc-slate-300: #cbd5e1;
+  --cc-slate-200: #e2e8f0;
+  --cc-slate-100: #f1f5f9;
+  --cc-slate-50:  #f8fafc;
+
+  /* Semantic Hues */
+  --cc-blue-surface: #eff6ff;
+  --cc-blue-border:  #93c5fd;
+  --cc-blue-text:    #2563eb;
+  --cc-blue-hover:   #dbeafe;
+
+  --cc-green-surface: #f0fdf4;
+  --cc-green-border:  #86efac;
+  --cc-green-text:    #16a34a;
+  --cc-green-hover:   #dcfce7;
+
+  --cc-red-surface: #fff1f2;
+  --cc-red-border:  #fda4af;
+  --cc-red-text:    #e11d48;
+  --cc-red-hover:   #ffe4e6;
+
+  --cc-orange-surface: #fff7ed;
+  --cc-orange-border:  #fed7aa;
+  --cc-orange-text:    #c2410c;
+  --cc-orange-hover:   #ffedd5;
+
+  --cc-teal-surface: #f0fdfa;
+  --cc-teal-border:  #99f6e4;
+  --cc-teal-text:    #0f766e;
+  --cc-teal-hover:   #ccfbf1;
+
+  --cc-purple-surface: #fdf4ff;
+  --cc-purple-border:  #d8b4fe;
+  --cc-purple-text:    #9333ea;
+  --cc-purple-hover:   #f3e8ff;
+
+  --gsc-primary: #0b5e28;
+  --gsc-dark-green: #073d1a;
+  --gsc-gold: #f59e0b;
+}
+
 html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus,
-.btn:active:focus,
-.btn-link.nav-link:focus,
-.form-control:focus,
-.form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
+  font-size: 15px;
   position: relative;
   min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+  background-color: var(--cc-slate-50);
+  color: var(--cc-slate-900);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
 }
 
-.form-floating>.form-control-plaintext::placeholder,
-.form-floating>.form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+/* --- Section Labels --- */
+.cc-section-label {
+  font-size: 0.70rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  color: var(--cc-slate-400) !important;
 }
 
-.form-floating>.form-control-plaintext:focus::placeholder,
-.form-floating>.form-control:focus::placeholder {
-  text-align: start;
+/* --- Card Anatomy --- */
+.card.cc-card {
+  border: 0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px 0 rgba(0, 0, 0, 0.04) !important;
+  border-radius: 0.5rem !important;
+  background-color: #ffffff;
 }
+
+.cc-gradient-bar-blue {
+  height: 3px;
+  background: linear-gradient(90deg, #0b5e28, #f59e0b);
+  border-radius: 0 0 0.375rem 0.375rem;
+}
+
+.cc-gradient-bar-green {
+  height: 3px;
+  background: linear-gradient(90deg, #16a34a, #34d399);
+  border-radius: 0 0 0.375rem 0.375rem;
+}
+
+.cc-gradient-bar-red {
+  height: 3px;
+  background: linear-gradient(90deg, #e11d48, #fda4af);
+  border-radius: 0 0 0.375rem 0.375rem;
+}
+
+.cc-gradient-bar-orange {
+  height: 3px;
+  background: linear-gradient(90deg, #c2410c, #fb923c);
+  border-radius: 0 0 0.375rem 0.375rem;
+}
+
+.cc-gradient-bar-purple {
+  height: 3px;
+  background: linear-gradient(90deg, #9333ea, #a78bfa);
+  border-radius: 0 0 0.375rem 0.375rem;
+}
+
+.cc-gradient-bar-teal {
+  height: 3px;
+  background: linear-gradient(90deg, #0f766e, #2dd4bf);
+  border-radius: 0 0 0.375rem 0.375rem;
+}
+
+.cc-gradient-bar-rainbow {
+  height: 3px;
+  background: linear-gradient(90deg, #0b5e28, #f59e0b, #10b981);
+  border-radius: 0 0 0.375rem 0.375rem;
+}
+
+/* --- Soft Buttons --- */
+.btn-cc-primary, .btn-soft-primary {
+  background-color: var(--cc-blue-surface) !important;
+  color: var(--cc-blue-text) !important;
+  border: 1.5px solid var(--cc-blue-border) !important;
+  border-radius: 8px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-cc-primary:hover, .btn-soft-primary:hover {
+  background-color: var(--cc-blue-hover) !important;
+  color: #1d4ed8 !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15) !important;
+}
+
+.btn-cc-success, .btn-soft-success {
+  background-color: var(--cc-green-surface) !important;
+  color: var(--cc-green-text) !important;
+  border: 1.5px solid var(--cc-green-border) !important;
+  border-radius: 8px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-cc-success:hover, .btn-soft-success:hover {
+  background-color: var(--cc-green-hover) !important;
+  color: #15803d !important;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.15) !important;
+}
+
+.btn-cc-danger, .btn-soft-danger {
+  background-color: var(--cc-red-surface) !important;
+  color: var(--cc-red-text) !important;
+  border: 1.5px solid var(--cc-red-border) !important;
+  border-radius: 8px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-cc-danger:hover, .btn-soft-danger:hover {
+  background-color: var(--cc-red-hover) !important;
+  color: #be123c !important;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.15) !important;
+}
+
+.btn-cc-warning, .btn-soft-warning {
+  background-color: var(--cc-orange-surface) !important;
+  color: var(--cc-orange-text) !important;
+  border: 1.5px solid var(--cc-orange-border) !important;
+  border-radius: 8px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-cc-warning:hover, .btn-soft-warning:hover {
+  background-color: var(--cc-orange-hover) !important;
+  color: #9a3412 !important;
+  box-shadow: 0 2px 8px rgba(194, 65, 12, 0.15) !important;
+}
+
+.btn-cc-neutral, .btn-soft-secondary {
+  background-color: var(--cc-slate-100) !important;
+  color: var(--cc-slate-600) !important;
+  border: 1.5px solid var(--cc-slate-200) !important;
+  border-radius: 8px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-cc-neutral:hover, .btn-soft-secondary:hover {
+  background-color: var(--cc-slate-200) !important;
+  color: var(--cc-slate-900) !important;
+}
+
+.btn-cc-purple, .btn-soft-purple {
+  background-color: var(--cc-purple-surface) !important;
+  color: var(--cc-purple-text) !important;
+  border: 1.5px solid var(--cc-purple-border) !important;
+  border-radius: 8px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-cc-purple:hover, .btn-soft-purple:hover {
+  background-color: var(--cc-purple-hover) !important;
+  color: #7e22ce !important;
+}
+
+.btn-cc-teal, .btn-soft-teal {
+  background-color: var(--cc-teal-surface) !important;
+  color: var(--cc-teal-text) !important;
+  border: 1.5px solid var(--cc-teal-border) !important;
+  border-radius: 8px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-cc-teal:hover, .btn-soft-teal:hover {
+  background-color: var(--cc-teal-hover) !important;
+  color: #115e59 !important;
+}
+
+/* --- Badges & Soft Pills --- */
+.pill-cc-blue, .badge-soft-primary {
+  background-color: var(--cc-blue-surface) !important;
+  color: var(--cc-blue-text) !important;
+  border: 1px solid var(--cc-blue-border) !important;
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  border-radius: 20px !important;
+  padding: 3px 10px !important;
+}
+
+.pill-cc-green, .badge-soft-success {
+  background-color: var(--cc-green-surface) !important;
+  color: var(--cc-green-text) !important;
+  border: 1px solid var(--cc-green-border) !important;
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  border-radius: 20px !important;
+  padding: 3px 10px !important;
+}
+
+.pill-cc-red, .badge-soft-danger {
+  background-color: var(--cc-red-surface) !important;
+  color: var(--cc-red-text) !important;
+  border: 1px solid var(--cc-red-border) !important;
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  border-radius: 20px !important;
+  padding: 3px 10px !important;
+}
+
+.pill-cc-orange, .badge-soft-warning {
+  background-color: var(--cc-orange-surface) !important;
+  color: var(--cc-orange-text) !important;
+  border: 1px solid var(--cc-orange-border) !important;
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  border-radius: 20px !important;
+  padding: 3px 10px !important;
+}
+
+.pill-cc-slate, .badge-soft-slate {
+  background-color: var(--cc-slate-100) !important;
+  color: var(--cc-slate-600) !important;
+  border: 1px solid var(--cc-slate-200) !important;
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  border-radius: 20px !important;
+  padding: 3px 10px !important;
+}
+
+/* --- Form Controls --- */
+.form-control.cc-input, .form-select.cc-input, select.cc-input, input.cc-input, textarea.cc-input {
+  border: 1.5px solid var(--cc-slate-200) !important;
+  border-radius: 8px !important;
+  font-size: 0.85rem !important;
+  color: var(--cc-slate-900) !important;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+}
+
+.form-control.cc-input:focus, .form-select.cc-input:focus, select.cc-input:focus, input.cc-input:focus, textarea.cc-input:focus {
+  border-color: var(--cc-blue-border) !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+
+/* --- Tables --- */
+.table.cc-table {
+  font-size: 0.85rem;
+}
+.table.cc-table thead tr {
+  border-bottom: 2px solid var(--cc-slate-200);
+}
+.table.cc-table th {
+  font-size: 0.72rem;
+  color: var(--cc-slate-500);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.table.cc-table tbody tr {
+  border-bottom: 1px solid var(--cc-slate-100);
+}
+.cc-ruled {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+.cc-ruled th, .cc-ruled td {
+  border: 1px solid var(--cc-slate-200);
+}
+
+/* Font Monospace */
+.font-monospace {
+  font-family: 'JetBrains Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
+/* ==========================================================================
+   GOLD & GREEN THEME IMPLEMENTATION — GOLDEN SUCCESS COLLEGE
+   ========================================================================== */
+
+:root {
+  /* Neutral Scale */
+  --cc-slate-900: #0f172a;
+  --cc-slate-600: #475569;
+  --cc-slate-500: #64748b;
+  --cc-slate-400: #94a3b8;
+  --cc-slate-300: #cbd5e1;
+  --cc-slate-200: #e2e8f0;
+  --cc-slate-100: #f1f5f9;
+  --cc-slate-50:  #f8fafc;
+
+  /* Gold & Green Core Tokens */
+  --gsc-primary: #0b5e28;
+  --gsc-dark-green: #073d1a;
+  --gsc-gold: #f59e0b;
+  --gsc-gold-light: #fef08a;
+  --gsc-gold-hover: #d97706;
+
+  /* Semantic Hues aligned to Gold & Emerald Green */
+  --cc-green-surface: #f0fdf4;
+  --cc-green-border:  #86efac;
+  --cc-green-text:    #15803d;
+  --cc-green-hover:   #dcfce7;
+
+  --cc-blue-surface: #eff6ff;
+  --cc-blue-border:  #93c5fd;
+  --cc-blue-text:    #2563eb;
+  --cc-blue-hover:   #dbeafe;
+
+  --cc-amber-surface: #fffbeb;
+  --cc-amber-border:  #fde68a;
+  --cc-amber-text:    #b45309;
+  --cc-amber-hover:   #fef3c7;
+
+  --cc-red-surface: #fff1f2;
+  --cc-red-border:  #fda4af;
+  --cc-red-text:    #e11d48;
+  --cc-red-hover:   #ffe4e6;
+}
+
+/* --- Gradient Bars --- */
+.cc-gradient-bar-gold {
+  height: 3px;
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  border-radius: 0 0 0.375rem 0.375rem;
+}
+
+.cc-gradient-bar-emerald {
+  height: 3px;
+  background: linear-gradient(90deg, #0b5e28, #10b981);
+  border-radius: 0 0 0.375rem 0.375rem;
+}
+
+.cc-gradient-bar-gold-green {
+  height: 3px;
+  background: linear-gradient(90deg, #0b5e28, #f59e0b, #10b981);
+  border-radius: 0 0 0.375rem 0.375rem;
+}
+
+/* Soft Gold Pill & Buttons */
+.pill-cc-amber, .badge-soft-amber, .pill-cc-gold {
+  background-color: var(--cc-amber-surface) !important;
+  color: var(--cc-amber-text) !important;
+  border: 1px solid var(--cc-amber-border) !important;
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+  border-radius: 20px !important;
+  padding: 3px 10px !important;
+}
+
+.btn-soft-amber, .btn-soft-gold {
+  background-color: var(--cc-amber-surface) !important;
+  color: var(--cc-amber-text) !important;
+  border: 1.5px solid var(--cc-amber-border) !important;
+  border-radius: 8px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+.btn-soft-amber:hover, .btn-soft-gold:hover {
+  background-color: var(--cc-amber-hover) !important;
+  color: #78350f !important;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2) !important;
+}
+
+/* ==========================================================================
+   CHEMICAL CARBON DARK THEME (Gold & Emerald Forest Variant)
+   ========================================================================== */
+[data-bs-theme="dark"] {
+  --cc-slate-900: #f0fdf4;
+  --cc-slate-600: #cbd5e1;
+  --cc-slate-500: #a7f3d0;
+  --cc-slate-400: #6ee7b7;
+  --cc-slate-300: #34d399;
+  --cc-slate-200: #1c4d2b;
+  --cc-slate-100: #0d2f19;
+  --cc-slate-50:  #051a0e;
+
+  --cc-green-surface: rgba(16, 185, 129, 0.18);
+  --cc-green-border:  rgba(110, 231, 183, 0.35);
+  --cc-green-text:    #6ee7b7;
+  --cc-green-hover:   rgba(16, 185, 129, 0.3);
+
+  --cc-amber-surface: rgba(245, 158, 11, 0.18);
+  --cc-amber-border:  rgba(253, 230, 138, 0.35);
+  --cc-amber-text:    #fef08a;
+  --cc-amber-hover:   rgba(245, 158, 11, 0.3);
+
+  --cc-blue-surface: rgba(59, 130, 246, 0.18);
+  --cc-blue-border:  rgba(147, 197, 253, 0.35);
+  --cc-blue-text:    #93c5fd;
+  --cc-blue-hover:   rgba(59, 130, 246, 0.3);
+
+  --cc-red-surface: rgba(225, 29, 72, 0.18);
+  --cc-red-border:  rgba(253, 164, 175, 0.35);
+  --cc-red-text:    #fda4af;
+  --cc-red-hover:   rgba(225, 29, 72, 0.3);
+
+  body {
+    background-color: #04170c !important;
+    color: #f0fdf4 !important;
+  }
+
+  header {
+    background-color: #031209 !important;
+    border-bottom: 2px solid #f59e0b !important;
+  }
+
+  .navbar-brand span {
+    color: #f0fdf4 !important;
+  }
+
+  .card, .card.cc-card, .users-table-card, .settings-sidebar, .settings-section, .auth-card {
+    background-color: #0b2915 !important;
+    color: #f0fdf4 !important;
+    border: 1px solid #164e27 !important;
+  }
+
+  .card-header, .card-footer {
+    background-color: #04170c !important;
+    border-color: #164e27 !important;
+  }
+
+  .dropdown-menu {
+    background-color: #0b2915 !important;
+    border: 1px solid #f59e0b !important;
+  }
+  .dropdown-item {
+    color: #cbd5e1 !important;
+  }
+  .dropdown-item:hover {
+    background-color: #164e27 !important;
+    color: #fef08a !important;
+  }
+  .dropdown-menu .bg-light {
+    background-color: #04170c !important;
+  }
+
+  .text-dark {
+    color: #f0fdf4 !important;
+  }
+  .text-secondary, .text-muted {
+    color: #a7f3d0 !important;
+  }
+  .bg-light, .bg-light-emerald, .bg-light-danger, .bg-light-primary {
+    background-color: #04170c !important;
+  }
+  .bg-white {
+    background-color: #0b2915 !important;
+    color: #f0fdf4 !important;
+  }
+
+  .table, .table th, .table td {
+    color: #f0fdf4 !important;
+    border-color: #164e27 !important;
+  }
+  .table thead, .table thead.bg-light, .table thead th {
+    background-color: #04170c !important;
+    color: #fbf089 !important;
+  }
+
+  .form-control.cc-input, .form-select.cc-input, select.cc-input, input.cc-input, textarea.cc-input {
+    background-color: #04170c !important;
+    color: #f0fdf4 !important;
+    border-color: #164e27 !important;
+  }
+
+  .form-control.cc-input:focus, .form-select.cc-input:focus {
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25) !important;
+  }
+
+  .form-floating label {
+    color: #a7f3d0 !important;
+  }
+
+  .form-floating > .form-control:focus ~ label,
+  .form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: #fef08a !important;
+    background-color: transparent !important;
+  }
+
+  .border, .border-bottom, .border-top, .border-start, .border-end {
+    border-color: #164e27 !important;
+  }
+
+  .modal-content {
+    background-color: #0b2915 !important;
+    color: #f0fdf4 !important;
+    border: 1px solid #f59e0b !important;
+  }
+
+  .modal-header, .modal-footer {
+    border-color: #164e27 !important;
+  }
+
+  .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+  }
+
+  .list-group-item {
+    background-color: #0b2915 !important;
+    color: #f0fdf4 !important;
+    border-color: #164e27 !important;
+  }
+
+  .navbar-toggler {
+    background-color: #164e27 !important;
+  }
+  .navbar-toggler-icon {
+    filter: invert(1);
+  }
+}
+
+/* ==========================================================================
+   EVENTS PAGE — EXTRA GRADIENT BARS, AMBER BUTTON & PAGINATION
+   ========================================================================== */
+
+/* Gradient bars */
+.cc-gradient-bar-emerald {
+  height: 3px;
+  background: linear-gradient(90deg, #0b5e28, #22c55e);
+  border-radius: 0 0 0.375rem 0.375rem;
+}
+.cc-gradient-bar-gold {
+  height: 3px;
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  border-radius: 0 0 0.375rem 0.375rem;
+}
+.cc-gradient-bar-gold-green {
+  height: 3px;
+  background: linear-gradient(90deg, #f59e0b, #0b5e28, #22c55e);
+  border-radius: 0 0 0.375rem 0.375rem;
+}
+
+/* Amber (Gold) Soft Button */
+:root {
+  --cc-amber-surface: #fffbeb;
+  --cc-amber-border:  #fcd34d;
+  --cc-amber-text:    #b45309;
+  --cc-amber-hover:   #fef3c7;
+}
+.btn-soft-amber {
+  background-color: var(--cc-amber-surface) !important;
+  color: var(--cc-amber-text) !important;
+  border: 1.5px solid var(--cc-amber-border) !important;
+  border-radius: 8px !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-soft-amber:hover {
+  background-color: var(--cc-amber-hover) !important;
+  color: #92400e !important;
+  box-shadow: 0 2px 8px rgba(180, 83, 9, 0.15) !important;
+}
+
+/* Amber badge/pill */
+.pill-cc-amber {
+  background-color: var(--cc-amber-surface) !important;
+  color: var(--cc-amber-text) !important;
+  border: 1px solid var(--cc-amber-border) !important;
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  border-radius: 20px !important;
+  padding: 3px 10px !important;
+  display: inline-block;
+}
+
+/* Pagination link styling */
+.pagination .page-link.btn-soft-success,
+.pagination .page-link.btn-soft-secondary {
+  padding: 0.3rem 0.65rem !important;
+  font-size: 0.78rem !important;
+  font-weight: 600 !important;
+  text-decoration: none;
+}
+.pagination .page-item.disabled .page-link {
+  opacity: 0.45 !important;
+  pointer-events: none;
+}
+.pagination .page-item.active .page-link {
+  font-weight: 700 !important;
+}
+

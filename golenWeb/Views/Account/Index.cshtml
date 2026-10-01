@@ -50,86 +50,101 @@
     }
 </style>
 
-<div class="user-mgmt-header">
-    <div class="d-flex align-items-center justify-content-between">
-        <div>
-            <h1 class="mb-1" style="font-size:1.6rem;font-weight:800;"><i class="bi bi-shield-fill-check me-2" style="color:#e6b800;"></i>User Management</h1>
-            <p class="mb-0" style="color:rgba(255,255,255,0.7);font-size:0.9rem;">Manage accounts and roles — Admin access only</p>
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <div>
+        <div class="cc-section-label text-success">
+            <i class="bi bi-shield-fill-check"></i> Security & Administration
         </div>
-        <div class="d-flex gap-2">
-            <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-light btn-sm">
-                <i class="bi bi-arrow-left me-1"></i>Dashboard
-            </a>
-            <a asp-action="Create" class="btn btn-warning btn-sm fw-bold">
+        <h1 class="h3 fw-bold mb-1 text-dark">User Management</h1>
+        <p class="text-muted small mb-0">Manage system user accounts, credentials, and access roles.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-soft-secondary text-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Dashboard
+        </a>
+        @if (User?.Identity?.IsAuthenticated ?? false)
+        {
+            <a asp-action="Create" class="btn btn-soft-success fw-bold">
                 <i class="bi bi-person-plus me-1"></i>Add User
             </a>
-        </div>
+        }
     </div>
 </div>
 
-<div class="users-table-card">
-    <table class="table users-table mb-0">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>User</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var u in Model)
-            {
+<div class="card border-0 shadow-sm position-relative overflow-hidden">
+    <div class="cc-gradient-bar cc-gradient-bar-emerald"></div>
+    <div class="table-responsive">
+        <table class="table align-middle mb-0">
+            <thead class="bg-light">
                 <tr>
-                    <td class="text-muted" style="font-size:0.85rem;">@u.Id</td>
-                    <td>
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="user-avatar-sm">@u.Username.Substring(0, 1).ToUpper()</div>
-                            <span class="fw-600" style="font-weight:600;">@u.Username</span>
-                        </div>
-                    </td>
-                    <td class="text-muted" style="font-size:0.88rem;">@u.Email</td>
-                    <td>
-                        @if (u.Role == "Admin")
-                        {
-                            <span class="role-badge admin"><i class="bi bi-shield-fill-check me-1"></i>Admin</span>
-                        }
-                        else
-                        {
-                            <span class="role-badge user"><i class="bi bi-person me-1"></i>User</span>
-                        }
-                    </td>
-                    <td>
-                        <div class="d-flex gap-2 flex-wrap">
-                            <a asp-action="Edit" asp-route-id="@u.Id" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-pencil me-1"></i>Edit
-                            </a>
-                            <a asp-action="Delete" asp-route-id="@u.Id" class="btn btn-sm btn-outline-danger">
-                                <i class="bi bi-trash me-1"></i>Delete
-                            </a>
-                            <!-- Quick Role Toggle -->
-                            <form asp-action="ChangeRole" method="post" class="d-inline">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="id" value="@u.Id" />
-                                <input type="hidden" name="role" value="@(u.Role == "Admin" ? "User" : "Admin")" />
-                                <button type="submit" class="btn btn-sm btn-outline-secondary"
-                                        onclick="return confirm('Change role of @u.Username to @(u.Role == "Admin" ? "User" : "Admin")?')">
-                                    <i class="bi bi-arrow-left-right me-1"></i>
-                                    → @(u.Role == "Admin" ? "User" : "Admin")
-                                </button>
-                            </form>
-                        </div>
-                    </td>
+                    <th class="ps-4 text-uppercase text-secondary extra-small fw-bold">#</th>
+                    <th class="text-uppercase text-secondary extra-small fw-bold">User</th>
+                    <th class="text-uppercase text-secondary extra-small fw-bold">Email</th>
+                    <th class="text-uppercase text-secondary extra-small fw-bold">Role</th>
+                    <th class="pe-4 text-end text-uppercase text-secondary extra-small fw-bold">Actions</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var u in Model)
+                {
+                    <tr>
+                        <td class="ps-4 text-muted small">@u.UserId</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="user-avatar-sm" style="width:34px;height:34px;border-radius:50%;background:#dcfce7;color:#15803d;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;">
+                                    @u.Username.Substring(0, 1).ToUpper()
+                                </div>
+                                <span class="fw-bold text-dark">@u.Username</span>
+                            </div>
+                        </td>
+                        <td class="text-muted small">@u.Email</td>
+                        <td>
+                            @if (u.Role == "Admin")
+                            {
+                                <span class="pill-cc pill-cc-amber"><i class="bi bi-shield-fill-check me-1"></i>Admin</span>
+                            }
+                            else
+                            {
+                                <span class="pill-cc pill-cc-emerald"><i class="bi bi-person me-1"></i>User</span>
+                            }
+                        </td>
+                        <td class="pe-4 text-end">
+                            @if (User?.Identity?.IsAuthenticated ?? false)
+                            {
+                                <div class="d-inline-flex gap-2">
+                                    <a asp-action="Edit" asp-route-id="@u.UserId" class="btn btn-soft-primary btn-sm">
+                                        <i class="bi bi-pencil me-1"></i>Edit
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@u.UserId" class="btn btn-soft-danger btn-sm">
+                                        <i class="bi bi-trash me-1"></i>Delete
+                                    </a>
+                                    <form asp-action="ChangeRole" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@u.UserId" />
+                                        <input type="hidden" name="role" value="@(u.Role == "Admin" ? "User" : "Admin")" />
+                                        <button type="submit" class="btn btn-soft-secondary btn-sm"
+                                                onclick="return confirm('Change role of @u.Username to @(u.Role == "Admin" ? "User" : "Admin")?')">
+                                            <i class="bi bi-arrow-left-right me-1"></i>
+                                            Make @(u.Role == "Admin" ? "User" : "Admin")
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                            else
+                            {
+                                <span class="badge bg-light text-muted fw-normal">Read-Only</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
     @if (!Model.Any())
     {
         <div class="text-center py-5 text-muted">
-            <i class="bi bi-people" style="font-size:3rem;opacity:0.3;"></i>
-            <p class="mt-2">No users found.</p>
+            <i class="bi bi-people text-secondary" style="font-size:2.5rem;opacity:0.4;"></i>
+            <p class="mt-2 mb-0 small">No users found.</p>
         </div>
     }
 </div>

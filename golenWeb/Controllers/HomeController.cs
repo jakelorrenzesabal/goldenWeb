@@ -7,24 +7,26 @@ namespace golenWeb.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly EventService _eventService;
-        private readonly BulletinService _bulletinService;
+        private readonly HomeService _homeService;
 
-        public HomeController(EventService eventService, BulletinService bulletinService)
+        public HomeController(HomeService homeService)
         {
-            _eventService = eventService;
-            _bulletinService = bulletinService;
+            _homeService = homeService;
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var todayEvents = await _eventService.GetTodayEventsAsync();
-            var bulletins = await _bulletinService.GetAllAsync();
-            ViewData["TodayEvents"] = todayEvents;
-            ViewData["Bulletins"] = bulletins;
-            return View();
+            var data = await _homeService.GetHomePageDataAsync();
+
+            ViewData["TodayEvents"] = data.TodayEvents;
+            ViewData["AllEvents"] = data.AllEvents;
+            ViewData["Bulletins"] = data.Bulletins;
+
+            return View(data);
         }
 
+        [HttpGet]
         public IActionResult Privacy()
         {
             return View();

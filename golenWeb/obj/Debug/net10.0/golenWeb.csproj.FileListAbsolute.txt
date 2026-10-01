@@ -218,7 +218,7 @@ D:\goldenWebsitePro\golenWeb\golenWeb\bin\Debug\net10.0\runtimes\win-x64\native\
 D:\goldenWebsitePro\golenWeb\golenWeb\bin\Debug\net10.0\runtimes\win-x64\native\krbcc64.dll
 D:\goldenWebsitePro\golenWeb\golenWeb\bin\Debug\net10.0\runtimes\win\lib\net10.0\System.Windows.Extensions.dll
 D:\goldenWebsitePro\golenWeb\golenWeb\obj\Debug\net10.0\golenWeb.sourcelink.json
-D:\goldenWebsitePro\golenWeb\golenWeb\obj\Debug\net10.0\compressed\bakaea2773-{0}-j2c96po7m8-j2c96po7m8.gz
 D:\goldenWebsitePro\golenWeb\golenWeb\obj\Debug\net10.0\compressed\d7wia24xjs-{0}-w3vt3gu39b-w3vt3gu39b.gz
 D:\goldenWebsitePro\golenWeb\golenWeb\obj\Debug\net10.0\compressed\09b5m0swic-{0}-61n19gt1b8-61n19gt1b8.gz
 D:\goldenWebsitePro\golenWeb\golenWeb\obj\Debug\net10.0\compressed\her3flbjb7-{0}-34igru4c0t-34igru4c0t.gz
+D:\goldenWebsitePro\golenWeb\golenWeb\obj\Debug\net10.0\compressed\bakaea2773-{0}-5t3sbs27qt-5t3sbs27qt.gz
