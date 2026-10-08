@@ -110,71 +110,148 @@
     }
 </div>
 
-<!-- Recent Headlines Showcase -->
-<div class="card cc-card border-0 shadow-sm mb-4">
+<!-- FEATURED SPOTLIGHT SHOWCASE & HEADLINES (ABS-CBN MEDIA PORTAL STYLE) -->
+<div class="card cc-card border-0 shadow-sm mb-4 overflow-hidden">
     <div class="card-body px-4 py-3">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <p class="cc-section-label mb-0"><i class="bi bi-images me-1"></i> Campus Headlines &amp; Picture Attachments</p>
-            <a asp-controller="Events" asp-action="Create" class="btn btn-soft-success">
-                <i class="bi bi-plus-circle-fill"></i> Upload Picture Event
-            </a>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-danger text-uppercase px-2 py-1 fw-bold" style="font-size:0.65rem; letter-spacing:0.08em;">
+                    <i class="bi bi-broadcast me-1"></i> MEDIA SHOWCASE
+                </span>
+                <p class="cc-section-label mb-0" style="color: var(--gsc-primary) !important; font-weight:700;">
+                    Campus Spotlight Events &amp; Headlines
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-controller="Events" asp-action="Index" class="btn btn-soft-secondary btn-sm">
+                    <i class="bi bi-calendar-event me-1"></i> Events Calendar (@eventCount)
+                </a>
+                <a asp-controller="Events" asp-action="Create" class="btn btn-soft-success btn-sm fw-bold">
+                    <i class="bi bi-plus-circle-fill me-1"></i> Add Event
+                </a>
+            </div>
         </div>
-        <div class="row g-3">
-            @if (!recentEvents.Any() && !recentBulletins.Any())
-            {
-                <div class="col-12 text-center py-4">
-                    <i class="bi bi-images fs-1 mb-2" style="color: var(--cc-slate-300);"></i>
-                    <p style="color: var(--cc-slate-600); font-size: 0.85rem;">No headlines or pictures posted yet.</p>
+
+        @if (recentEvents.Any())
+        {
+            var dashHero = recentEvents.FirstOrDefault(e => e.IsFeatured && e.ImageData != null) ?? recentEvents.FirstOrDefault();
+            var dashSide = recentEvents.Where(e => e.EventId != dashHero?.EventId).Take(3).ToList();
+            var todayStr = DateTime.Today.ToString("yyyy-MM-dd");
+
+            <div class="row g-3">
+                <!-- Main Spotlight Hero -->
+                @if (dashHero != null)
+                {
+                    <div class="col-lg-7">
+                        <div class="event-hero-card h-100" style="min-height: 320px; height: 320px;" onclick="openEventModal(@dashHero.EventId)">
+                            <div class="event-hero-img-wrap">
+                                @if (dashHero.ImageData != null)
+                                {
+                                    <img src="/Events/Image/@dashHero.EventId" alt="@dashHero.Title" class="event-hero-img" />
+                                }
+                                else
+                                {
+                                    <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #073d1a 0%, #0b5e28 50%, #0f172a 100%);">
+                                        <i class="bi bi-calendar-event text-warning opacity-50" style="font-size: 6rem;"></i>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="event-hero-overlay">
+                                <div class="event-hero-top">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge bg-danger text-uppercase px-2 py-1 fw-bold" style="font-size:0.65rem;">
+                                            <i class="bi bi-star-fill me-1 text-warning"></i> FEATURED SPOTLIGHT
+                                        </span>
+                                        @if (dashHero.EventDate.ToString("yyyy-MM-dd") == todayStr)
+                                        {
+                                            <span class="badge bg-success text-uppercase px-2 py-1 fw-bold" style="font-size:0.65rem;">
+                                                <i class="bi bi-record-fill me-1 text-light"></i> TODAY
+                                            </span>
+                                        }
+                                    </div>
+
+                                    <div class="event-date-stamp shadow-sm">
+                                        <div class="stamp-month">@dashHero.EventDate.ToString("MMM")</div>
+                                        <div class="stamp-day">@dashHero.EventDate.ToString("dd")</div>
+                                    </div>
+                                </div>
+
+                                <div class="event-hero-bottom">
+                                    <div class="mb-2">
+                                        <span class="pill-cc-amber me-2"><i class="bi bi-tag-fill me-1"></i>@dashHero.Category</span>
+                                        <span class="event-meta-pill">
+                                            <i class="bi bi-clock me-1 text-warning"></i>@dashHero.StartTime – @dashHero.EndTime
+                                        </span>
+                                    </div>
+
+                                    <h4 class="event-hero-title" style="font-size: 1.35rem; margin-bottom: 6px;">@dashHero.Title</h4>
+                                    
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 pt-2 border-top border-secondary border-opacity-25">
+                                        <div class="d-flex align-items-center gap-3 text-light small fw-semibold" style="font-size: 0.78rem;">
+                                            <span><i class="bi bi-geo-alt-fill text-danger me-1"></i>@dashHero.Location</span>
+                                            <span><i class="bi bi-person-badge text-info me-1"></i>@dashHero.Organizer</span>
+                                        </div>
+                                        <button type="button" class="btn btn-warning btn-sm fw-bold px-3 shadow-sm rounded-pill" style="font-size: 0.75rem;" onclick="event.stopPropagation(); openEventModal(@dashHero.EventId);">
+                                            <i class="bi bi-eye-fill me-1"></i> Details
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Side Highlights -->
+                <div class="col-lg-5">
+                    <div class="d-flex flex-column gap-2 h-100 justify-content-between">
+                        @foreach (var sh in dashSide)
+                        {
+                            var isShToday = sh.EventDate.ToString("yyyy-MM-dd") == todayStr;
+                            <div class="event-side-card p-2" style="cursor: pointer;" onclick="openEventModal(@sh.EventId)">
+                                @if (sh.ImageData != null)
+                                {
+                                    <img src="/Events/Image/@sh.EventId" alt="@sh.Title" class="event-side-thumb" style="width: 80px; height: 70px;" />
+                                }
+                                else
+                                {
+                                    <div class="event-side-placeholder" style="width: 80px; height: 70px; font-size: 1.3rem;">
+                                        <i class="bi bi-calendar-event"></i>
+                                    </div>
+                                }
+
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="d-flex align-items-center gap-1 mb-1">
+                                        <span class="pill-cc-amber" style="font-size:0.62rem; padding: 1px 6px;">@sh.Category</span>
+                                        @if (isShToday)
+                                        {
+                                            <span class="pill-cc-red" style="font-size:0.62rem; padding: 1px 6px;"><i class="bi bi-record-fill me-1"></i>TODAY</span>
+                                        }
+                                    </div>
+                                    <h6 class="event-side-title mb-1" style="font-size: 0.88rem;">@sh.Title</h6>
+                                    <div class="small text-muted d-flex align-items-center gap-2" style="font-size: 0.73rem;">
+                                        <span><i class="bi bi-calendar3 text-success me-1"></i>@sh.EventDate.ToString("MMM dd")</span>
+                                        <span>&bull;</span>
+                                        <span><i class="bi bi-geo-alt text-danger me-1"></i>@sh.Location</span>
+                                    </div>
+                                </div>
+                                <i class="bi bi-chevron-right text-muted opacity-50 ms-auto"></i>
+                            </div>
+                        }
+                    </div>
                 </div>
-            }
-            else
-            {
-                @foreach (var ev in recentEvents)
-                {
-                    <div class="col-md-6 col-lg-4">
-                        <div class="card cc-card border-0 shadow-sm h-100 overflow-hidden" style="background-color: var(--cc-slate-50);">
-                            @if (ev.ImageData != null)
-                            {
-                                <img src="/Events/Image/@ev.EventId" alt="@ev.Title" class="w-100" style="height: 140px; object-fit: cover;" />
-                            }
-                            else
-                            {
-                                <div class="w-100 d-flex align-items-center justify-content-center text-primary" style="height: 140px; background-color: var(--cc-blue-surface); font-size: 2.2rem;">
-                                    <i class="bi bi-calendar-event"></i>
-                                </div>
-                            }
-                            <div class="card-body p-3">
-                                <span class="pill-cc-blue mb-1">Event &bull; @ev.Category</span>
-                                <div class="fw-bold text-truncate" style="color: var(--cc-slate-900); font-size: 0.90rem;" title="@ev.Title">@ev.Title</div>
-                                <small style="color: var(--cc-slate-500);" class="d-block mt-1"><i class="bi bi-geo-alt me-1"></i>@ev.Location</small>
-                            </div>
-                        </div>
-                    </div>
-                }
-                @foreach (var b in recentBulletins.Take(2))
-                {
-                    <div class="col-md-6 col-lg-4">
-                        <div class="card cc-card border-0 shadow-sm h-100 overflow-hidden" style="background-color: var(--cc-slate-50);">
-                            @if (b.ImageData != null)
-                            {
-                                <img src="/Bulletins/Image/@b.BulletinId" alt="@b.Title" class="w-100" style="height: 140px; object-fit: cover;" />
-                            }
-                            else
-                            {
-                                <div class="w-100 d-flex align-items-center justify-content-center text-warning" style="height: 140px; background-color: var(--cc-orange-surface); font-size: 2.2rem;">
-                                    <i class="bi bi-megaphone"></i>
-                                </div>
-                            }
-                            <div class="card-body p-3">
-                                <span class="pill-cc-orange mb-1">Bulletin &bull; @b.Category</span>
-                                <div class="fw-bold text-truncate" style="color: var(--cc-slate-900); font-size: 0.90rem;" title="@b.Title">@b.Title</div>
-                                <small style="color: var(--cc-slate-500);" class="d-block mt-1"><i class="bi bi-person me-1"></i>@b.Author</small>
-                            </div>
-                        </div>
-                    </div>
-                }
-            }
-        </div>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-4">
+                <i class="bi bi-calendar-x fs-1 mb-2" style="color: var(--cc-slate-300);"></i>
+                <p style="color: var(--cc-slate-600); font-size: 0.85rem;">No campus events scheduled to display.</p>
+                <a asp-controller="Events" asp-action="Create" class="btn btn-soft-success btn-sm">
+                    <i class="bi bi-plus-circle-fill me-1"></i> Schedule First Event
+                </a>
+            </div>
+        }
     </div>
     <div class="cc-gradient-bar-rainbow"></div>
 </div>
@@ -315,4 +392,121 @@
         </div>
     }
 </div>
+
+<!-- ========== EVENT DETAIL MODAL ========== -->
+<div class="modal fade" id="eventDetailModal" tabindex="-1" aria-labelledby="eventDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg overflow-hidden">
+            <div style="height: 4px; background: linear-gradient(90deg, #f59e0b, #0b5e28, #22c55e);"></div>
+            <div class="modal-header border-0 px-4 pt-4 pb-2">
+                <div class="d-flex align-items-center gap-2 flex-wrap w-100">
+                    <div id="modalCategoryBadge"></div>
+                    <h5 class="modal-title fw-bold mb-0" id="eventDetailModalLabel" style="font-size:1.1rem;"></h5>
+                </div>
+                <button type="button" class="btn-close ms-2 flex-shrink-0" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-4 pt-0 pb-3">
+                <div id="modalImageWrap" class="mb-3 rounded-3 overflow-hidden shadow-sm" style="max-height:240px; display:none;">
+                    <img id="modalImage" src="" alt="Event photo" class="w-100" style="height:240px; object-fit:cover;">
+                </div>
+                <p id="modalDescription" class="text-muted mb-3" style="font-size:0.92rem; line-height:1.65;"></p>
+                <div class="p-3 rounded-3 border mb-1" style="background-color:var(--cc-slate-50); border-color:var(--cc-slate-200) !important; font-size:0.875rem;">
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="bi bi-calendar3 text-success fs-5 mt-1"></i>
+                                <div>
+                                    <div class="text-muted" style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Date</div>
+                                    <div class="fw-semibold text-dark" id="modalDate"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="bi bi-clock text-warning fs-5 mt-1"></i>
+                                <div>
+                                    <div class="text-muted" style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Time</div>
+                                    <div class="fw-semibold text-dark" id="modalTime"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="bi bi-geo-alt-fill text-danger fs-5 mt-1"></i>
+                                <div>
+                                    <div class="text-muted" style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Venue</div>
+                                    <div class="fw-semibold text-dark" id="modalLocation"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-start gap-2">
+                                <i class="bi bi-person-badge text-secondary fs-5 mt-1"></i>
+                                <div>
+                                    <div class="text-muted" style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Organizer</div>
+                                    <div class="fw-semibold text-dark" id="modalOrganizer"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 px-4 pb-4 pt-2 gap-2 justify-content-start">
+                <div id="modalAuthButtons" class="d-none d-flex gap-2"></div>
+                <button type="button" class="btn btn-soft-secondary ms-auto" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function openEventModal(id) {
+        const modal = new bootstrap.Modal(document.getElementById('eventDetailModal'));
+        document.getElementById('eventDetailModalLabel').textContent = 'Loading\u2026';
+        document.getElementById('modalDescription').textContent = '';
+        document.getElementById('modalDate').textContent = '';
+        document.getElementById('modalTime').textContent = '';
+        document.getElementById('modalLocation').textContent = '';
+        document.getElementById('modalOrganizer').textContent = '';
+        document.getElementById('modalCategoryBadge').innerHTML = '';
+        document.getElementById('modalImageWrap').style.display = 'none';
+        document.getElementById('modalAuthButtons').innerHTML = '';
+        document.getElementById('modalAuthButtons').classList.add('d-none');
+        modal.show();
+
+        fetch('/Events/GetJson/' + id)
+            .then(function(r) {
+                if (!r.ok) throw new Error('Not found');
+                return r.json();
+            })
+            .then(function(ev) {
+                document.getElementById('eventDetailModalLabel').textContent = ev.title;
+                document.getElementById('modalDescription').textContent = ev.description || 'No description provided.';
+                document.getElementById('modalDate').textContent = ev.formattedDate;
+                document.getElementById('modalTime').textContent = ev.startTime + ' \u2013 ' + ev.endTime;
+                document.getElementById('modalLocation').textContent = ev.location;
+                document.getElementById('modalOrganizer').textContent = ev.organizer;
+                document.getElementById('modalCategoryBadge').innerHTML =
+                    '<span class="pill-cc-amber"><i class="bi bi-tag-fill me-1"></i>' + ev.category + '</span>';
+                if (ev.hasImage) {
+                    document.getElementById('modalImage').src = ev.imageUrl;
+                    document.getElementById('modalImageWrap').style.display = 'block';
+                }
+                var btns = document.getElementById('modalAuthButtons');
+                btns.classList.remove('d-none');
+                btns.innerHTML =
+                    '<a href="/Events/Edit/' + ev.eventId + '" class="btn btn-soft-amber btn-sm"><i class="bi bi-pencil-fill"></i> Edit Event</a>' +
+                    '<a href="/Events/Delete/' + ev.eventId + '" class="btn btn-soft-danger btn-sm"><i class="bi bi-trash-fill"></i> Delete</a>';
+            })
+            .catch(function() {
+                document.getElementById('eventDetailModalLabel').textContent = 'Error';
+                document.getElementById('modalDescription').textContent = 'Could not load event details. Please try again.';
+            });
+    }
+</script>
+}
+
 

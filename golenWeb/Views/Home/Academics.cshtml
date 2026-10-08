@@ -1,0 +1,524 @@
+@using golenWeb.Models
+@model HomeViewModel
+@{
+    ViewData["Title"] = "Academic Programs & Special Offers - Golden Success College";
+    var bulletins = Model?.Bulletins ?? new List<Bulletin>();
+    var academicBulletins = bulletins.Where(b => b.Category == "Academic Programs" || b.Category == "Scholarships & Offers" || b.Category == "Online Services & Ads").ToList();
+}
+
+<!-- HERO BANNER WITH AUTHENTIC CAMPUS PHOTO -->
+<section class="card cc-card border-0 shadow-sm mb-4 p-4 p-md-5 overflow-hidden" style="background: linear-gradient(135deg, var(--gsc-dark-green) 0%, #0d5225 55%, var(--cc-slate-900) 100%);">
+    <div class="row align-items-center position-relative" style="z-index: 1;">
+        <div class="col-lg-7 text-white mb-4 mb-lg-0">
+            <span class="pill-cc-amber mb-2 d-inline-block">
+                <i class="bi bi-award-fill me-1"></i> DEPED &amp; CHED ACCREDITED PROGRAMS
+            </span>
+            <h1 class="fw-bold mb-2 text-white" style="letter-spacing: -0.5px; font-size: 2.2rem;">Our Academic Programs &amp; Offers</h1>
+            <p class="fs-6 text-light opacity-90 mb-3 fw-semibold">
+                Discover the Senior High School strands and College degree programs (BSIT, BSHM, BEEd, BSEd English &amp; Math) offered to shape the <em>Innovators, Entrepreneurs, and Future Leaders</em> of tomorrow.
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="https://golden-success.com/services/enrollment/online" target="_blank" class="btn btn-warning fw-bold px-4 py-2 shadow-sm rounded-pill">
+                    <i class="bi bi-check-circle-fill me-1"></i> PROCEED TO ENROLLMENT
+                </a>
+                <a href="#college-section" class="btn btn-soft-success px-3 py-2">
+                    <i class="bi bi-bank2 me-1"></i> College Degrees
+                </a>
+                <a href="#shs-section" class="btn btn-soft-gold px-3 py-2">
+                    <i class="bi bi-journal-bookmark-fill me-1"></i> Senior High Strands
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-5 text-center">
+            <div class="position-relative d-inline-block rounded-4 overflow-hidden shadow-lg border border-2 border-warning border-opacity-50">
+                <img src="~/images/departments_02.png" alt="Golden Success College Campus" class="img-fluid" style="max-height: 260px; width: 100%; object-fit: cover;" />
+            </div>
+        </div>
+    </div>
+    <div class="cc-gradient-bar-emerald"></div>
+</section>
+
+<!-- SPECIAL PROMO ENROLLMENT AD BANNER WITH AUTHENTIC FLYER -->
+<div class="card cc-card border-0 shadow-sm mb-4 overflow-hidden" style="background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); border: 1.5px solid #fed7aa !important;">
+    <div class="card-body p-4">
+        <div class="row align-items-center">
+            <div class="col-md-5 text-center mb-3 mb-md-0">
+                <img src="~/images/programs_06.jpg" alt="Free Tuition & Student Supply Package Promo Flyer" class="img-fluid rounded-3 shadow-sm border" style="max-height: 220px; width: 100%; object-fit: cover;" />
+            </div>
+            <div class="col-md-7">
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                    <span class="pill-cc-red"><i class="bi bi-fire me-1"></i> LIMITED TIME ENROLLMENT PROMO</span>
+                    <span class="pill-cc-amber">ADMISSIONS 2026-2027</span>
+                </div>
+                <h3 class="fw-bold text-dark mb-2" style="font-size: 1.4rem;">100% Free Tuition &amp; Free Student Supply Kit Package!</h3>
+                <p class="mb-3 text-secondary" style="font-size: 0.92rem; line-height: 1.6;">
+                    Grade 7 &amp; Grade 11 Public School Graduates are eligible for <strong>100% Free Tuition</strong>, <strong>FREE Registration</strong>, <strong>FREE Official School ID</strong>, and a <strong>FREE Student Supply Kit</strong> upon enrollment!
+                </p>
+                <a href="https://golden-success.com/services/enrollment/online" target="_blank" class="btn btn-danger fw-bold px-4 py-2 shadow-sm" style="border-radius: 10px;">
+                    <i class="bi bi-send-fill me-1"></i> APPLY FOR FREE TUITION &amp; KITS
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="cc-gradient-bar-orange"></div>
+</div>
+
+<!-- LIVE BULLETIN OFFERS & ADS FEED WITH AUTHENTIC PHOTOS -->
+@if (academicBulletins.Any())
+{
+    <div class="card cc-card border-0 shadow-sm mb-4">
+        <div class="card-body px-4 py-3">
+            <p class="cc-section-label mb-3"><i class="bi bi-megaphone-fill me-1 text-warning"></i> Campus Offers &amp; Special Ads Bulletin Feed</p>
+            <div class="row g-3">
+                @foreach (var b in academicBulletins)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="p-3 rounded-3 border h-100 d-flex flex-column" style="background-color: var(--cc-slate-50); border-color: var(--cc-slate-200) !important;">
+                            @if (b.ImageData != null)
+                            {
+                                <div class="mb-2 rounded-3 overflow-hidden shadow-sm text-center bg-white" style="height: 140px;">
+                                    <img src="/Bulletins/Image/@b.BulletinId" alt="@b.Title" class="w-100 h-100" style="object-fit: cover;" />
+                                </div>
+                            }
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="pill-cc-amber" style="font-size:0.65rem;">@b.Category</span>
+                                <span class="small text-muted" style="font-size:0.75rem;"><i class="bi bi-calendar3 me-1"></i>@b.PublishDate.ToString("MMM dd, yyyy")</span>
+                            </div>
+                            <h6 class="fw-bold mb-2 text-dark" style="font-size:0.95rem;">@b.Title</h6>
+                            <p class="small text-secondary mb-3 flex-grow-1" style="font-size:0.83rem; line-height:1.5; white-space: pre-line;">@b.Content</p>
+                            <div class="pt-2 border-top d-flex justify-content-between align-items-center" style="border-color: var(--cc-slate-200) !important;">
+                                <small class="text-muted" style="font-size:0.75rem;"><i class="bi bi-building me-1"></i>@b.Author</small>
+                                <button type="button" class="btn btn-soft-warning btn-sm" onclick="openBulletinModal(@b.BulletinId)" style="font-size:0.75rem;">Details &rarr;</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="cc-gradient-bar-gold"></div>
+    </div>
+}
+
+<!-- COLLEGE DEGREE PROGRAMS SECTION (BSIT, BSHM, BEEd, BSEd English & Math ONLY) -->
+<div id="college-section" class="mb-5">
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <div>
+            <p class="cc-section-label mb-1"><i class="bi bi-bank2 me-1 text-primary"></i> Tertiary Degree Programs</p>
+            <h2 class="fw-bold text-dark mb-0" style="font-size: 1.4rem;">CHED-Accredited College Programs</h2>
+        </div>
+        <span class="pill-cc-blue"><i class="bi bi-mortarboard-fill me-1"></i> Official College Offerings</span>
+    </div>
+
+    <!-- COLLEGE INFOGRAPHIC SHOWCASE BANNER PHOTO -->
+    <div class="card cc-card border-0 shadow-sm mb-4 overflow-hidden">
+        <div class="row g-0 align-items-center">
+            <div class="col-md-5">
+                <img src="~/images/programs_05.jpg" alt="Golden Success College Degree Programs Infographic" class="img-fluid w-100" style="height: 240px; object-fit: cover;" />
+            </div>
+            <div class="col-md-7 p-4">
+                <span class="pill-cc-amber mb-2 d-inline-block">COLLEGE DEGREES OFFERED</span>
+                <h4 class="fw-bold text-dark mb-2">Excellence in IT, Hospitality &amp; Education</h4>
+                <p class="small text-secondary mb-0" style="font-size: 0.88rem; line-height: 1.6;">
+                    Golden Success College provides specialized tertiary degree programs in Information Technology (BSIT), Hospitality Management (BSHM), Elementary Education (BEEd), and Secondary Education (BSEd Major in English &amp; Major in Mathematics).
+                </p>
+            </div>
+        </div>
+        <div class="cc-gradient-bar-blue"></div>
+    </div>
+
+    <div class="row g-3">
+        <!-- 1. BSIT -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card cc-card border-0 shadow-sm h-100 p-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; background-color: #eff6ff; color: #2563eb;">
+                            <i class="bi bi-laptop-fill fs-4"></i>
+                        </div>
+                        <div>
+                            <span class="pill-cc-blue">BSIT</span>
+                            <h5 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">BS Information Technology</h5>
+                        </div>
+                    </div>
+                    <p class="small text-secondary mb-3" style="font-size: 0.84rem; line-height: 1.55;">
+                        Specialized in software engineering, full-stack web architecture, database administration, network engineering, and cybersecurity.
+                    </p>
+                    <ul class="small text-secondary ps-3 mb-0" style="font-size: 0.81rem;">
+                        <li>Systems Analysis &amp; Development</li>
+                        <li>Modern Web &amp; Mobile App Programming</li>
+                        <li>Network &amp; Server Infrastructure</li>
+                    </ul>
+                </div>
+                <div class="cc-gradient-bar-blue"></div>
+            </div>
+        </div>
+
+        <!-- 2. BSHM -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card cc-card border-0 shadow-sm h-100 p-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; background-color: #fff7ed; color: #c2410c;">
+                            <i class="bi bi-cup-hot-fill fs-4"></i>
+                        </div>
+                        <div>
+                            <span class="pill-cc-amber">BSHM</span>
+                            <h5 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">BS Hospitality Management</h5>
+                        </div>
+                    </div>
+                    <p class="small text-secondary mb-3" style="font-size: 0.84rem; line-height: 1.55;">
+                        Comprehensive training in hotel and resort operations, culinary arts, food and beverage management, front office, and cruise line logistics.
+                    </p>
+                    <ul class="small text-secondary ps-3 mb-0" style="font-size: 0.81rem;">
+                        <li>Hotel &amp; Resort Front Office Operations</li>
+                        <li>Commercial Culinary &amp; Banquet Craft</li>
+                        <li>Event &amp; Travel Logistics Management</li>
+                    </ul>
+                </div>
+                <div class="cc-gradient-bar-gold"></div>
+            </div>
+        </div>
+
+        <!-- 3. BEEd -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card cc-card border-0 shadow-sm h-100 p-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; background-color: #f0fdf4; color: #16a34a;">
+                            <i class="bi bi-journal-text fs-4"></i>
+                        </div>
+                        <div>
+                            <span class="pill-cc-green">BEEd</span>
+                            <h5 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">BS Elementary Education</h5>
+                        </div>
+                    </div>
+                    <p class="small text-secondary mb-3" style="font-size: 0.84rem; line-height: 1.55;">
+                        Preparing future primary school teachers with strong pedagogical methods, child psychology, subject mastery, and classroom management.
+                    </p>
+                    <ul class="small text-secondary ps-3 mb-0" style="font-size: 0.81rem;">
+                        <li>Child &amp; Adolescent Development</li>
+                        <li>Elementary Curriculum &amp; Pedagogy</li>
+                        <li>Instructional Materials Development</li>
+                    </ul>
+                </div>
+                <div class="cc-gradient-bar-emerald"></div>
+            </div>
+        </div>
+
+        <!-- 4. BSEd English -->
+        <div class="col-md-6 col-lg-6">
+            <div class="card cc-card border-0 shadow-sm h-100 p-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; background-color: #fdf4ff; color: #9333ea;">
+                            <i class="bi bi-chat-quote-fill fs-4"></i>
+                        </div>
+                        <div>
+                            <span class="pill-cc-purple">BSEd ENGLISH</span>
+                            <h5 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">BSEd Major in English</h5>
+                        </div>
+                    </div>
+                    <p class="small text-secondary mb-3" style="font-size: 0.84rem; line-height: 1.55;">
+                        Specialized training for secondary high school educators focusing on English linguistics, world literature, rhetoric, speech, and language pedagogy.
+                    </p>
+                    <ul class="small text-secondary ps-3 mb-0" style="font-size: 0.81rem;">
+                        <li>Structure of English &amp; Linguistics</li>
+                        <li>Mythology, Folklore &amp; World Literature</li>
+                        <li>Language Assessment &amp; Teaching Strategies</li>
+                    </ul>
+                </div>
+                <div class="cc-gradient-bar-purple"></div>
+            </div>
+        </div>
+
+        <!-- 5. BSEd Mathematics -->
+        <div class="col-md-6 col-lg-6">
+            <div class="card cc-card border-0 shadow-sm h-100 p-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; background-color: #f0f9ff; color: #0284c7;">
+                            <i class="bi bi-calculator-fill fs-4"></i>
+                        </div>
+                        <div>
+                            <span class="pill-cc-blue">BSEd MATH</span>
+                            <h5 class="fw-bold text-dark mb-0" style="font-size: 1.05rem;">BSEd Major in Mathematics</h5>
+                        </div>
+                    </div>
+                    <p class="small text-secondary mb-3" style="font-size: 0.84rem; line-height: 1.55;">
+                        Training secondary mathematics teachers in advanced algebra, geometry, calculus, statistics, analytical problem solving, and modern math instruction.
+                    </p>
+                    <ul class="small text-secondary ps-3 mb-0" style="font-size: 0.81rem;">
+                        <li>Advanced Algebra, Geometry &amp; Trigonometry</li>
+                        <li>Calculus &amp; Probability Theory</li>
+                        <li>Modern Mathematics Teaching Methods</li>
+                    </ul>
+                </div>
+                <div class="cc-gradient-bar-blue"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SENIOR HIGH SCHOOL STRANDS SECTION -->
+<div id="shs-section" class="mb-5">
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <div>
+            <p class="cc-section-label mb-1"><i class="bi bi-mortarboard-fill me-1 text-success"></i> Senior High School Offerings</p>
+            <h2 class="fw-bold text-dark mb-0" style="font-size: 1.4rem;">Academic Track &amp; TVL Specializations</h2>
+        </div>
+        <span class="badge bg-success text-white px-3 py-2 fw-bold" style="border-radius:20px;">DepEd Voucher Program Accepted</span>
+    </div>
+
+    <!-- SHS INFOGRAPHIC BANNER -->
+    <div class="card cc-card border-0 shadow-sm mb-4 overflow-hidden">
+        <div class="row g-0 align-items-center">
+            <div class="col-md-5">
+                <img src="~/images/programs_02.jpg" alt="Senior High School Academic Strands Flyer" class="img-fluid w-100" style="height: 220px; object-fit: cover;" />
+            </div>
+            <div class="col-md-7 p-4">
+                <span class="pill-cc-green mb-2 d-inline-block">ACADEMIC TRACK STRANDS</span>
+                <h4 class="fw-bold text-dark mb-2">ABM, HUMSS &amp; GAS Strands</h4>
+                <p class="small text-secondary mb-0" style="font-size: 0.88rem; line-height: 1.6;">
+                    Fully accredited by the Department of Education (DepEd). Golden Success College offers Academic Track strands tailored for university entrance and professional career readiness.
+                </p>
+            </div>
+        </div>
+        <div class="cc-gradient-bar-emerald"></div>
+    </div>
+
+    <!-- ACADEMIC TRACKS CARDS -->
+    <h5 class="fw-bold text-secondary mb-3"><i class="bi bi-book me-2 text-primary"></i>1. Academic Track Strands</h5>
+    <div class="row g-3 mb-4">
+        <!-- ABM -->
+        <div class="col-md-4">
+            <div class="card cc-card border-0 shadow-sm h-100">
+                <div class="card-body px-4 py-3">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #eff6ff; color: #2563eb;">
+                            <i class="bi bi-graph-up-arrow fs-5"></i>
+                        </div>
+                        <div>
+                            <span class="pill-cc-blue">ACADEMIC TRACK</span>
+                            <h5 class="fw-bold mb-0 text-dark" style="font-size: 1.05rem;">ABM</h5>
+                        </div>
+                    </div>
+                    <h6 class="fw-semibold text-dark mb-2">Accountancy, Business &amp; Management</h6>
+                    <p class="small text-secondary mb-3" style="font-size: 0.85rem;">
+                        Designed for students aspiring for careers in corporate leadership, financial management, accountancy, and business creation.
+                    </p>
+                    <ul class="small text-secondary ps-3 mb-0" style="font-size: 0.82rem;">
+                        <li>Fundamentals of Accountancy &amp; Business</li>
+                        <li>Organization &amp; Management</li>
+                        <li>Business Math &amp; Marketing</li>
+                    </ul>
+                </div>
+                <div class="cc-gradient-bar-blue"></div>
+            </div>
+        </div>
+
+        <!-- HUMSS -->
+        <div class="col-md-4">
+            <div class="card cc-card border-0 shadow-sm h-100">
+                <div class="card-body px-4 py-3">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #fdf4ff; color: #9333ea;">
+                            <i class="bi bi-people-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <span class="pill-cc-purple">ACADEMIC TRACK</span>
+                            <h5 class="fw-bold mb-0 text-dark" style="font-size: 1.05rem;">HUMSS</h5>
+                        </div>
+                    </div>
+                    <h6 class="fw-semibold text-dark mb-2">Humanities &amp; Social Sciences</h6>
+                    <p class="small text-secondary mb-3" style="font-size: 0.85rem;">
+                        For future lawyers, educators, journalists, psychologists, and social leaders seeking critical thinking and civic advocacy skills.
+                    </p>
+                    <ul class="small text-secondary ps-3 mb-0" style="font-size: 0.82rem;">
+                        <li>Creative Writing &amp; World Religions</li>
+                        <li>Philippine Politics &amp; Governance</li>
+                        <li>Social Sciences &amp; Communication</li>
+                    </ul>
+                </div>
+                <div class="cc-gradient-bar-purple"></div>
+            </div>
+        </div>
+
+        <!-- GAS -->
+        <div class="col-md-4">
+            <div class="card cc-card border-0 shadow-sm h-100">
+                <div class="card-body px-4 py-3">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #f0fdf4; color: #16a34a;">
+                            <i class="bi bi-compass-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <span class="pill-cc-green">ACADEMIC TRACK</span>
+                            <h5 class="fw-bold mb-0 text-dark" style="font-size: 1.05rem;">GAS</h5>
+                        </div>
+                    </div>
+                    <h6 class="fw-semibold text-dark mb-2">General Academic Strand</h6>
+                    <p class="small text-secondary mb-3" style="font-size: 0.85rem;">
+                        A flexible curriculum providing a versatile foundation across humanities, sciences, social studies, and business options.
+                    </p>
+                    <ul class="small text-secondary ps-3 mb-0" style="font-size: 0.82rem;">
+                        <li>Disaster Readiness &amp; Risk Reduction</li>
+                        <li>Humanities &amp; Applied Social Sciences</li>
+                        <li>Elective Track Explorations</li>
+                    </ul>
+                </div>
+                <div class="cc-gradient-bar-emerald"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TVL TRACK SPECIALIZATIONS WITH INFOGRAPHIC PHOTOS -->
+    <h5 class="fw-bold text-secondary mb-3"><i class="bi bi-tools me-2 text-warning"></i>2. Technical-Vocational-Livelihood (TVL) Track</h5>
+    
+    <div class="row g-3 mb-4">
+        <!-- TVL ICT -->
+        <div class="col-md-6">
+            <div class="card cc-card border-0 shadow-sm h-100 overflow-hidden">
+                <img src="~/images/programs_03.jpg" alt="TVL ICT Programming and Servicing Flyer" class="card-img-top" style="height: 180px; object-fit: cover;" />
+                <div class="card-body px-4 py-3">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #eff6ff; color: #2563eb;">
+                            <i class="bi bi-laptop fs-5"></i>
+                        </div>
+                        <div>
+                            <span class="pill-cc-blue">TVL - ICT STRAND</span>
+                            <h5 class="fw-bold mb-0 text-dark" style="font-size: 1.05rem;">Information &amp; Communications Technology</h5>
+                        </div>
+                    </div>
+                    <p class="small text-secondary mb-3" style="font-size: 0.85rem;">
+                        State-of-the-art computer laboratories preparing students for instant IT employability and national certification.
+                    </p>
+                    <div class="p-3 rounded-3 border bg-light" style="border-color: var(--cc-slate-200) !important;">
+                        <div class="fw-semibold text-dark mb-2 small"><i class="bi bi-patch-check-fill text-success me-1"></i> TESDA NC II / NC III Specializations:</div>
+                        <ul class="small text-secondary ps-3 mb-0" style="font-size: 0.83rem;">
+                            <li><strong>Computer Programming (.NET Tech &amp; Java) NC III</strong></li>
+                            <li><strong>Computer System Servicing (CSS) NC II</strong></li>
+                            <li><strong>2D / 3D Digital Animation NC III</strong></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="cc-gradient-bar-blue"></div>
+            </div>
+        </div>
+
+        <!-- TVL HOME ECONOMICS -->
+        <div class="col-md-6">
+            <div class="card cc-card border-0 shadow-sm h-100 overflow-hidden">
+                <img src="~/images/programs_04.jpg" alt="TVL Home Economics Culinary and Hospitality Flyer" class="card-img-top" style="height: 180px; object-fit: cover;" />
+                <div class="card-body px-4 py-3">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #fff7ed; color: #c2410c;">
+                            <i class="bi bi-cup-hot-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <span class="pill-cc-amber">TVL - HE STRAND</span>
+                            <h5 class="fw-bold mb-0 text-dark" style="font-size: 1.05rem;">Home Economics &amp; Hospitality</h5>
+                        </div>
+                    </div>
+                    <p class="small text-secondary mb-3" style="font-size: 0.85rem;">
+                        Commercial culinary kitchens, mock hotel suites, and event simulation rooms for real-world service training.
+                    </p>
+                    <div class="p-3 rounded-3 border bg-light" style="border-color: var(--cc-slate-200) !important;">
+                        <div class="fw-semibold text-dark mb-2 small"><i class="bi bi-patch-check-fill text-warning me-1"></i> TESDA NC II / NC III Specializations:</div>
+                        <div class="row g-1 small text-secondary" style="font-size: 0.83rem;">
+                            <div class="col-6">&bull; Cookery NC II</div>
+                            <div class="col-6">&bull; Bread &amp; Pastry Production NC II</div>
+                            <div class="col-6">&bull; Food &amp; Beverage NC II</div>
+                            <div class="col-6">&bull; Front Office Services NC II</div>
+                            <div class="col-6">&bull; Housekeeping NC II</div>
+                            <div class="col-6">&bull; Events Management NC III</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="cc-gradient-bar-amber"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SCHOLARSHIPS SECTION -->
+<div id="scholarships-section" class="mb-5">
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <div>
+            <p class="cc-section-label mb-1"><i class="bi bi-heart-fill me-1 text-danger"></i> Financial Assistance &amp; Grants</p>
+            <h2 class="fw-bold text-dark mb-0" style="font-size: 1.4rem;">Scholarship Opportunities</h2>
+        </div>
+        <a href="https://golden-success.com/scholarships" target="_blank" class="btn btn-soft-gold btn-sm">
+            Visit Scholarships Portal &rarr;
+        </a>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="card cc-card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <i class="bi bi-stars text-warning fs-3"></i>
+                        <h6 class="fw-bold mb-0 text-dark">Batang May Pangarap Ministry</h6>
+                    </div>
+                    <p class="small text-secondary mb-0" style="font-size: 0.86rem; line-height: 1.6;">
+                        Aims to help underprivileged but deserving youth achieve their career and academic dreams through holistic education and Christian guidance.
+                    </p>
+                </div>
+                <div class="cc-gradient-bar-gold"></div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card cc-card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <i class="bi bi-geo-alt-fill text-danger fs-3"></i>
+                        <h6 class="fw-bold mb-0 text-dark">Cebu City College Scholarship</h6>
+                    </div>
+                    <p class="small text-secondary mb-0" style="font-size: 0.86rem; line-height: 1.6;">
+                        Scholarship for qualified resident beneficiaries in Cebu City who wish to pursue higher education through municipal assistance.
+                    </p>
+                </div>
+                <div class="cc-gradient-bar-blue"></div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card cc-card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <i class="bi bi-award-fill text-success fs-3"></i>
+                        <h6 class="fw-bold mb-0 text-dark">Academic Honor Scholars</h6>
+                    </div>
+                    <p class="small text-secondary mb-0" style="font-size: 0.86rem; line-height: 1.6;">
+                        Merit-based tuition discounts for incoming first-year college students who graduated with Academic Honors from Senior High School.
+                    </p>
+                </div>
+                <div class="cc-gradient-bar-emerald"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ONLINE SERVICES & APPLICATION AD FOOTER -->
+<div class="card cc-card border-0 shadow-sm mb-4 text-center p-4 p-md-5" style="background: linear-gradient(135deg, #073d1a 0%, #0b5e28 100%);">
+    <div class="card-body text-white">
+        <span class="pill-cc-amber mb-3 d-inline-block">24/7 ONLINE ADMISSIONS</span>
+        <h2 class="fw-bold mb-2">Ready to Begin Your Golden Success Journey?</h2>
+        <p class="fs-6 opacity-90 mb-4 max-w-lg mx-auto" style="max-width: 650px;">
+            Join thousands of student innovators, entrepreneurs, and skilled professionals. Submit your online application today!
+        </p>
+        <div class="d-flex justify-content-center flex-wrap gap-3">
+            <a href="https://golden-success.com/services/enrollment/online" target="_blank" class="btn btn-warning btn-lg fw-bold px-4 shadow-sm" style="border-radius: 24px;">
+                <i class="bi bi-pencil-square me-1"></i> ENROLLMENT APPLICATION
+            </a>
+            <a href="https://golden-success.com/services/enrollment/tracker" target="_blank" class="btn btn-outline-light btn-lg fw-bold px-4" style="border-radius: 24px;">
+                <i class="bi bi-search me-1"></i> APPLICATION TRACKER
+            </a>
+            <a href="https://eclass.golden-success.com" target="_blank" class="btn btn-soft-success btn-lg fw-bold px-4" style="border-radius: 24px;">
+                <i class="bi bi-laptop me-1"></i> E-CLASS PORTAL
+            </a>
+        </div>
+    </div>
+    <div class="cc-gradient-bar-gold-green"></div>
+</div>

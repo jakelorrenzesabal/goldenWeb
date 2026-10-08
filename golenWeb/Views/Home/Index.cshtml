@@ -5,8 +5,16 @@
     var allEvents = ViewData["AllEvents"] as List<EventModel> ?? new List<EventModel>();
     var bulletins = ViewData["Bulletins"] as List<Bulletin> ?? new List<Bulletin>();
     var todayStr = DateTime.Today.ToString("dddd, MMMM dd, yyyy");
+    var todayDateOnly = DateTime.Today.ToString("yyyy-MM-dd");
     var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
-    var displayEvents = todayEvents.Any() ? todayEvents : allEvents.Take(4).ToList();
+    
+    var displayEvents = todayEvents.Any() ? todayEvents : allEvents;
+    var heroEvent = displayEvents.FirstOrDefault(e => e.IsFeatured && e.ImageData != null) 
+                    ?? displayEvents.FirstOrDefault(e => e.IsFeatured) 
+                    ?? displayEvents.FirstOrDefault();
+    var sideEvents = heroEvent != null 
+        ? displayEvents.Where(e => e.EventId != heroEvent.EventId).Take(3).ToList() 
+        : new List<EventModel>();
 }
 
 <!-- HERO BANNER -->
@@ -60,13 +68,141 @@
     <div class="cc-gradient-bar-green"></div>
 </div>
 
+<!-- MEDIA PORTAL SPOTLIGHT SHOWCASE SECTION (ABS-CBN STYLE) -->
+@if (heroEvent != null)
+{
+    <div class="card cc-card border-0 shadow-sm mb-4 overflow-hidden">
+        <div class="card-body px-4 py-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-danger text-uppercase px-2 py-1 fw-bold" style="font-size:0.65rem; letter-spacing:0.08em;">
+                        <i class="bi bi-broadcast me-1"></i> MEDIA SPOTLIGHT
+                    </span>
+                    <p class="cc-section-label mb-0" style="color: var(--gsc-primary) !important; font-weight:700;">
+                        Campus Events Showcase
+                    </p>
+                </div>
+                <a asp-controller="Events" asp-action="Index" class="btn btn-soft-success btn-sm">
+                    <i class="bi bi-arrow-right-circle me-1"></i> Explore Full Calendar
+                </a>
+            </div>
+
+            <div class="row g-4 align-items-stretch">
+                <!-- HERO MAIN FEATURED EVENT -->
+                <div class="col-lg-7">
+                    <div class="event-hero-card h-100" style="min-height: 380px;" onclick="openEventModal(@heroEvent.EventId)">
+                        <div class="event-hero-img-wrap">
+                            @if (heroEvent.ImageData != null)
+                            {
+                                <img src="/Events/Image/@heroEvent.EventId" alt="@heroEvent.Title" class="event-hero-img" />
+                            }
+                            else
+                            {
+                                <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #073d1a 0%, #0b5e28 50%, #0f172a 100%);">
+                                    <i class="bi bi-calendar-event text-warning opacity-50" style="font-size: 7rem;"></i>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="event-hero-overlay">
+                            <div class="event-hero-top">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-danger text-uppercase px-2 py-1 fw-bold" style="font-size:0.68rem;">
+                                        <i class="bi bi-star-fill me-1 text-warning"></i> TOP FEATURED SPOTLIGHT
+                                    </span>
+                                    @if (heroEvent.EventDate.ToString("yyyy-MM-dd") == todayDateOnly)
+                                    {
+                                        <span class="badge bg-success text-uppercase px-2 py-1 fw-bold" style="font-size:0.68rem;">
+                                            <i class="bi bi-record-fill me-1 text-light"></i> HAPPENING TODAY
+                                        </span>
+                                    }
+                                </div>
+
+                                <div class="event-date-stamp shadow-sm">
+                                    <div class="stamp-month">@heroEvent.EventDate.ToString("MMM")</div>
+                                    <div class="stamp-day">@heroEvent.EventDate.ToString("dd")</div>
+                                </div>
+                            </div>
+
+                            <div class="event-hero-bottom">
+                                <div class="mb-2">
+                                    <span class="pill-cc-amber me-2"><i class="bi bi-tag-fill me-1"></i>@heroEvent.Category</span>
+                                    <span class="event-meta-pill">
+                                        <i class="bi bi-clock me-1 text-warning"></i>@heroEvent.StartTime – @heroEvent.EndTime
+                                    </span>
+                                </div>
+
+                                <h3 class="event-hero-title">@heroEvent.Title</h3>
+                                <p class="event-hero-desc">
+                                    @(string.IsNullOrEmpty(heroEvent.Description) ? "Join us for this scheduled campus event at Golden Success College." : heroEvent.Description)
+                                </p>
+
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 pt-2 border-top border-secondary border-opacity-25">
+                                    <div class="d-flex align-items-center gap-3 text-light small fw-semibold">
+                                        <span><i class="bi bi-geo-alt-fill text-danger me-1"></i>@heroEvent.Location</span>
+                                        <span><i class="bi bi-person-badge text-info me-1"></i>@heroEvent.Organizer</span>
+                                    </div>
+                                    <button type="button" class="btn btn-warning btn-sm fw-bold px-3 shadow-sm rounded-pill" onclick="event.stopPropagation(); openEventModal(@heroEvent.EventId);">
+                                        <i class="bi bi-eye-fill me-1"></i> View Event Details
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SIDE HIGHLIGHT CARDS -->
+                <div class="col-lg-5">
+                    <div class="d-flex flex-column gap-3 h-100 justify-content-center">
+                        @foreach (var sh in sideEvents)
+                        {
+                            var isShToday = sh.EventDate.ToString("yyyy-MM-dd") == todayDateOnly;
+                            <div class="event-side-card" onclick="openEventModal(@sh.EventId)">
+                                @if (sh.ImageData != null)
+                                {
+                                    <img src="/Events/Image/@sh.EventId" alt="@sh.Title" class="event-side-thumb" />
+                                }
+                                else
+                                {
+                                    <div class="event-side-placeholder">
+                                        <i class="bi bi-calendar-event"></i>
+                                    </div>
+                                }
+
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="pill-cc-amber" style="font-size:0.65rem; padding: 2px 8px;">@sh.Category</span>
+                                        @if (isShToday)
+                                        {
+                                            <span class="pill-cc-red" style="font-size:0.65rem; padding: 2px 8px;"><i class="bi bi-record-fill me-1"></i>TODAY</span>
+                                        }
+                                    </div>
+                                    <h6 class="event-side-title mb-1">@sh.Title</h6>
+                                    <div class="small text-muted d-flex align-items-center gap-2" style="font-size: 0.76rem;">
+                                        <span><i class="bi bi-calendar3 me-1 text-success"></i>@sh.EventDate.ToString("MMM dd, yyyy")</span>
+                                        <span>&bull;</span>
+                                        <span><i class="bi bi-geo-alt me-1 text-danger"></i>@sh.Location</span>
+                                    </div>
+                                </div>
+
+                                <i class="bi bi-chevron-right text-muted opacity-50 ms-auto"></i>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="cc-gradient-bar-gold-green"></div>
+    </div>
+}
+
 <div class="row g-3 mb-4">
-    <!-- CAMPUS EVENTS WIDGET -->
+    <!-- CAMPUS EVENTS QUICK LIST WIDGET -->
     <div class="col-lg-7">
         <div class="card cc-card border-0 shadow-sm h-100 overflow-hidden">
             <div class="card-body px-4 py-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <p class="cc-section-label mb-0"><i class="bi bi-calendar-check me-1"></i> Campus Events &amp; Schedule</p>
+                    <p class="cc-section-label mb-0"><i class="bi bi-calendar-check me-1"></i> Upcoming Campus Events</p>
                     @if (isAuthenticated)
                     {
                         <a asp-controller="Events" asp-action="Create" class="btn btn-soft-success">
@@ -90,39 +226,39 @@
                 }
                 else
                 {
-                    <div class="d-flex flex-column gap-2 mb-3">
-                        @foreach (var ev in displayEvents)
+                    <div class="d-flex flex-column gap-3 mb-3">
+                        @foreach (var ev in displayEvents.Take(5))
                         {
-                            var isToday = ev.EventDate.ToString("yyyy-MM-dd") == DateTime.Today.ToString("yyyy-MM-dd");
-                            <div class="p-3 rounded-3 border d-flex align-items-center gap-3" style="background-color: var(--cc-slate-50); border-color: var(--cc-slate-200) !important; cursor: pointer;" onclick="openEventModal(@ev.EventId)">
+                            var isToday = ev.EventDate.ToString("yyyy-MM-dd") == todayDateOnly;
+                            <div class="event-side-card" onclick="openEventModal(@ev.EventId)">
                                 @if (ev.ImageData != null)
                                 {
-                                    <img src="/Events/Image/@ev.EventId" alt="@ev.Title" class="rounded-3 flex-shrink-0" style="width: 54px; height: 54px; object-fit: cover;" />
+                                    <img src="/Events/Image/@ev.EventId" alt="@ev.Title" class="event-side-thumb" />
                                 }
                                 else
                                 {
-                                    <div class="rounded-circle flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px; background-color: var(--cc-blue-surface); color: var(--cc-blue-text); font-size: 1.25rem;">
+                                    <div class="event-side-placeholder">
                                         <i class="bi bi-calendar-event"></i>
                                     </div>
                                 }
-                                <div class="flex-grow-1">
-                                    <div class="d-flex align-items-center gap-1 mb-1">
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
                                         @if (isToday)
                                         {
-                                            <span class="pill-cc-red"><i class="bi bi-record-fill me-1"></i>TODAY</span>
+                                            <span class="pill-cc-red" style="font-size:0.65rem; padding: 2px 8px;"><i class="bi bi-record-fill me-1"></i>TODAY</span>
                                         }
-                                        <span class="pill-cc-amber">@ev.Category</span>
-                                        <span class="small text-muted ms-auto">@ev.EventDate.ToString("MMM dd, yyyy")</span>
+                                        <span class="pill-cc-amber" style="font-size:0.65rem; padding: 2px 8px;">@ev.Category</span>
+                                        <span class="small text-muted ms-auto" style="font-size:0.75rem;"><i class="bi bi-calendar3 me-1"></i>@ev.EventDate.ToString("MMM dd, yyyy")</span>
                                     </div>
-                                    <div class="fw-bold" style="color: var(--cc-slate-900); font-size: 0.95rem;">@ev.Title</div>
-                                    <small style="color: var(--cc-slate-500);" class="d-block mt-1">
-                                        <i class="bi bi-clock me-1 text-primary"></i>@ev.StartTime – @ev.EndTime
-                                        &bull; <i class="bi bi-geo-alt me-1 text-danger"></i>@ev.Location
+                                    <h6 class="event-side-title mb-1">@ev.Title</h6>
+                                    <small class="text-muted d-block" style="font-size: 0.78rem;">
+                                        <i class="bi bi-clock me-1 text-warning"></i>@ev.StartTime – @ev.EndTime
+                                        &bull; <i class="bi bi-geo-alt-fill me-1 text-danger"></i>@ev.Location
                                     </small>
                                 </div>
                                 @if (isAuthenticated)
                                 {
-                                    <a asp-controller="Events" asp-action="Edit" asp-route-id="@ev.EventId" onclick="event.stopPropagation();" class="btn btn-soft-amber" title="Edit Event">
+                                    <a asp-controller="Events" asp-action="Edit" asp-route-id="@ev.EventId" onclick="event.stopPropagation();" class="btn btn-soft-amber btn-sm ms-auto flex-shrink-0" title="Edit Event">
                                         <i class="bi bi-pencil-fill"></i>
                                     </a>
                                 }
@@ -210,34 +346,50 @@
     </div>
 </div>
 
-<!-- QUICK ACCESS CARDS -->
-<div class="row g-3">
-    <div class="col-md-6">
+<!-- QUICK ACCESS CARDS & ACADEMIC OFFERS -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
         <div class="card cc-card border-0 shadow-sm text-center p-3 h-100">
             <div class="card-body">
                 <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 52px; height: 52px; background-color: var(--cc-green-surface);">
-                    <i class="bi bi-calendar-event-fill" style="color: var(--cc-green-text); font-size: 1.4rem;"></i>
+                    <i class="bi bi-award-fill" style="color: var(--cc-green-text); font-size: 1.4rem;"></i>
                 </div>
-                <h5 class="fw-bold" style="color: var(--cc-slate-900);">Event Calendar</h5>
-                <p class="mb-4" style="font-size: 0.82rem; color: var(--cc-slate-600);">Schedule, view, and manage campus events with database-stored photos.</p>
-                @if (isAuthenticated)
-                {
-                    <a asp-controller="Events" asp-action="Create" class="btn btn-soft-success w-100 justify-content-center">
-                        <i class="bi bi-plus-circle-fill"></i> Add Event
-                    </a>
-                }
-                else
-                {
-                    <a asp-controller="Events" asp-action="Index" class="btn btn-soft-success w-100 justify-content-center">
-                        <i class="bi bi-calendar-event"></i> View Events
-                    </a>
-                }
+                <h5 class="fw-bold" style="color: var(--cc-slate-900);">Programs &amp; Offers</h5>
+                <p class="mb-4" style="font-size: 0.82rem; color: var(--cc-slate-600);">Explore Senior High School strands (HUMSS, ABM, TVL-ICT, TVL-HE) and College degree courses.</p>
+                <a asp-controller="Home" asp-action="Academics" class="btn btn-soft-success w-100 justify-content-center">
+                    <i class="bi bi-journal-bookmark-fill"></i> View Academic Offers
+                </a>
             </div>
             <div class="cc-gradient-bar-emerald"></div>
         </div>
     </div>
 
-    <div class="col-md-6">
+    <div class="col-md-4">
+        <div class="card cc-card border-0 shadow-sm text-center p-3 h-100">
+            <div class="card-body">
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 52px; height: 52px; background-color: var(--cc-blue-surface);">
+                    <i class="bi bi-calendar-event-fill" style="color: var(--cc-blue-text); font-size: 1.4rem;"></i>
+                </div>
+                <h5 class="fw-bold" style="color: var(--cc-slate-900);">Event Calendar</h5>
+                <p class="mb-4" style="font-size: 0.82rem; color: var(--cc-slate-600);">Schedule, view, and manage campus events with database-stored photos.</p>
+                @if (isAuthenticated)
+                {
+                    <a asp-controller="Events" asp-action="Create" class="btn btn-soft-primary w-100 justify-content-center">
+                        <i class="bi bi-plus-circle-fill"></i> Add Event
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="Events" asp-action="Index" class="btn btn-soft-primary w-100 justify-content-center">
+                        <i class="bi bi-calendar-event"></i> View Events
+                    </a>
+                }
+            </div>
+            <div class="cc-gradient-bar-blue"></div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
         <div class="card cc-card border-0 shadow-sm text-center p-3 h-100">
             <div class="card-body">
                 <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 52px; height: 52px; background-color: var(--cc-amber-surface);">
@@ -276,15 +428,15 @@
                 <button type="button" class="btn-close ms-2 flex-shrink-0" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body px-4 pt-0 pb-3">
-                <div id="modalImageWrap" class="mb-3 rounded-3 overflow-hidden" style="max-height:220px; display:none;">
-                    <img id="modalImage" src="" alt="Event photo" class="w-100" style="height:220px; object-fit:cover;">
+                <div id="modalImageWrap" class="mb-3 rounded-3 overflow-hidden shadow-sm" style="max-height:240px; display:none;">
+                    <img id="modalImage" src="" alt="Event photo" class="w-100" style="height:240px; object-fit:cover;">
                 </div>
-                <p id="modalDescription" class="text-muted mb-3" style="font-size:0.9rem; line-height:1.65;"></p>
+                <p id="modalDescription" class="text-muted mb-3" style="font-size:0.92rem; line-height:1.65;"></p>
                 <div class="p-3 rounded-3 border mb-1" style="background-color:var(--cc-slate-50); border-color:var(--cc-slate-200) !important; font-size:0.875rem;">
-                    <div class="row g-2">
+                    <div class="row g-3">
                         <div class="col-sm-6">
                             <div class="d-flex align-items-start gap-2">
-                                <i class="bi bi-calendar3 text-success mt-1"></i>
+                                <i class="bi bi-calendar3 text-success fs-5 mt-1"></i>
                                 <div>
                                     <div class="text-muted" style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Date</div>
                                     <div class="fw-semibold text-dark" id="modalDate"></div>
@@ -293,7 +445,7 @@
                         </div>
                         <div class="col-sm-6">
                             <div class="d-flex align-items-start gap-2">
-                                <i class="bi bi-clock text-warning mt-1"></i>
+                                <i class="bi bi-clock text-warning fs-5 mt-1"></i>
                                 <div>
                                     <div class="text-muted" style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Time</div>
                                     <div class="fw-semibold text-dark" id="modalTime"></div>
@@ -302,7 +454,7 @@
                         </div>
                         <div class="col-sm-6">
                             <div class="d-flex align-items-start gap-2">
-                                <i class="bi bi-geo-alt-fill text-danger mt-1"></i>
+                                <i class="bi bi-geo-alt-fill text-danger fs-5 mt-1"></i>
                                 <div>
                                     <div class="text-muted" style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Venue</div>
                                     <div class="fw-semibold text-dark" id="modalLocation"></div>
@@ -311,7 +463,7 @@
                         </div>
                         <div class="col-sm-6">
                             <div class="d-flex align-items-start gap-2">
-                                <i class="bi bi-person-badge text-secondary mt-1"></i>
+                                <i class="bi bi-person-badge text-secondary fs-5 mt-1"></i>
                                 <div>
                                     <div class="text-muted" style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Organizer</div>
                                     <div class="fw-semibold text-dark" id="modalOrganizer"></div>
@@ -362,7 +514,7 @@
                 document.getElementById('modalLocation').textContent = ev.location;
                 document.getElementById('modalOrganizer').textContent = ev.organizer;
                 document.getElementById('modalCategoryBadge').innerHTML =
-                    '<span class="pill-cc-amber">' + ev.category + '</span>';
+                    '<span class="pill-cc-amber"><i class="bi bi-tag-fill me-1"></i>' + ev.category + '</span>';
                 if (ev.hasImage) {
                     document.getElementById('modalImage').src = ev.imageUrl;
                     document.getElementById('modalImageWrap').style.display = 'block';
@@ -371,8 +523,8 @@
                     var btns = document.getElementById('modalAuthButtons');
                     btns.classList.remove('d-none');
                     btns.innerHTML =
-                        '<a href="/Events/Edit/' + ev.id + '" class="btn btn-soft-amber btn-sm"><i class="bi bi-pencil-fill"></i> Edit</a>' +
-                        '<a href="/Events/Delete/' + ev.id + '" class="btn btn-soft-danger btn-sm"><i class="bi bi-trash-fill"></i> Delete</a>';
+                        '<a href="/Events/Edit/' + ev.eventId + '" class="btn btn-soft-amber btn-sm"><i class="bi bi-pencil-fill"></i> Edit Event</a>' +
+                        '<a href="/Events/Delete/' + ev.eventId + '" class="btn btn-soft-danger btn-sm"><i class="bi bi-trash-fill"></i> Delete</a>';
                 }
             })
             .catch(function() {
@@ -386,5 +538,3 @@
     }
 </script>
 }
-
-

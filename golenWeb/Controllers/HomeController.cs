@@ -27,6 +27,20 @@ namespace golenWeb.Controllers
         }
 
         [HttpGet]
+        [Route("academics")]
+        [Route("Home/Academics")]
+        public async Task<IActionResult> Academics()
+        {
+            var data = await _homeService.GetHomePageDataAsync();
+
+            ViewData["TodayEvents"] = data.TodayEvents;
+            ViewData["AllEvents"] = data.AllEvents;
+            ViewData["Bulletins"] = data.Bulletins;
+
+            return View(data);
+        }
+
+        [HttpGet]
         public IActionResult Privacy()
         {
             return View();

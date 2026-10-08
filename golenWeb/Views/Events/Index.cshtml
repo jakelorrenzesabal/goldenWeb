@@ -1,7 +1,7 @@
 @model IEnumerable<golenWeb.Models.EventModel>
 
 @{
-    ViewData["Title"] = "Campus Event Schedule & Calendar";
+    ViewData["Title"] = "Campus Event Schedule & Highlights Portal";
     var todayStr = DateTime.Today.ToString("yyyy-MM-dd");
     var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
     var currentPage = (int)(ViewData["CurrentPage"] ?? 1);
@@ -10,45 +10,62 @@
     var search = ViewData["CurrentSearch"]?.ToString() ?? "";
     var category = ViewData["CurrentCategory"]?.ToString() ?? "";
     var selectedDate = ViewData["SelectedDate"]?.ToString() ?? "";
+
+    var eventsList = Model?.ToList() ?? new List<golenWeb.Models.EventModel>();
+    var featuredHero = eventsList.FirstOrDefault(e => e.IsFeatured && e.ImageData != null) 
+                       ?? eventsList.FirstOrDefault(e => e.IsFeatured) 
+                       ?? eventsList.FirstOrDefault();
+    
+    var sideHighlights = featuredHero != null 
+        ? eventsList.Where(e => e.EventId != featuredHero.EventId).Take(3).ToList() 
+        : new List<golenWeb.Models.EventModel>();
+
+    var gridEvents = featuredHero != null 
+        ? eventsList.Where(e => e.EventId != featuredHero.EventId && !sideHighlights.Any(s => s.EventId == e.EventId)).ToList() 
+        : eventsList;
 }
 
 <!-- Page Header Card -->
 <div class="card border-0 shadow-sm mb-4 position-relative overflow-hidden">
-    <div class="cc-gradient-bar-emerald"></div>
+    <div class="cc-gradient-bar-gold-green"></div>
     <div class="card-body px-4 py-3">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
             <div class="d-flex align-items-center gap-3">
                 <div class="rounded-circle d-flex align-items-center justify-content-center"
-                     style="width: 44px; height: 44px; background-color: var(--cc-green-surface);">
-                    <i class="bi bi-calendar-event" style="color: var(--cc-green-text); font-size: 1.25rem;"></i>
+                     style="width: 48px; height: 48px; background: linear-gradient(135deg, var(--gsc-primary), #15803d); color: #f59e0b; box-shadow: 0 4px 12px rgba(11,94,40,0.25);">
+                    <i class="bi bi-broadcast" style="font-size: 1.4rem;"></i>
                 </div>
                 <div>
-                    <h4 class="fw-bold mb-0 text-dark" style="font-size: 1.25rem;">
-                        Campus Event Schedule &amp; Calendar
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-danger text-uppercase px-2 py-1 fw-bold" style="font-size:0.65rem; letter-spacing:0.08em;">MEDIA SHOWCASE</span>
+                        <span class="cc-section-label text-success mb-0">Golden Success College</span>
+                    </div>
+                    <h4 class="fw-bold mb-0 text-dark" style="font-size: 1.35rem; letter-spacing:-0.01em;">
+                        Campus Events &amp; Highlights Portal
                     </h4>
-                    <p class="mb-0 cc-section-label text-success">
-                        Golden Success College · @totalCount Total Event(s)
-                    </p>
                 </div>
             </div>
 
-            @if (isAuthenticated)
-            {
-                <div class="d-flex gap-2">
-                    @if (Model.Any() || totalCount > 0)
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-light text-dark border px-3 py-2 fw-bold me-1" style="font-size:0.82rem;">
+                    <i class="bi bi-calendar-check text-success me-1"></i> @totalCount Event(s)
+                </span>
+                @if (isAuthenticated)
+                {
+                    @if (eventsList.Any() || totalCount > 0)
                     {
                         <form asp-action="DeleteAll" method="post" onsubmit="return confirm('Are you sure you want to delete ALL scheduled events?');" class="d-inline">
                             @Html.AntiForgeryToken()
                             <button type="submit" class="btn btn-soft-danger">
-                                <i class="bi bi-trash3"></i> Clear All Events
+                                <i class="bi bi-trash3"></i> Clear All
                             </button>
                         </form>
                     }
                     <a asp-action="Create" class="btn btn-soft-success fw-bold">
-                        <i class="bi bi-plus-circle-fill"></i> Schedule New Event
+                        <i class="bi bi-plus-circle-fill"></i> Schedule Event
                     </a>
-                </div>
-            }
+                }
+            </div>
         </div>
     </div>
 </div>
@@ -62,32 +79,199 @@
     </div>
 }
 
-<!-- Search & Date Filter Bar -->
+<!-- LIVE TICKER BAR -->
+@if (eventsList.Any())
+{
+    <div class="events-ticker-bar mb-4">
+        <div class="ticker-tag">
+            <i class="bi bi-lightning-charge-fill"></i> HIGHLIGHTS
+        </div>
+        <div class="ticker-content flex-grow-1">
+            <div class="d-flex align-items-center flex-wrap gap-3">
+                @foreach (var ev in eventsList.Take(4))
+                {
+                    <a href="javascript:void(0)" onclick="openEventModal(@ev.EventId)" class="text-decoration-none text-light ticker-item">
+                        <span class="badge bg-warning text-dark fw-bold me-1">@ev.Category</span>
+                        <strong>@ev.Title</strong>
+                        <span class="text-muted small ms-1">(@ev.EventDate.ToString("MMM dd"))</span>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<!-- FEATURED HIGHLIGHTS SHOWCASE (ABS-CBN STYLE HERO GRID) -->
+@if (featuredHero != null)
+{
+    <div class="row g-4 mb-4 align-items-stretch">
+        <!-- HERO MAIN FEATURED SPOTLIGHT (LEFT) -->
+        <div class="col-lg-7">
+            <div class="event-hero-card h-100" onclick="openEventModal(@featuredHero.EventId)">
+                <div class="event-hero-img-wrap">
+                    @if (featuredHero.ImageData != null)
+                    {
+                        <img src="/Events/Image/@featuredHero.EventId" alt="@featuredHero.Title" class="event-hero-img" />
+                    }
+                    else
+                    {
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #073d1a 0%, #0b5e28 50%, #0f172a 100%);">
+                            <i class="bi bi-calendar-event text-warning opacity-50" style="font-size: 8rem;"></i>
+                        </div>
+                    }
+                </div>
+
+                <div class="event-hero-overlay">
+                    <div class="event-hero-top">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-danger text-uppercase px-2 py-1 fw-bold" style="font-size:0.7rem; letter-spacing:0.06em;">
+                                <i class="bi bi-star-fill me-1 text-warning"></i> TOP FEATURED HIGHLIGHT
+                            </span>
+                            @if (featuredHero.EventDate.ToString("yyyy-MM-dd") == todayStr)
+                            {
+                                <span class="badge bg-success text-uppercase px-2 py-1 fw-bold" style="font-size:0.7rem;">
+                                    <i class="bi bi-record-fill me-1 text-light"></i> HAPPENING TODAY
+                                </span>
+                            }
+                        </div>
+
+                        <!-- Date Ribbon Stamp -->
+                        <div class="event-date-stamp shadow-sm">
+                            <div class="stamp-month">@featuredHero.EventDate.ToString("MMM")</div>
+                            <div class="stamp-day">@featuredHero.EventDate.ToString("dd")</div>
+                        </div>
+                    </div>
+
+                    <div class="event-hero-bottom">
+                        <div class="mb-2">
+                            <span class="pill-cc-amber me-2"><i class="bi bi-tag-fill me-1"></i>@featuredHero.Category</span>
+                            <span class="event-meta-pill">
+                                <i class="bi bi-clock me-1 text-warning"></i>@featuredHero.StartTime – @featuredHero.EndTime
+                            </span>
+                        </div>
+
+                        <h3 class="event-hero-title">@featuredHero.Title</h3>
+                        <p class="event-hero-desc">
+                            @(string.IsNullOrEmpty(featuredHero.Description) ? "Join us for this exciting campus event at Golden Success College." : featuredHero.Description)
+                        </p>
+
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 pt-2 border-top border-secondary border-opacity-25">
+                            <div class="d-flex align-items-center gap-3 text-light small fw-semibold">
+                                <span><i class="bi bi-geo-alt-fill text-danger me-1"></i>@featuredHero.Location</span>
+                                <span><i class="bi bi-person-badge text-info me-1"></i>@featuredHero.Organizer</span>
+                            </div>
+                            <button type="button" class="btn btn-warning btn-sm fw-bold px-3 shadow-sm rounded-pill" onclick="event.stopPropagation(); openEventModal(@featuredHero.EventId);">
+                                <i class="bi bi-eye-fill me-1"></i> View Event Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECONDARY HIGHLIGHTS LIST (RIGHT) -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm h-100 p-3" style="background-color: var(--cc-slate-50); border: 1px solid var(--cc-slate-200);">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                    <p class="cc-section-label mb-0" style="font-size: 0.75rem; font-weight: 700; color: var(--gsc-primary) !important;">
+                        <i class="bi bi-fire text-warning me-1 fs-6"></i> SPOTLIGHT HIGHLIGHTS
+                    </p>
+                    <span class="small text-muted fw-semibold">@sideHighlights.Count Highlight(s)</span>
+                </div>
+
+                @if (!sideHighlights.Any())
+                {
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-calendar-plus fs-2 mb-2 d-block opacity-50"></i>
+                        <small>No additional spotlight events scheduled.</small>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-3 flex-grow-1 justify-content-center">
+                        @foreach (var sh in sideHighlights)
+                        {
+                            var isShToday = sh.EventDate.ToString("yyyy-MM-dd") == todayStr;
+                            <div class="event-side-card" onclick="openEventModal(@sh.EventId)">
+                                @if (sh.ImageData != null)
+                                {
+                                    <img src="/Events/Image/@sh.EventId" alt="@sh.Title" class="event-side-thumb" />
+                                }
+                                else
+                                {
+                                    <div class="event-side-placeholder">
+                                        <i class="bi bi-calendar-event"></i>
+                                    </div>
+                                }
+
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="pill-cc-amber" style="font-size:0.65rem; padding: 2px 8px;">@sh.Category</span>
+                                        @if (isShToday)
+                                        {
+                                            <span class="pill-cc-red" style="font-size:0.65rem; padding: 2px 8px;"><i class="bi bi-record-fill me-1"></i>TODAY</span>
+                                        }
+                                    </div>
+                                    <h6 class="event-side-title mb-1">@sh.Title</h6>
+                                    <div class="small text-muted d-flex align-items-center gap-2" style="font-size: 0.76rem;">
+                                        <span><i class="bi bi-calendar3 me-1 text-success"></i>@sh.EventDate.ToString("MMM dd, yyyy")</span>
+                                        <span>&bull;</span>
+                                        <span><i class="bi bi-geo-alt me-1 text-danger"></i>@sh.Location</span>
+                                    </div>
+                                </div>
+
+                                <i class="bi bi-chevron-right text-muted opacity-50 ms-auto"></i>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<!-- CATEGORY QUICK TABS & SEARCH FILTER BAR -->
 <div class="card border-0 shadow-sm mb-4 position-relative overflow-hidden">
     <div class="cc-gradient-bar-gold"></div>
     <div class="card-body px-4 py-3">
-        <p class="cc-section-label mb-2"><i class="bi bi-funnel-fill me-1 text-warning"></i> Filter &amp; Search Events</p>
-        <form method="get" class="row g-2 align-items-center">
+        <!-- Category Filter Tabs -->
+        <div class="mb-3">
+            <p class="cc-section-label mb-2"><i class="bi bi-grid-fill me-1 text-warning"></i> Category Filter Tabs</p>
+            <div class="category-filter-pills">
+                <a href="@Url.Action("Index", new { search = search, date = selectedDate })" 
+                   class="btn btn-soft-secondary category-filter-btn @(string.IsNullOrEmpty(category) ? "active" : "")">
+                    <i class="bi bi-collection-fill me-1"></i> All Categories
+                </a>
+                @foreach (var cat in new[] { "Academic", "Ceremony", "Seminar", "Sports", "Cultural", "Club" })
+                {
+                    <a href="@Url.Action("Index", new { category = cat, search = search, date = selectedDate })" 
+                       class="btn btn-soft-secondary category-filter-btn @(category == cat ? "active" : "")">
+                        @cat
+                    </a>
+                }
+            </div>
+        </div>
+
+        <!-- Search Form Controls -->
+        <form method="get" class="row g-2 align-items-center pt-2 border-top">
+            <input type="hidden" name="category" value="@category" />
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="search" class="form-control cc-input border-start-0" placeholder="Search event title, venue, organizer..." value="@search" />
+                </div>
+            </div>
             <div class="col-md-4">
-                <input type="text" name="search" class="form-control cc-input" placeholder="Search event title, venue, organizer..." value="@search" />
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-0"><i class="bi bi-calendar-event text-muted"></i></span>
+                    <input type="date" name="date" class="form-control cc-input border-start-0" value="@selectedDate" />
+                </div>
             </div>
-            <div class="col-md-3">
-                <select name="category" class="form-select cc-input">
-                    <option value="">All Categories</option>
-                    @foreach (var cat in new[] { "Academic", "Ceremony", "Seminar", "Sports", "Cultural", "Club" })
-                    {
-                        <option value="@cat" selected="@(category == cat ? "selected" : null)">@cat</option>
-                    }
-                </select>
-            </div>
-            <div class="col-md-3">
-                <input type="date" name="date" class="form-control cc-input" value="@selectedDate" />
-            </div>
-            <div class="col-md-2 d-flex gap-1">
+            <div class="col-md-3 d-flex gap-2">
                 <button type="submit" class="btn btn-soft-success w-100 justify-content-center">
-                    <i class="bi bi-search"></i> Filter
+                    <i class="bi bi-funnel-fill"></i> Filter Events
                 </button>
-                <a asp-action="Index" class="btn btn-soft-secondary">
+                <a asp-action="Index" class="btn btn-soft-secondary" title="Reset Filters">
                     <i class="bi bi-arrow-counterclockwise"></i>
                 </a>
             </div>
@@ -95,17 +279,26 @@
     </div>
 </div>
 
-<!-- Event List Cards -->
+<!-- ALL CAMPUS EVENTS GRID -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold text-dark mb-0" style="font-size: 1.15rem;">
+        <i class="bi bi-calendar3-event text-success me-2"></i>Campus Event Directory
+    </h5>
+    <span class="small text-muted fw-semibold">
+        Showing @gridEvents.Count event(s)
+    </span>
+</div>
+
 <div class="row g-3 mb-4">
-    @if (!Model.Any())
+    @if (!gridEvents.Any())
     {
         <div class="col-12">
             <div class="card border-0 shadow-sm text-center py-5 position-relative overflow-hidden">
                 <div class="cc-gradient-bar-emerald"></div>
                 <div class="card-body">
                     <i class="bi bi-calendar-x fs-1 mb-2" style="color: var(--cc-slate-300);"></i>
-                    <h5 class="fw-bold text-dark">No Events Scheduled</h5>
-                    <p class="mb-3 text-muted small">There are no campus events scheduled matching your search criteria.</p>
+                    <h5 class="fw-bold text-dark">No Events Found</h5>
+                    <p class="mb-3 text-muted small">There are no additional campus events scheduled matching your search or filter criteria.</p>
                     @if (isAuthenticated)
                     {
                         <a asp-action="Create" class="btn btn-soft-success">
@@ -118,20 +311,20 @@
     }
     else
     {
-        @foreach (var ev in Model)
+        @foreach (var ev in gridEvents)
         {
             var isToday = ev.EventDate.ToString("yyyy-MM-dd") == todayStr;
             <div class="col-lg-6">
-                <div class="card border-0 shadow-sm h-100 overflow-hidden" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;"
+                <div class="card border-0 shadow-sm h-100 overflow-hidden" style="cursor: pointer; transition: transform 0.25s, box-shadow 0.25s;"
                      onclick="openEventModal(@ev.EventId)"
-                     onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 24px rgba(11,94,40,0.15)'"
+                     onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 10px 25px rgba(11,94,40,0.15)'"
                      onmouseout="this.style.transform='';this.style.boxShadow=''">
                     @if (ev.ImageData != null)
                     {
-                        <div style="position:relative; max-height: 180px; overflow: hidden;">
-                            <img src="/Events/Image/@ev.EventId" alt="@ev.Title" class="w-100" style="height: 180px; object-fit: cover;" loading="lazy" />
-                            <span class="pill-cc-slate position-absolute top-0 end-0 m-2">
-                                <i class="bi bi-database-fill-check text-warning me-1"></i>Photo
+                        <div style="position:relative; max-height: 190px; overflow: hidden;">
+                            <img src="/Events/Image/@ev.EventId" alt="@ev.Title" class="w-100" style="height: 190px; object-fit: cover; transition: transform 0.4s ease;" loading="lazy" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform=''" />
+                            <span class="pill-cc-slate position-absolute top-0 end-0 m-2 shadow-sm">
+                                <i class="bi bi-camera-fill text-warning me-1"></i>Photo
                             </span>
                         </div>
                     }
@@ -145,11 +338,11 @@
                                 <span class="pill-cc-amber">@ev.Category</span>
                             </div>
                             <span style="font-size: 0.78rem; color: var(--cc-slate-500); font-weight: 600;">
-                                <i class="bi bi-clock me-1"></i>@ev.StartTime – @ev.EndTime
+                                <i class="bi bi-clock me-1 text-warning"></i>@ev.StartTime – @ev.EndTime
                             </span>
                         </div>
 
-                        <h5 class="fw-bold mb-2 text-dark" style="font-size: 1.05rem;">@ev.Title</h5>
+                        <h5 class="fw-bold mb-2 text-dark" style="font-size: 1.08rem; line-height: 1.35;">@ev.Title</h5>
                         <p class="mb-3 text-muted" style="font-size: 0.85rem; line-height: 1.5;">
                             @(string.IsNullOrEmpty(ev.Description) ? "No description provided." : (ev.Description.Length > 130 ? ev.Description.Substring(0, 127) + "…" : ev.Description))
                         </p>
@@ -175,8 +368,8 @@
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center pt-2 border-top" style="border-color: var(--cc-slate-100) !important;">
-                            <button type="button" class="btn btn-soft-success btn-sm" onclick="event.stopPropagation(); openEventModal(@ev.EventId);">
-                                <i class="bi bi-info-circle"></i> View Details
+                            <button type="button" class="btn btn-soft-success btn-sm fw-semibold" onclick="event.stopPropagation(); openEventModal(@ev.EventId);">
+                                <i class="bi bi-info-circle me-1"></i> View Details
                             </button>
 
                             @if (isAuthenticated)
@@ -199,7 +392,7 @@
     }
 </div>
 
-<!-- Pagination -->
+<!-- PAGINATION -->
 @if (totalPages > 1)
 {
     <div class="card border-0 shadow-sm position-relative overflow-hidden">
@@ -238,7 +431,7 @@
                             </a>
                         </li>
 
-                        <!-- Page number buttons (show up to 5 around current) -->
+                        <!-- Page number buttons -->
                         @{
                             int startPage = Math.Max(1, currentPage - 2);
                             int endPage = Math.Min(totalPages, startPage + 4);
@@ -303,15 +496,15 @@
                 <button type="button" class="btn-close ms-2 flex-shrink-0" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body px-4 pt-0 pb-3">
-                <div id="modalImageWrap" class="mb-3 rounded-3 overflow-hidden" style="max-height:220px; display:none;">
-                    <img id="modalImage" src="" alt="Event photo" class="w-100" style="height:220px; object-fit:cover;">
+                <div id="modalImageWrap" class="mb-3 rounded-3 overflow-hidden shadow-sm" style="max-height:240px; display:none;">
+                    <img id="modalImage" src="" alt="Event photo" class="w-100" style="height:240px; object-fit:cover;">
                 </div>
-                <p id="modalDescription" class="text-muted mb-3" style="font-size:0.9rem; line-height:1.65;"></p>
+                <p id="modalDescription" class="text-muted mb-3" style="font-size:0.92rem; line-height:1.65;"></p>
                 <div class="p-3 rounded-3 border mb-1" style="background-color:var(--cc-slate-50); border-color:var(--cc-slate-200) !important; font-size:0.875rem;">
-                    <div class="row g-2">
+                    <div class="row g-3">
                         <div class="col-sm-6">
                             <div class="d-flex align-items-start gap-2">
-                                <i class="bi bi-calendar3 text-success mt-1"></i>
+                                <i class="bi bi-calendar3 text-success fs-5 mt-1"></i>
                                 <div>
                                     <div class="text-muted" style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Date</div>
                                     <div class="fw-semibold text-dark" id="modalDate"></div>
@@ -320,7 +513,7 @@
                         </div>
                         <div class="col-sm-6">
                             <div class="d-flex align-items-start gap-2">
-                                <i class="bi bi-clock text-warning mt-1"></i>
+                                <i class="bi bi-clock text-warning fs-5 mt-1"></i>
                                 <div>
                                     <div class="text-muted" style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Time</div>
                                     <div class="fw-semibold text-dark" id="modalTime"></div>
@@ -329,7 +522,7 @@
                         </div>
                         <div class="col-sm-6">
                             <div class="d-flex align-items-start gap-2">
-                                <i class="bi bi-geo-alt-fill text-danger mt-1"></i>
+                                <i class="bi bi-geo-alt-fill text-danger fs-5 mt-1"></i>
                                 <div>
                                     <div class="text-muted" style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Venue</div>
                                     <div class="fw-semibold text-dark" id="modalLocation"></div>
@@ -338,7 +531,7 @@
                         </div>
                         <div class="col-sm-6">
                             <div class="d-flex align-items-start gap-2">
-                                <i class="bi bi-person-badge text-secondary mt-1"></i>
+                                <i class="bi bi-person-badge text-secondary fs-5 mt-1"></i>
                                 <div>
                                     <div class="text-muted" style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Organizer</div>
                                     <div class="fw-semibold text-dark" id="modalOrganizer"></div>
@@ -389,7 +582,7 @@
                 document.getElementById('modalLocation').textContent = ev.location;
                 document.getElementById('modalOrganizer').textContent = ev.organizer;
                 document.getElementById('modalCategoryBadge').innerHTML =
-                    '<span class="pill-cc-amber">' + ev.category + '</span>';
+                    '<span class="pill-cc-amber"><i class="bi bi-tag-fill me-1"></i>' + ev.category + '</span>';
                 if (ev.hasImage) {
                     document.getElementById('modalImage').src = ev.imageUrl;
                     document.getElementById('modalImageWrap').style.display = 'block';
@@ -398,7 +591,7 @@
                     var btns = document.getElementById('modalAuthButtons');
                     btns.classList.remove('d-none');
                     btns.innerHTML =
-                        '<a href="/Events/Edit/' + ev.eventId + '" class="btn btn-soft-amber btn-sm"><i class="bi bi-pencil-fill"></i> Edit</a>' +
+                        '<a href="/Events/Edit/' + ev.eventId + '" class="btn btn-soft-amber btn-sm"><i class="bi bi-pencil-fill"></i> Edit Event</a>' +
                         '<a href="/Events/Delete/' + ev.eventId + '" class="btn btn-soft-danger btn-sm"><i class="bi bi-trash-fill"></i> Delete</a>';
                 }
             })
@@ -409,4 +602,3 @@
     }
 </script>
 }
-
